@@ -1,14 +1,16 @@
 # Urban Development Analysis Program
 
-This project is a Phase 0 / S0 MVP for analyzing general urban development projects.
+This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, and YAML-based rule files.
 
-The current MVP provides a FastAPI backend, YAML-based procedure rules, placeholder assessment rules, and Docker Compose for backend + PostgreSQL.
+Current stage: Phase 1.
+
+Phase 1 adds PostgreSQL persistence for analysis requests and results. MOLEG Open API and RAG are not integrated yet.
 
 ## Important Limits
 
-- This MVP is not a final legal determination.
+- This application is not a final legal determination tool.
 - Legal article numbers are not finalized.
-- Environmental impact assessment, traffic impact assessment, underground safety assessment, and buried cultural heritage review thresholds are TODO/placeholders.
+- Environmental impact assessment, traffic impact assessment, underground safety assessment, and buried cultural heritage review thresholds remain TODO/placeholders.
 - Real criteria must be finalized later through MOLEG Open API integration and expert review.
 
 ## Windows PowerShell Local Run
@@ -21,6 +23,8 @@ python -m venv .venv
 pip install -r requirements.txt
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+
+For local backend execution outside Docker, use `DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5433/urban_dev` while the Compose PostgreSQL container is running.
 
 ## Docker Compose Run
 
@@ -43,12 +47,20 @@ Stop containers:
 docker compose down
 ```
 
-## PostgreSQL Ports
+## PostgreSQL Connection
 
 The backend container connects to PostgreSQL through Docker internal networking:
 
 ```text
 postgres:5432
+DATABASE_URL=postgresql+psycopg://postgres:postgres@postgres:5432/urban_dev
+```
+
+Local Python processes on Windows connect through the host port:
+
+```text
+localhost:5433
+DATABASE_URL=postgresql+psycopg://postgres:postgres@localhost:5433/urban_dev
 ```
 
 The host/local PostgreSQL port is mapped to `5433` to avoid conflicts with an existing local PostgreSQL on `5432`.
@@ -61,9 +73,11 @@ user: postgres
 password: postgres
 ```
 
+Tables are created automatically at FastAPI startup for Phase 1. A future phase should replace this with Alembic migrations.
+
 ## API Tests
 
-In Windows PowerShell, `curl` can resolve to an `Invoke-WebRequest` alias. Use `curl.exe` for these checks.
+In Windows PowerShell, `curl` can resolve to an `Invoke-WebRequest` alias. Use `curl.exe` for simple GET checks.
 
 ### Health
 
@@ -77,9 +91,7 @@ Expected response:
 {"status":"ok"}
 ```
 
-### Analyze
-
-Use `ConvertTo-Json` to avoid JSON quoting problems in PowerShell.
+### Analyze and Store Result
 
 ```powershell
 $body = @{
@@ -91,18 +103,39 @@ $body = @{
   local_government = "Seongnam-si"
 } | ConvertTo-Json
 
-Invoke-RestMethod `
+$result = Invoke-RestMethod `
   -Uri "http://localhost:8000/api/analyze" `
   -Method Post `
   -ContentType "application/json" `
-  -Body $body | ConvertTo-Json -Depth 8
+  -Body $body
+
+$result | ConvertTo-Json -Depth 8
 ```
 
-The response includes project input, procedure steps from `rules/procedure_rules.yaml`, assessment placeholders from `rules/assessment_rules.yaml`, and warnings.
+The response keeps the Phase 0 analysis fields and also includes persistence metadata:
 
-Assessment response policy:
+```text
+project_id
+analysis_id
+created_at
+```
 
-- Do not determine whether an assessment is required in Phase 0.
+### List Stored Analyses
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8000/api/analyses" -Method Get | ConvertTo-Json -Depth 5
+```
+
+### Get Stored Analysis Detail
+
+```powershell
+$analysisId = $result.analysis_id
+Invoke-RestMethod -Uri "http://localhost:8000/api/analyses/$analysisId" -Method Get | ConvertTo-Json -Depth 8
+```
+
+## Assessment Response Policy
+
+- Do not determine whether an assessment is required in Phase 1.
 - Keep thresholds as `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA`.
 - Mark assessment status as legal review required.
 - Finalize criteria later through MOLEG Open API and expert review.
@@ -114,11 +147,18 @@ cd C:\Users\poiu2\Desktop\??????_??_??_????
 python -m pytest
 ```
 
-## Initial Git Commit
+The persistence tests require PostgreSQL to be running. The recommended setup is:
+
+```powershell
+docker compose up --build --detach
+python -m pytest
+```
+
+## Git Commit
 
 ```powershell
 git status
 git add .
-git commit -m "Initial MVP skeleton for urban development analysis"
+git commit -m "Add database persistence for analysis results"
 git status
 ```

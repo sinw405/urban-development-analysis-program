@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -40,3 +42,6 @@ class AnalyzeResponse(BaseModel):
     procedures: list[ProcedureStep]
     assessments: list[AssessmentItem]
     warnings: list[str]
+    project_id: int | None = None
+    analysis_id: int | None = None
+    created_at: datetime | None = None

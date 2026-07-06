@@ -6,7 +6,7 @@ services:
       dockerfile: backend/Dockerfile
     container_name: urban-dev-backend
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/urban_dev
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/urban_dev
     ports:
       - "8000:8000"
     depends_on:

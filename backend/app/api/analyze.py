@@ -1,6 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
+from app.services.analysis_repository import create_project_with_analysis
 from app.services.analyzer import analyze_project
 
 
@@ -8,5 +11,17 @@ router = APIRouter(tags=["analysis"])
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
-def analyze(request: AnalyzeRequest) -> AnalyzeResponse:
-    return analyze_project(request)
+def analyze(request: AnalyzeRequest, db: Session = Depends(get_db)) -> AnalyzeResponse:
+    result = analyze_project(request)
+    result.warnings.append("Analysis request and result were stored in PostgreSQL.")
+    analysis = create_project_with_analysis(
+        db=db,
+        request=request,
+        result=result,
+        rule_version="Phase 1 YAML placeholder rules",
+    )
+
+    result.project_id = analysis.project_id
+    result.analysis_id = analysis.id
+    result.created_at = analysis.created_at
+    return result

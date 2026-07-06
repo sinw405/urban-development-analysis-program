@@ -11,7 +11,7 @@ class Settings:
     def database_url(self) -> str:
         return os.getenv(
             "DATABASE_URL",
-            "postgresql://postgres:postgres@postgres:5432/urban_dev",
+            "postgresql+psycopg://postgres:postgres@localhost:5433/urban_dev",
         )
 
     @property
