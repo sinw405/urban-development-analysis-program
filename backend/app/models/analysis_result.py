@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import DateTime, ForeignKey, JSON, String, func
+from sqlalchemy import DateTime, ForeignKey, Index, JSON, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -9,6 +9,7 @@ from app.core.database import Base
 
 class AnalysisResult(Base):
     __tablename__ = "analysis_results"
+    __table_args__ = (Index("ix_analysis_results_created_at", "created_at"),)
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     project_id: Mapped[int] = mapped_column(ForeignKey("projects.id"), index=True)

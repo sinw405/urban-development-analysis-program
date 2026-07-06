@@ -20,10 +20,3 @@ def get_db() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
-
-
-def create_db_tables() -> None:
-    import app.models.analysis_result  # noqa: F401
-    import app.models.project  # noqa: F401
-
-    Base.metadata.create_all(bind=engine)

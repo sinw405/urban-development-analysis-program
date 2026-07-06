@@ -1,8 +1,9 @@
-from sqlalchemy import select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.analysis_result import AnalysisResult
 from app.models.project import Project
+from app.schemas.analysis_history import AnalysisSort
 from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
 
 
@@ -47,13 +48,45 @@ def create_project_with_analysis(
     return analysis
 
 
-def list_analysis_results(db: Session) -> list[AnalysisResult]:
-    statement = (
-        select(AnalysisResult)
+def _apply_analysis_filters(
+    statement: Select,
+    project_name: str | None,
+    local_government: str | None,
+) -> Select:
+    if project_name:
+        statement = statement.where(Project.project_name.ilike(f"%{project_name}%"))
+    if local_government:
+        statement = statement.where(Project.local_government.ilike(f"%{local_government}%"))
+    return statement
+
+
+def list_analysis_results(
+    db: Session,
+    limit: int,
+    offset: int,
+    project_name: str | None = None,
+    local_government: str | None = None,
+    sort: AnalysisSort = "created_at_desc",
+) -> tuple[list[AnalysisResult], int]:
+    base_statement = select(AnalysisResult).join(AnalysisResult.project)
+    base_statement = _apply_analysis_filters(base_statement, project_name, local_government)
+
+    count_statement = select(func.count()).select_from(base_statement.order_by(None).subquery())
+    total = db.scalar(count_statement) or 0
+
+    if sort == "created_at_asc":
+        order_by = (AnalysisResult.created_at.asc(), AnalysisResult.id.asc())
+    else:
+        order_by = (AnalysisResult.created_at.desc(), AnalysisResult.id.desc())
+
+    list_statement = (
+        base_statement
         .options(joinedload(AnalysisResult.project))
-        .order_by(AnalysisResult.created_at.desc(), AnalysisResult.id.desc())
+        .order_by(*order_by)
+        .limit(limit)
+        .offset(offset)
     )
-    return list(db.scalars(statement).all())
+    return list(db.scalars(list_statement).all()), total
 
 
 def get_analysis_result(db: Session, analysis_id: int) -> AnalysisResult | None:

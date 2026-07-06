@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, Float, String, func
+from sqlalchemy import CheckConstraint, DateTime, Float, Index, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -12,6 +12,10 @@ if TYPE_CHECKING:
 
 class Project(Base):
     __tablename__ = "projects"
+    __table_args__ = (
+        CheckConstraint("area_square_meters > 0", name="ck_projects_area_square_meters_positive"),
+        Index("ix_projects_created_at", "created_at"),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     project_name: Mapped[str] = mapped_column(String(255), index=True)

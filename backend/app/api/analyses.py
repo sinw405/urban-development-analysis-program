@@ -1,18 +1,39 @@
-from fastapi import APIRouter, Depends, HTTPException
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.analysis_history import AnalysisDetail, AnalysisSummary
+from app.schemas.analysis_history import (
+    AnalysisDetail,
+    AnalysisListResponse,
+    AnalysisSort,
+    AnalysisSummary,
+)
 from app.services.analysis_repository import get_analysis_result, list_analysis_results
 
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 
 
-@router.get("", response_model=list[AnalysisSummary])
-def list_analyses(db: Session = Depends(get_db)) -> list[AnalysisSummary]:
-    analyses = list_analysis_results(db)
-    return [
+@router.get("", response_model=AnalysisListResponse)
+def list_analyses(
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    project_name: str | None = None,
+    local_government: str | None = None,
+    sort: AnalysisSort = "created_at_desc",
+    db: Session = Depends(get_db),
+) -> AnalysisListResponse:
+    analyses, total = list_analysis_results(
+        db=db,
+        limit=limit,
+        offset=offset,
+        project_name=project_name,
+        local_government=local_government,
+        sort=sort,
+    )
+    items = [
         AnalysisSummary(
             analysis_id=analysis.id,
             project_id=analysis.project_id,
@@ -24,6 +45,7 @@ def list_analyses(db: Session = Depends(get_db)) -> list[AnalysisSummary]:
         )
         for analysis in analyses
     ]
+    return AnalysisListResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @router.get("/{analysis_id}", response_model=AnalysisDetail)
