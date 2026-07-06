@@ -1,12 +1,16 @@
-﻿.venv/
+.venv/
 __pycache__/
 *.pyc
 .env
 .env.*
+!.env.example
 node_modules/
 dist/
 build/
 .DS_Store
 data/raw/
 data/processed/
+postgres_data/
 *.log
+.pytest_cache/
+pytest-cache-files-*/

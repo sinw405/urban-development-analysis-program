@@ -1,0 +1,175 @@
+version: "0.1.0"
+phase: "Phase 0 MVP"
+notes:
+  - "General urban development project procedure skeleton."
+  - "Legal article numbers are not finalized in Phase 0."
+  - "Confirm exact statutory basis later through MOLEG Open API and expert review."
+procedure_steps:
+  - order: 1
+    name: "Project input and basic feasibility review"
+    description: "Review basic project information such as location, area, implementation method, implementer type, and local government."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Project overview"
+      - "Location map"
+      - "Land area summary"
+      - "Implementation method summary"
+    consultation_agencies:
+      - "Relevant local government department"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "This is an MVP procedure step and not a final legal opinion."
+
+  - order: 2
+    name: "Urban development zone designation proposal or review"
+    description: "Prepare or review the proposal for urban development zone designation."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Draft zone designation proposal"
+      - "Land use status materials"
+      - "Basic development direction"
+    consultation_agencies:
+      - "Local government urban development department"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Exact requirements depend on project type and competent authority review."
+
+  - order: 3
+    name: "Resident opinion hearing and public notice"
+    description: "Conduct resident opinion hearing, public inspection, and related public notice procedures where required."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+      - "Related local ordinance - TODO_LOCAL_ORDINANCE_CHECK"
+    required_documents:
+      - "Public notice draft"
+      - "Resident opinion collection record"
+      - "Public inspection materials"
+    consultation_agencies:
+      - "Local government"
+      - "Residents and interested parties"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Detailed notice period must be confirmed later."
+
+  - order: 4
+    name: "Related agency consultation"
+    description: "Consult with relevant agencies on planning, infrastructure, environment, traffic, safety, and cultural heritage issues."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+      - "Individual assessment statutes - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Consultation request package"
+      - "Project plan materials"
+      - "Assessment screening materials if applicable"
+    consultation_agencies:
+      - "Relevant local government"
+      - "Environmental authority - TODO_CONFIRM"
+      - "Traffic authority - TODO_CONFIRM"
+      - "Cultural heritage authority - TODO_CONFIRM"
+      - "Underground safety authority - TODO_CONFIRM"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Agency list is a placeholder and must be refined by jurisdiction and project characteristics."
+
+  - order: 5
+    name: "Urban planning committee review"
+    description: "Submit the plan for urban planning committee deliberation where required."
+    legal_basis:
+      - "National Land Planning and Utilization Act - TODO_MOLEG_API_ARTICLE_CHECK"
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Committee deliberation materials"
+      - "Plan drawings"
+      - "Consultation result summary"
+    consultation_agencies:
+      - "Urban planning committee"
+      - "Relevant local government"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Committee type and agenda requirements must be verified."
+
+  - order: 6
+    name: "Zone designation and public notification"
+    description: "Proceed with designation and public notification after required review and consultation."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Designation decision document"
+      - "Public notification document"
+      - "Approved drawings"
+    consultation_agencies:
+      - "Competent authority"
+      - "Relevant local government"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Final designation authority must be confirmed by project scale and jurisdiction."
+
+  - order: 7
+    name: "Development plan establishment"
+    description: "Prepare and establish the development plan for the designated urban development zone."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Development plan"
+      - "Land use plan"
+      - "Infrastructure plan"
+      - "Financing and implementation plan"
+    consultation_agencies:
+      - "Competent authority"
+      - "Relevant local government departments"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Plan contents must be verified against current statutes and ordinances."
+
+  - order: 8
+    name: "Implementation plan authorization"
+    description: "Prepare and obtain authorization for the implementation plan."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Implementation plan application"
+      - "Detailed design documents"
+      - "Land acquisition or replotting materials as applicable"
+      - "Consultation completion evidence"
+    consultation_agencies:
+      - "Competent authority"
+      - "Relevant infrastructure agencies"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Required attachments differ by implementation method."
+
+  - order: 9
+    name: "Project implementation and construction"
+    description: "Execute the project according to the authorized implementation plan."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+      - "Construction-related statutes - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Construction commencement documents"
+      - "Progress management records"
+      - "Change authorization documents if applicable"
+    consultation_agencies:
+      - "Competent authority"
+      - "Construction and infrastructure agencies"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Construction period is highly project-specific."
+
+  - order: 10
+    name: "Completion inspection and project closeout"
+    description: "Request completion inspection and close the project after required confirmations."
+    legal_basis:
+      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
+    required_documents:
+      - "Completion inspection request"
+      - "As-built drawings"
+      - "Facility transfer materials"
+      - "Final consultation compliance documents"
+    consultation_agencies:
+      - "Competent authority"
+      - "Facility management agencies"
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    notes:
+      - "Closeout requirements must be confirmed by implementation method and authorization conditions."
