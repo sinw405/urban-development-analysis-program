@@ -13,13 +13,14 @@ class AnalyzeRequest(BaseModel):
 
 
 class ProcedureStep(BaseModel):
-    order: int
-    name: str
+    step_code: str
+    step_name: str
+    sequence: int
     description: str
-    legal_basis: list[str]
     required_documents: list[str]
-    consultation_agencies: list[str]
+    related_agencies: list[str]
     estimated_duration: str
+    legal_basis_placeholder: list[str]
     notes: list[str] = []
 
 
@@ -30,6 +31,7 @@ class AssessmentItem(BaseModel):
     legal_basis: str
     required_action: str
     notes: list[str] = []
+    assessment_code: str | None = None
 
 
 class AnalyzeResponse(BaseModel):

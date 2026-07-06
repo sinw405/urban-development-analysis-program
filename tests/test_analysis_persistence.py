@@ -45,6 +45,13 @@ def test_list_and_get_analysis_results():
     assert detail["result_payload"]["project_id"] == created["project_id"]
     assert detail["result_payload"]["created_at"] is not None
     assert len(detail["result_payload"]["procedures"]) > 0
+    first_step = detail["result_payload"]["procedures"][0]
+    assert "step_code" in first_step
+    assert "step_name" in first_step
+    assert "sequence" in first_step
+    assert "legal_basis_placeholder" in first_step
+    assert "order" not in first_step
+    assert "legal_basis" not in first_step
     assert len(detail["result_payload"]["assessments"]) == 4
 
 
@@ -105,6 +112,6 @@ def test_stored_assessment_thresholds_remain_placeholders():
     assert len(assessments) == 4
     for item in assessments:
         assert item["threshold"] == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-        assert "TODO" in item["legal_basis"]
-        assert "?? ??" not in item["status"]
-        assert "??? ??" not in item["status"]
+        assert item["legal_basis"] == "TODO_MOLEG_API_ARTICLE_CHECK"
+        assert "\ub300\uc0c1 \ud655\uc815" not in item["status"]
+        assert "\ube44\ub300\uc0c1 \ud655\uc815" not in item["status"]

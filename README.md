@@ -179,6 +179,132 @@ $analysisId = $result.analysis_id
 Invoke-RestMethod -Uri "http://localhost:8000/api/analyses/$analysisId" -Method Get | ConvertTo-Json -Depth 8
 ```
 
+
+## Phase 2 Rule Engine
+
+Phase 2 standardizes the YAML-based procedure rule engine. It does not add MOLEG Open API integration, RAG, React frontend, legal article finalization, or assessment threshold finalization.
+
+### Procedure Rule Structure
+
+`rules/procedure_rules.yaml` uses this structure:
+
+```yaml
+common_steps: []
+implementation_method_rules: {}
+implementer_type_rules: {}
+```
+
+Each procedure step uses the standardized response fields below:
+
+```text
+step_code
+step_name
+sequence
+description
+required_documents
+related_agencies
+estimated_duration
+legal_basis_placeholder
+notes
+```
+
+Legacy field mapping:
+
+```text
+order -> sequence
+name -> step_name
+legal_basis -> legal_basis_placeholder
+consultation_agencies -> related_agencies
+```
+
+### Supported Implementation Methods
+
+```text
+expropriation_or_use
+replotting
+mixed
+```
+
+Korean compatibility aliases are supported:
+
+```text
+?? ?? ?? ??, ?? -> expropriation_or_use
+?? ??, ?? -> replotting
+?? ??, ?? -> mixed
+```
+
+### Supported Implementer Types
+
+```text
+public
+private
+public_private_spc
+```
+
+Korean compatibility aliases are supported:
+
+```text
+?? -> public
+?? -> private
+??SPC, ???? SPC -> public_private_spc
+```
+
+### Assessment Placeholder Policy
+
+`rules/assessment_rules.yaml` remains placeholder-only.
+
+Required invariant:
+
+```text
+threshold = TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+legal_basis = TODO_MOLEG_API_ARTICLE_CHECK
+```
+
+The following are not implemented in Phase 2:
+
+- Environmental impact assessment threshold finalization
+- Traffic impact assessment threshold finalization
+- Underground safety assessment threshold finalization
+- Buried cultural heritage threshold finalization
+- MOLEG Open API integration
+- RAG
+- React frontend
+
+Baekhyeon MICE may be used only as a generic validation input. There is no Baekhyeon-specific branch, step code, or hardcoded logic.
+
+### Analyze Response Example
+
+`POST /api/analyze` keeps the top-level response fields and standardizes `procedures` items:
+
+```json
+{
+  "project_name": "Test Urban Development Project",
+  "location": "Seongnam-si, Gyeonggi-do",
+  "area_square_meters": 100000,
+  "implementation_method": "mixed",
+  "implementer_type": "public_private_spc",
+  "local_government": "Seongnam-si",
+  "procedures": [
+    {
+      "step_code": "PROJECT_BASIC_REVIEW",
+      "step_name": "Project basic review",
+      "sequence": 10,
+      "description": "Review basic project information...",
+      "required_documents": [],
+      "related_agencies": [],
+      "estimated_duration": "TODO_EXPERT_REVIEW",
+      "legal_basis_placeholder": ["TODO_MOLEG_API_ARTICLE_CHECK"],
+      "notes": []
+    }
+  ],
+  "assessments": [],
+  "warnings": [],
+  "project_id": 1,
+  "analysis_id": 1,
+  "created_at": "2026-07-06T00:00:00Z"
+}
+```
+
 ## Assessment Response Policy
 
 - Do not determine whether an assessment is required in Phase 1.5.

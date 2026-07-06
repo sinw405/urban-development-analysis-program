@@ -1,175 +1,293 @@
-version: "0.1.0"
-phase: "Phase 0 MVP"
+version: "0.2.0"
+phase: "Phase 2 Rule Engine"
 notes:
-  - "General urban development project procedure skeleton."
-  - "Legal article numbers are not finalized in Phase 0."
-  - "Confirm exact statutory basis later through MOLEG Open API and expert review."
-procedure_steps:
-  - order: 1
-    name: "Project input and basic feasibility review"
+  - "Procedure rules are draft workflow candidates for general urban development projects."
+  - "Legal basis values are placeholders only."
+  - "Finalize legal article references later through MOLEG Open API and expert review."
+common_steps:
+  - step_code: "PROJECT_BASIC_REVIEW"
+    step_name: "Project basic review"
+    sequence: 10
     description: "Review basic project information such as location, area, implementation method, implementer type, and local government."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Project overview"
       - "Location map"
       - "Land area summary"
       - "Implementation method summary"
-    consultation_agencies:
+    related_agencies:
       - "Relevant local government department"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
-      - "This is an MVP procedure step and not a final legal opinion."
+      - "This step is a draft workflow item and not a final legal determination."
 
-  - order: 2
-    name: "Urban development zone designation proposal or review"
+  - step_code: "ZONE_DESIGNATION_REVIEW"
+    step_name: "Urban development zone designation proposal or review"
+    sequence: 20
     description: "Prepare or review the proposal for urban development zone designation."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Draft zone designation proposal"
       - "Land use status materials"
       - "Basic development direction"
-    consultation_agencies:
+    related_agencies:
       - "Local government urban development department"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
-      - "Exact requirements depend on project type and competent authority review."
+      - "Exact requirements must be verified later."
 
-  - order: 3
-    name: "Resident opinion hearing and public notice"
+  - step_code: "RESIDENT_OPINION_HEARING"
+    step_name: "Resident opinion hearing and public notice"
+    sequence: 30
     description: "Conduct resident opinion hearing, public inspection, and related public notice procedures where required."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
-      - "Related local ordinance - TODO_LOCAL_ORDINANCE_CHECK"
     required_documents:
       - "Public notice draft"
       - "Resident opinion collection record"
       - "Public inspection materials"
-    consultation_agencies:
+    related_agencies:
       - "Local government"
       - "Residents and interested parties"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
+      - "TODO_LOCAL_ORDINANCE_CHECK"
     notes:
       - "Detailed notice period must be confirmed later."
 
-  - order: 4
-    name: "Related agency consultation"
+  - step_code: "RELATED_AGENCY_CONSULTATION"
+    step_name: "Related agency consultation"
+    sequence: 40
     description: "Consult with relevant agencies on planning, infrastructure, environment, traffic, safety, and cultural heritage issues."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
-      - "Individual assessment statutes - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Consultation request package"
       - "Project plan materials"
       - "Assessment screening materials if applicable"
-    consultation_agencies:
+    related_agencies:
       - "Relevant local government"
       - "Environmental authority - TODO_CONFIRM"
       - "Traffic authority - TODO_CONFIRM"
       - "Cultural heritage authority - TODO_CONFIRM"
       - "Underground safety authority - TODO_CONFIRM"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
       - "Agency list is a placeholder and must be refined by jurisdiction and project characteristics."
 
-  - order: 5
-    name: "Urban planning committee review"
+  - step_code: "URBAN_PLANNING_COMMITTEE_REVIEW"
+    step_name: "Urban planning committee review"
+    sequence: 50
     description: "Submit the plan for urban planning committee deliberation where required."
-    legal_basis:
-      - "National Land Planning and Utilization Act - TODO_MOLEG_API_ARTICLE_CHECK"
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Committee deliberation materials"
       - "Plan drawings"
       - "Consultation result summary"
-    consultation_agencies:
+    related_agencies:
       - "Urban planning committee"
       - "Relevant local government"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
       - "Committee type and agenda requirements must be verified."
 
-  - order: 6
-    name: "Zone designation and public notification"
+  - step_code: "ZONE_DESIGNATION_NOTIFICATION"
+    step_name: "Zone designation and public notification"
+    sequence: 60
     description: "Proceed with designation and public notification after required review and consultation."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Designation decision document"
       - "Public notification document"
       - "Approved drawings"
-    consultation_agencies:
+    related_agencies:
       - "Competent authority"
       - "Relevant local government"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
       - "Final designation authority must be confirmed by project scale and jurisdiction."
 
-  - order: 7
-    name: "Development plan establishment"
+  - step_code: "DEVELOPMENT_PLAN_ESTABLISHMENT"
+    step_name: "Development plan establishment"
+    sequence: 70
     description: "Prepare and establish the development plan for the designated urban development zone."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Development plan"
       - "Land use plan"
       - "Infrastructure plan"
       - "Financing and implementation plan"
-    consultation_agencies:
+    related_agencies:
       - "Competent authority"
       - "Relevant local government departments"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
       - "Plan contents must be verified against current statutes and ordinances."
 
-  - order: 8
-    name: "Implementation plan authorization"
+  - step_code: "IMPLEMENTATION_PLAN_AUTHORIZATION"
+    step_name: "Implementation plan authorization"
+    sequence: 90
     description: "Prepare and obtain authorization for the implementation plan."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Implementation plan application"
       - "Detailed design documents"
-      - "Land acquisition or replotting materials as applicable"
       - "Consultation completion evidence"
-    consultation_agencies:
+    related_agencies:
       - "Competent authority"
       - "Relevant infrastructure agencies"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
       - "Required attachments differ by implementation method."
 
-  - order: 9
-    name: "Project implementation and construction"
+  - step_code: "PROJECT_IMPLEMENTATION"
+    step_name: "Project implementation and construction"
+    sequence: 100
     description: "Execute the project according to the authorized implementation plan."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
-      - "Construction-related statutes - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Construction commencement documents"
       - "Progress management records"
       - "Change authorization documents if applicable"
-    consultation_agencies:
+    related_agencies:
       - "Competent authority"
       - "Construction and infrastructure agencies"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
       - "Construction period is highly project-specific."
 
-  - order: 10
-    name: "Completion inspection and project closeout"
+  - step_code: "COMPLETION_INSPECTION"
+    step_name: "Completion inspection and project closeout"
+    sequence: 110
     description: "Request completion inspection and close the project after required confirmations."
-    legal_basis:
-      - "Urban Development Act - TODO_MOLEG_API_ARTICLE_CHECK"
     required_documents:
       - "Completion inspection request"
       - "As-built drawings"
       - "Facility transfer materials"
       - "Final consultation compliance documents"
-    consultation_agencies:
+    related_agencies:
       - "Competent authority"
       - "Facility management agencies"
     estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
     notes:
       - "Closeout requirements must be confirmed by implementation method and authorization conditions."
+
+implementation_method_rules:
+  expropriation_or_use:
+    add_steps:
+      - step_code: "LAND_ACQUISITION_REVIEW"
+        step_name: "Land acquisition and compensation review"
+        sequence: 80
+        description: "Review land acquisition, use, and compensation workflow candidates for expropriation-or-use implementation."
+        required_documents:
+          - "Land ownership summary"
+          - "Compensation planning materials"
+          - "Land acquisition schedule draft"
+        related_agencies:
+          - "Competent authority"
+          - "Land acquisition and compensation consultation body - TODO_CONFIRM"
+        estimated_duration: "TODO_EXPERT_REVIEW"
+        legal_basis_placeholder:
+          - "TODO_MOLEG_API_ARTICLE_CHECK"
+        notes:
+          - "This is a workflow candidate only. Legal applicability must be reviewed later."
+  replotting:
+    add_steps:
+      - step_code: "REPLOTTING_PLAN_REVIEW"
+        step_name: "Replotting plan review"
+        sequence: 80
+        description: "Review replotting plan workflow candidates for replotting implementation."
+        required_documents:
+          - "Draft replotting plan"
+          - "Landowner and parcel status materials"
+          - "Replotting calculation materials - TODO_CONFIRM"
+        related_agencies:
+          - "Competent authority"
+          - "Landowner or association stakeholders - TODO_CONFIRM"
+        estimated_duration: "TODO_EXPERT_REVIEW"
+        legal_basis_placeholder:
+          - "TODO_MOLEG_API_ARTICLE_CHECK"
+        notes:
+          - "This step does not finalize replotting legal criteria."
+  mixed:
+    add_steps:
+      - step_code: "MIXED_METHOD_COORDINATION"
+        step_name: "Mixed implementation method coordination"
+        sequence: 80
+        description: "Coordinate candidate workflows where expropriation-or-use and replotting methods may both be involved."
+        required_documents:
+          - "Mixed method scope summary"
+          - "Area or parcel classification draft"
+          - "Method-specific schedule comparison"
+        related_agencies:
+          - "Competent authority"
+          - "Relevant local government departments"
+        estimated_duration: "TODO_EXPERT_REVIEW"
+        legal_basis_placeholder:
+          - "TODO_MOLEG_API_ARTICLE_CHECK"
+        notes:
+          - "Mixed method details must be confirmed later through legal and expert review."
+
+implementer_type_rules:
+  public:
+    add_steps:
+      - step_code: "PUBLIC_IMPLEMENTER_COORDINATION"
+        step_name: "Public implementer coordination"
+        sequence: 15
+        description: "Coordinate candidate workflow items for a public implementer."
+        required_documents:
+          - "Public implementer designation or authority materials"
+          - "Public financing or implementation plan summary"
+        related_agencies:
+          - "Relevant public institution"
+          - "Competent authority"
+        estimated_duration: "TODO_EXPERT_REVIEW"
+        legal_basis_placeholder:
+          - "TODO_MOLEG_API_ARTICLE_CHECK"
+        notes:
+          - "Public implementer authority must be reviewed later."
+  private:
+    add_steps:
+      - step_code: "PRIVATE_IMPLEMENTER_QUALIFICATION_REVIEW"
+        step_name: "Private implementer qualification review"
+        sequence: 15
+        description: "Review candidate qualification and documentation workflow for a private implementer."
+        required_documents:
+          - "Private implementer profile"
+          - "Financing capacity summary"
+          - "Landowner consent or ownership materials - TODO_CONFIRM"
+        related_agencies:
+          - "Competent authority"
+          - "Relevant local government department"
+        estimated_duration: "TODO_EXPERT_REVIEW"
+        legal_basis_placeholder:
+          - "TODO_MOLEG_API_ARTICLE_CHECK"
+        notes:
+          - "No private implementer eligibility criteria are finalized in Phase 2."
+  public_private_spc:
+    add_steps:
+      - step_code: "SPC_GOVERNANCE_REVIEW"
+        step_name: "Public-private SPC governance review"
+        sequence: 15
+        description: "Review candidate governance, role allocation, and implementation workflow for a public-private SPC."
+        required_documents:
+          - "SPC structure summary"
+          - "Public-private role allocation draft"
+          - "Governance and financing summary"
+        related_agencies:
+          - "Competent authority"
+          - "Public partner institution - TODO_CONFIRM"
+          - "Private partner entity - TODO_CONFIRM"
+        estimated_duration: "TODO_EXPERT_REVIEW"
+        legal_basis_placeholder:
+          - "TODO_MOLEG_API_ARTICLE_CHECK"
+        notes:
+          - "No SPC-specific legal eligibility criteria are finalized in Phase 2."

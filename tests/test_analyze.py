@@ -6,15 +6,15 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_analyze_returns_procedures_placeholder_assessments_and_persistence_ids():
+def test_analyze_returns_phase2_procedure_structure_and_persistence_ids():
     response = client.post(
         "/api/analyze",
         json={
             "project_name": "Test Urban Development Project",
             "location": "Seongnam-si, Gyeonggi-do",
             "area_square_meters": 100000,
-            "implementation_method": "Expropriation or use method",
-            "implementer_type": "Local public corporation",
+            "implementation_method": "expropriation_or_use",
+            "implementer_type": "public",
             "local_government": "Seongnam-si",
         },
     )
@@ -22,16 +22,33 @@ def test_analyze_returns_procedures_placeholder_assessments_and_persistence_ids(
     assert response.status_code == 200
     data = response.json()
     assert data["project_name"] == "Test Urban Development Project"
-    assert len(data["procedures"]) > 0
-    assert len(data["assessments"]) == 4
     assert isinstance(data["project_id"], int)
     assert isinstance(data["analysis_id"], int)
     assert data["created_at"] is not None
+    assert len(data["procedures"]) > 0
 
-    expected_status = "법령 검토 필요"
-    expected_action_fragment = "기준 미확정"
+    expected_fields = {
+        "step_code",
+        "step_name",
+        "sequence",
+        "description",
+        "required_documents",
+        "related_agencies",
+        "estimated_duration",
+        "legal_basis_placeholder",
+        "notes",
+    }
+    assert set(data["procedures"][0]) == expected_fields
+    assert "order" not in data["procedures"][0]
+    assert "name" not in data["procedures"][0]
+    assert "legal_basis" not in data["procedures"][0]
+    assert "consultation_agencies" not in data["procedures"][0]
+
+    for step in data["procedures"]:
+        assert "TODO" in " ".join(step["legal_basis_placeholder"])
+
     for item in data["assessments"]:
-        assert item["status"] == expected_status
         assert item["threshold"] == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-        assert "TODO" in item["legal_basis"]
-        assert expected_action_fragment in item["required_action"]
+        assert item["legal_basis"] == "TODO_MOLEG_API_ARTICLE_CHECK"
+        assert "\ub300\uc0c1 \ud655\uc815" not in item["status"]
+        assert "\ube44\ub300\uc0c1 \ud655\uc815" not in item["status"]
