@@ -14,7 +14,7 @@ router = APIRouter(tags=["analysis"])
 @router.post("/analyze", response_model=AnalyzeResponse)
 def analyze(request: AnalyzeRequest, db: Session = Depends(get_db)) -> AnalyzeResponse:
     result = analyze_project(request)
-    attach_legal_references(db=db, result=result)
+    attach_legal_references(db=db, result=result, as_of=request.as_of)
     result.warnings.append("Analysis request and result were stored in PostgreSQL.")
     analysis = create_project_with_analysis(
         db=db,

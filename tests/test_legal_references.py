@@ -134,11 +134,16 @@ def test_analyze_returns_test_only_legal_reference_for_connected_step():
         assert legal_reference["step_code"] == TEST_STEP_CODE
         assert legal_reference["reference_status"] == TODO_MOLEG_API_ARTICLE_CHECK
         assert legal_reference["placeholder"] == TODO_MOLEG_API_ARTICLE_CHECK
-        assert legal_reference["law"]["law_name"] == TEST_LAW_NAME
-        assert legal_reference["law"]["mapping_status"] == PENDING_MOLEG_API_MAPPING
-        assert legal_reference["law_article"]["article_number_text"] == TEST_ARTICLE_TEXT
-        assert legal_reference["law_article"]["mapping_status"] == TODO_MOLEG_API_ARTICLE_CHECK
-        assert all("TEST_" in str(legal_reference[key]) or legal_reference[key] == TODO_MOLEG_API_ARTICLE_CHECK for key in ["law", "law_article", "placeholder"])
+        assert legal_reference["law_key"] == "TEST_LAW_KEY_DO_NOT_USE"
+        assert legal_reference["law_mapping_status"] == PENDING_MOLEG_API_MAPPING
+        assert legal_reference["article_key"] == "TEST_ARTICLE_KEY_DO_NOT_USE"
+        assert legal_reference["article_mapping_status"] == TODO_MOLEG_API_ARTICLE_CHECK
+        assert legal_reference["current_version"] is None
+        assert len(legal_reference["versions"]) == 1
+        assert "law" not in legal_reference
+        assert "law_article" not in legal_reference
+        assert "law_name" not in legal_reference
+        assert "article_number_text" not in legal_reference
 
         for item in data["assessments"]:
             assert item["threshold"] == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"

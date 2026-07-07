@@ -156,6 +156,7 @@ def analyze_project(request: AnalyzeRequest) -> AnalyzeResponse:
         implementation_method=request.implementation_method,
         implementer_type=request.implementer_type,
         local_government=request.local_government,
+        as_of=request.as_of,
         procedures=procedures,
         assessments=assessments,
         warnings=warnings,

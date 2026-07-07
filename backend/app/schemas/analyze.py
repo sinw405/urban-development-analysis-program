@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+﻿from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -11,6 +11,30 @@ class AnalyzeRequest(BaseModel):
     implementation_method: str = Field(..., description="Implementation method")
     implementer_type: str = Field(..., description="Type of project implementer")
     local_government: str = Field(..., description="Relevant local government")
+    as_of: date | None = Field(default=None, description="Optional date for stored legal reference version lookup")
+
+
+class LegalReferenceVersion(BaseModel):
+    version_id: int
+    version_status: str
+    temporal_status: str
+    effective_date: date | None = None
+    source: str
+
+
+class LegalReference(BaseModel):
+    step_code: str
+    reference_status: str
+    placeholder: str
+    law_id: int | None = None
+    law_key: str | None = None
+    law_mapping_status: str | None = None
+    article_id: int | None = None
+    article_key: str | None = None
+    article_mapping_status: str | None = None
+    current_version: LegalReferenceVersion | None = None
+    versions: list[LegalReferenceVersion] = Field(default_factory=list)
+    notes: dict[str, Any] = Field(default_factory=dict)
 
 
 class ProcedureStep(BaseModel):
@@ -22,7 +46,7 @@ class ProcedureStep(BaseModel):
     related_agencies: list[str]
     estimated_duration: str
     legal_basis_placeholder: list[str]
-    legal_references: list[dict[str, Any]] = Field(default_factory=list)
+    legal_references: list[LegalReference] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
 
 
@@ -43,6 +67,7 @@ class AnalyzeResponse(BaseModel):
     implementation_method: str
     implementer_type: str
     local_government: str
+    as_of: date | None = None
     procedures: list[ProcedureStep]
     assessments: list[AssessmentItem]
     warnings: list[str]
