@@ -1,4 +1,3 @@
-﻿import { useState } from "react";
 import type { ProcedureStep } from "../api/types";
 import { formatList } from "../utils/formatters";
 import type { ChecklistStatus } from "./ProcedureChecklist";
@@ -6,6 +5,8 @@ import { ProcedureStepDetail } from "./ProcedureStepDetail";
 
 interface ProcedureRoadmapProps {
   steps: ProcedureStep[];
+  stepStatuses: Record<string, ChecklistStatus>;
+  onStepStatusChange: (stepCode: string, status: ChecklistStatus) => void;
 }
 
 function statusClass(status: ChecklistStatus): string {
@@ -18,8 +19,7 @@ function statusClass(status: ChecklistStatus): string {
   return "pending";
 }
 
-export function ProcedureRoadmap({ steps }: ProcedureRoadmapProps) {
-  const [stepStatuses, setStepStatuses] = useState<Record<string, ChecklistStatus>>({});
+export function ProcedureRoadmap({ steps, stepStatuses, onStepStatusChange }: ProcedureRoadmapProps) {
 
   if (!steps || steps.length === 0) {
     return <p className="emptyState">표시할 절차 정보가 없습니다.</p>;
@@ -32,7 +32,7 @@ export function ProcedureRoadmap({ steps }: ProcedureRoadmapProps) {
   }
 
   function updateStepStatus(stepCode: string, status: ChecklistStatus) {
-    setStepStatuses((current) => ({ ...current, [stepCode]: status }));
+    onStepStatusChange(stepCode, status);
   }
 
   return (

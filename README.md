@@ -2,7 +2,7 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 12.
+Current stage: Phase 13.
 
 Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
@@ -397,7 +397,7 @@ VITE_API_BASE_URL=http://localhost:8000
 Local frontend run:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\????썹땟戮녹춿?貫夷???고닍????????援온?????곗뒩泳??????썹땟怨⒲뀋???묒낯筌뤾쑨???frontend
+cd C:\Users\poiu2\Desktop\?????밸븶筌믩끃異?縕ュㅇ???怨좊땷?????????댁삩??????怨쀫뮝力???????밸븶?ⓥ뮧????臾믩궚嶺뚮ㅎ????frontend
 npm install
 npm run dev
 ```
@@ -452,7 +452,7 @@ TEST law update event with impacted_step_codes
 After seeding, open the frontend:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\??ш끽維뽳쭛?λ쨬??우툓???癲????굿????됰슣維????ш끽維곩ㅇ??쒑쳸紐꾧덧??frontend
+cd C:\Users\poiu2\Desktop\????썹땟戮녹춿?貫夷???고닍????????援온?????곗뒩泳??????썹땟怨⒲뀋???묒낯筌뤾쑨???frontend
 npm install
 npm run dev
 ```
@@ -680,7 +680,7 @@ The UI displays these as Korean work-check items and shows Korean empty states w
 Step status is managed in React state for the current screen only:
 
 ```text
-誘명솗???뺤씤以??뺤씤?꾨즺
+沃섎챸????類ㅼ뵥餓??類ㅼ뵥?袁⑥┷
 ```
 
 Refreshing the browser resets checklist state in Phase 12. The same roadmap and checklist UI appears in both immediate analysis results and stored analysis details:
@@ -697,3 +697,43 @@ docs/manual_test_phase12.md
 ```
 
 Phase 12 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.
+
+## Phase 13 Analysis Report Print View
+
+Phase 13 adds a report-style summary section to analysis results. It does not add server-side PDF generation, file download APIs, authentication, database migrations, backend API changes, or changes to `analysis_results.result_payload`.
+
+The report section appears in both analysis result surfaces:
+
+```text
+/analyze
+/analyses/:analysisId
+```
+
+The report displays backend-provided and screen-state data in a structured format:
+
+```text
+Report title
+Project name or project ID
+Analysis ID when available
+as_of date
+created_at when available
+Analysis summary
+Procedure step count
+Legal reference count
+Procedure roadmap summary
+Step detail summary
+Step-level legal reference count
+Checklist status summary from the current browser screen
+Development TEST data notice
+Reference disclaimer
+```
+
+The `?몄뇙?섍린` button calls `window.print()`. Users can use the browser print dialog to print or save as PDF. Print-specific CSS hides navigation, buttons, input forms, and developer raw JSON sections so the report is easier to read on paper or in browser-generated PDFs.
+
+Manual browser checklist:
+
+```text
+docs/manual_test_phase13.md
+```
+
+Phase 13 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.

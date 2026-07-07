@@ -1,4 +1,7 @@
-﻿import { ProcedureRoadmap } from "../components/ProcedureRoadmap";
+﻿import { useState } from "react";
+import { AnalysisReport } from "../components/AnalysisReport";
+import type { ChecklistStatus } from "../components/ProcedureChecklist";
+import { ProcedureRoadmap } from "../components/ProcedureRoadmap";
 import type { AnalyzeResponse } from "../api/types";
 import { countLegalReferences, formatArea, formatDate, formatStatus } from "../utils/formatters";
 import { labelFor } from "../utils/labels";
@@ -12,6 +15,8 @@ function isRenderableResult(result: AnalyzeResponse): boolean {
 }
 
 export function AnalysisResult({ result }: AnalysisResultProps) {
+  const [checklistStatuses, setChecklistStatuses] = useState<Record<string, ChecklistStatus>>({});
+
   if (!result) {
     return (
       <section className="emptyPanel">
@@ -35,6 +40,10 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
   }
 
   const legalReferenceCount = countLegalReferences(result.procedures);
+
+  function updateChecklistStatus(stepCode: string, status: ChecklistStatus) {
+    setChecklistStatuses((current) => ({ ...current, [stepCode]: status }));
+  }
 
   return (
     <section className="stack">
@@ -74,6 +83,10 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
         </dl>
       </section>
 
+      <section className="panel reportPanel">
+        <AnalysisReport result={result} checklistStatuses={checklistStatuses} />
+      </section>
+
       <section className="panel">
         <div className="panelHeader">
           <div>
@@ -83,7 +96,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
           </div>
           <span className="badge neutral">{result.procedures.length}개 단계</span>
         </div>
-        <ProcedureRoadmap steps={result.procedures} />
+        <ProcedureRoadmap steps={result.procedures} stepStatuses={checklistStatuses} onStepStatusChange={updateChecklistStatus} />
       </section>
 
       {result.assessments.length > 0 && (
