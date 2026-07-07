@@ -2,9 +2,9 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 6.
+Current stage: Phase 7.
 
-Phase 6 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, Phase 3 legal-reference foundation, Phase 4 MOLEG ingest foundation, and Phase 5 law version lookup foundation. It adds as_of-based legal reference enrichment for analysis procedure steps. It does not finalize legal articles, assessment thresholds, or real law data.
+Phase 7 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, legal-reference foundation, MOLEG ingest foundation, law version lookup foundation, and as_of analysis enrichment. It adds a law update event foundation for detecting stored article version changes and finding impacted procedure step codes. It does not finalize legal articles, assessment thresholds, or real law data.
 
 ## Important Limits
 
@@ -362,6 +362,28 @@ unknown_effective_date
 
 Phase 6 tests use only `TEST_*_DO_NOT_USE` law, article, version, and procedure reference fixtures. MOLEG network calls, real legal data, RAG, and React remain out of scope.
 
+## Phase 7 Law Update Detection Foundation
+
+Phase 7 adds an event foundation for stored law article version changes. It compares an internal/fake incoming article version payload with existing `law_article_versions`, creates a `law_update_events` row when a new or changed version is detected, and reports impacted procedure step codes through `procedure_legal_references`.
+
+New table:
+
+```text
+law_update_events
+```
+
+Internal API endpoints:
+
+```text
+GET /api/law-updates
+GET /api/law-updates?since=YYYY-MM-DD
+GET /api/law-updates/{event_id}
+```
+
+Event responses include IDs, change type, detected date, effective date, status, source, and `impacted_step_codes`. They do not include real law names, real article numbers, or final legal criteria.
+
+Phase 7 tests use only `TEST_*_DO_NOT_USE` law, article, version, and procedure reference fixtures. MOLEG network calls remain disabled by default and are not used by update detection tests. RAG and React remain out of scope.
+
 Baekhyeon MICE may be used only as a generic validation input. There is no Baekhyeon-specific branch, step code, or hardcoded logic.
 
 ### Analyze Response Example
@@ -400,7 +422,7 @@ Baekhyeon MICE may be used only as a generic validation input. There is no Baekh
 
 ## Assessment Response Policy
 
-- Do not determine whether an assessment is required in Phase 6.
+- Do not determine whether an assessment is required in Phase 7.
 - Keep thresholds as `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA`.
 - Mark assessment status as legal review required.
 - Finalize criteria later through MOLEG Open API and expert review.
@@ -428,6 +450,6 @@ curl.exe http://localhost:8000/health
 ```powershell
 git status
 git add .
-git commit -m "Add phase 6 as-of legal references in analysis"
+git commit -m "Add phase 7 law update detection foundation"
 git status
 ```

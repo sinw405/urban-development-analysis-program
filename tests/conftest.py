@@ -14,7 +14,7 @@ if str(BACKEND_DIR) not in sys.path:
 
 def _delete_test_legal_reference_rows() -> None:
     from app.core.database import SessionLocal
-    from app.models import Law, LawArticle, LawArticleVersion, ProcedureLegalReference
+    from app.models import Law, LawArticle, LawArticleVersion, LawUpdateEvent, ProcedureLegalReference
 
     db = SessionLocal()
     try:
@@ -24,6 +24,7 @@ def _delete_test_legal_reference_rows() -> None:
 
         article_ids = list(db.scalars(select(LawArticle.id).where(LawArticle.law_id.in_(law_ids))).all())
         db.execute(delete(ProcedureLegalReference).where(ProcedureLegalReference.law_id.in_(law_ids)))
+        db.execute(delete(LawUpdateEvent).where(LawUpdateEvent.law_id.in_(law_ids)))
         if article_ids:
             db.execute(delete(LawArticleVersion).where(LawArticleVersion.law_article_id.in_(article_ids)))
             db.execute(delete(ProcedureLegalReference).where(ProcedureLegalReference.law_article_id.in_(article_ids)))

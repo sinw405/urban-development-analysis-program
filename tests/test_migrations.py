@@ -11,3 +11,4 @@ def test_alembic_configuration_points_to_backend_migrations():
     assert (root_dir / "backend" / "alembic" / "env.py").exists()
     assert (root_dir / "backend" / "alembic" / "versions" / "0001_create_project_and_analysis_result_tables.py").exists()
     assert (root_dir / "backend" / "alembic" / "versions" / "0002_create_legal_reference_tables.py").exists()
+    assert (root_dir / "backend" / "alembic" / "versions" / "0003_create_law_update_events.py").exists()
