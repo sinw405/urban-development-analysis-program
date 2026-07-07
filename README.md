@@ -1,10 +1,10 @@
-﻿# Urban Development Analysis Program
+# Urban Development Analysis Program
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 7.
+Current stage: Phase 8.
 
-Phase 7 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, legal-reference foundation, MOLEG ingest foundation, law version lookup foundation, and as_of analysis enrichment. It adds a law update event foundation for detecting stored article version changes and finding impacted procedure step codes. It does not finalize legal articles, assessment thresholds, or real law data.
+Phase 8 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, legal-reference foundation, MOLEG ingest foundation, law version lookup foundation, as_of analysis enrichment, and law update event foundation. It adds a React frontend MVP for submitting analysis requests and reviewing law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
 ## Important Limits
 
@@ -384,6 +384,49 @@ Event responses include IDs, change type, detected date, effective date, status,
 
 Phase 7 tests use only `TEST_*_DO_NOT_USE` law, article, version, and procedure reference fixtures. MOLEG network calls remain disabled by default and are not used by update detection tests. RAG and React remain out of scope.
 
+## Phase 8 React Frontend MVP
+
+Phase 8 adds a Vite + React + TypeScript frontend under `frontend/`. The frontend is an MVP for checking backend API behavior from a browser. It does not add real legal data, RAG, MOLEG network calls, or final UI workflows.
+
+Frontend environment:
+
+```text
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+Local frontend run:
+
+```powershell
+cd C:\Users\poiu2\Desktop\도시개발사업_관련_분석_프로그램\frontend
+npm install
+npm run dev
+```
+
+Build/typecheck:
+
+```powershell
+npm run typecheck
+npm run build
+```
+
+Screens:
+
+```text
+/             Dashboard with API base URL and navigation
+/analyze      Project analysis form calling POST /api/analyze
+/law-updates  Law update event list calling GET /api/law-updates
+```
+
+The analysis screen displays procedure steps, placeholder assessment values, and legal reference metadata exactly as returned by the backend. If a step has no connected legal references, it shows an empty state. If references exist, it displays backend-provided IDs, status values, effective dates, source, and temporal status only. It does not invent law names, article numbers, or criteria.
+
+FastAPI CORS is configured with `CORS_ALLOWED_ORIGINS`, defaulting to the Vite development origins:
+
+```text
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+```
+
+The frontend is not added as a Docker Compose service in Phase 8. Keeping it as a local npm workflow avoids adding Node dependency installation to the existing backend/database verification path. A production or containerized frontend can be added later when deployment requirements are clearer.
+
 Baekhyeon MICE may be used only as a generic validation input. There is no Baekhyeon-specific branch, step code, or hardcoded logic.
 
 ### Analyze Response Example
@@ -422,7 +465,7 @@ Baekhyeon MICE may be used only as a generic validation input. There is no Baekh
 
 ## Assessment Response Policy
 
-- Do not determine whether an assessment is required in Phase 7.
+- Do not determine whether an assessment is required in Phase 8.
 - Keep thresholds as `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA`.
 - Mark assessment status as legal review required.
 - Finalize criteria later through MOLEG Open API and expert review.
@@ -450,6 +493,6 @@ curl.exe http://localhost:8000/health
 ```powershell
 git status
 git add .
-git commit -m "Add phase 7 law update detection foundation"
+git commit -m "Add phase 8 react frontend foundation"
 git status
 ```

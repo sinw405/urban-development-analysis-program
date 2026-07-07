@@ -1,4 +1,4 @@
-﻿import os
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -24,6 +24,11 @@ class Settings:
     @property
     def rules_dir(self) -> Path:
         return self.project_root / "rules"
+
+    @property
+    def cors_allowed_origins(self) -> list[str]:
+        raw_value = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
+        return [origin.strip() for origin in raw_value.split(",") if origin.strip()]
 
     @property
     def moleg_api_base_url(self) -> str:
