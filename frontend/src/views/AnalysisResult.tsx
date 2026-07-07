@@ -6,7 +6,7 @@ interface AnalysisResultProps {
 
 function LegalReferences({ references }: { references: LegalReference[] }) {
   if (references.length === 0) {
-    return <p className="empty">연결된 법령 근거 없음</p>;
+    return <p className="empty">No connected legal references</p>;
   }
 
   return (
@@ -18,6 +18,8 @@ function LegalReferences({ references }: { references: LegalReference[] }) {
             <span>article_id</span><strong>{reference.article_id ?? "-"}</strong>
             <span>reference_status</span><strong>{reference.reference_status}</strong>
             <span>placeholder</span><strong>{reference.placeholder}</strong>
+            <span>law_key</span><strong>{reference.law_key ?? "-"}</strong>
+            <span>article_key</span><strong>{reference.article_key ?? "-"}</strong>
           </div>
           {reference.current_version ? (
             <div className="versionBox">
@@ -27,7 +29,7 @@ function LegalReferences({ references }: { references: LegalReference[] }) {
               <span>{reference.current_version.effective_date ?? "no effective date"}</span>
             </div>
           ) : (
-            <p className="empty">current version 없음</p>
+            <p className="empty">No current version for selected as_of</p>
           )}
           {reference.versions.length > 0 && (
             <table>
@@ -76,7 +78,7 @@ function ProcedureCard({ step }: { step: ProcedureStep }) {
 
 export function AnalysisResult({ result }: AnalysisResultProps) {
   if (!result) {
-    return <p className="empty">분석 결과가 아직 없습니다.</p>;
+    return <p className="empty">No analysis result yet.</p>;
   }
 
   return (

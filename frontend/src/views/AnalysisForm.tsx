@@ -10,7 +10,7 @@ const initialForm: AnalyzeRequest = {
   implementation_method: "mixed",
   implementer_type: "public_private_spc",
   local_government: "TEST_LOCAL_GOVERNMENT_DO_NOT_USE",
-  as_of: ""
+  as_of: "2099-06-15"
 };
 
 export function AnalysisForm() {

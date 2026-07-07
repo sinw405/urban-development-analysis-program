@@ -2,9 +2,9 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 8.
+Current stage: Phase 9.
 
-Phase 8 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, legal-reference foundation, MOLEG ingest foundation, law version lookup foundation, as_of analysis enrichment, and law update event foundation. It adds a React frontend MVP for submitting analysis requests and reviewing law update events. It does not finalize legal articles, assessment thresholds, or real law data.
+Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
 ## Important Limits
 
@@ -397,7 +397,7 @@ VITE_API_BASE_URL=http://localhost:8000
 Local frontend run:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\도시개발사업_관련_분석_프로그램\frontend
+cd C:\Users\poiu2\Desktop\?꾩떆媛쒕컻?ъ뾽_愿??遺꾩꽍_?꾨줈洹몃옩\frontend
 npm install
 npm run dev
 ```
@@ -426,6 +426,53 @@ CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
 
 The frontend is not added as a Docker Compose service in Phase 8. Keeping it as a local npm workflow avoids adding Node dependency installation to the existing backend/database verification path. A production or containerized frontend can be added later when deployment requirements are clearer.
+
+## Phase 9 Local Demo Testing Flow
+
+Phase 9 adds a development-only demo seed for browser testing. It creates only `TEST_*_DO_NOT_USE` data and is idempotent.
+
+Seed command:
+
+```powershell
+docker compose exec backend python -m app.dev_seed
+```
+
+Demo data includes:
+
+```text
+TEST_LAW_DO_NOT_USE
+TEST_ARTICLE_DO_NOT_USE
+TEST_VERSION_DO_NOT_USE_CURRENT
+TEST_VERSION_DO_NOT_USE_SCHEDULED
+TEST_PROJECT_DO_NOT_USE
+PROJECT_BASIC_REVIEW procedure legal reference
+TEST law update event with impacted_step_codes
+```
+
+After seeding, open the frontend:
+
+```powershell
+cd C:\Users\poiu2\Desktop\도시개발사업_관련_분석_프로그램\frontend
+npm install
+npm run dev
+```
+
+Browser URLs:
+
+```text
+http://localhost:5173/analyze
+http://localhost:5173/law-updates
+```
+
+Use `as_of = 2099-06-15` on the analysis screen to show the current TEST version and scheduled TEST version metadata. The law updates screen should show a TEST event with `impacted_step_codes`.
+
+Detailed manual checklist:
+
+```text
+docs/manual_test_phase9.md
+```
+
+The frontend remains a local npm workflow in Phase 9. Docker Compose frontend service is still deferred to keep the backend/database verification path stable.
 
 Baekhyeon MICE may be used only as a generic validation input. There is no Baekhyeon-specific branch, step code, or hardcoded logic.
 
@@ -465,7 +512,7 @@ Baekhyeon MICE may be used only as a generic validation input. There is no Baekh
 
 ## Assessment Response Policy
 
-- Do not determine whether an assessment is required in Phase 8.
+- Do not determine whether an assessment is required in Phase 9.
 - Keep thresholds as `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA`.
 - Mark assessment status as legal review required.
 - Finalize criteria later through MOLEG Open API and expert review.
@@ -493,6 +540,6 @@ curl.exe http://localhost:8000/health
 ```powershell
 git status
 git add .
-git commit -m "Add phase 8 react frontend foundation"
+git commit -m "Add phase 9 local demo testing flow"
 git status
 ```

@@ -32,7 +32,7 @@ export function LawUpdates() {
       </div>
       {error && <p className="error">{error}</p>}
       {isLoading ? <p className="empty">Loading events...</p> : null}
-      {!isLoading && items.length === 0 ? <p className="empty">감지된 법령 개정 이벤트 없음</p> : null}
+      {!isLoading && items.length === 0 ? <p className="empty">No detected law update events</p> : null}
       {items.length > 0 && (
         <table>
           <thead>
