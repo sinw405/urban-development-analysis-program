@@ -1,8 +1,9 @@
-from fastapi import FastAPI
+﻿from fastapi import FastAPI
 
 from app.api.analyses import router as analyses_router
 from app.api.analyze import router as analyze_router
 from app.api.health import router as health_router
+from app.api.laws import router as laws_router
 
 
 app = FastAPI(
@@ -14,3 +15,4 @@ app = FastAPI(
 app.include_router(health_router)
 app.include_router(analyze_router, prefix="/api")
 app.include_router(analyses_router, prefix="/api")
+app.include_router(laws_router, prefix="/api")

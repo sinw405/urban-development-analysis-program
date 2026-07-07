@@ -2,9 +2,9 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 3.
+Current stage: Phase 4.
 
-Phase 3 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, and YAML rule-engine flow, then adds a legal-reference data model foundation for future MOLEG article mapping. It is a legal-connection preparation stage only. MOLEG Open API calls, API keys, XML parsing, RAG, React, article finalization, and assessment threshold finalization are not integrated yet.
+Phase 4 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, and Phase 3 legal-reference foundation. It adds MOLEG Open API configuration, adapter boundaries, and a fake-response ingest pipeline foundation. It does not finalize legal articles, assessment thresholds, or real law data.
 
 ## Important Limits
 
@@ -12,7 +12,8 @@ Phase 3 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, and YAML r
 - Legal article numbers are not finalized.
 - Environmental impact assessment, traffic impact assessment, underground safety assessment, and buried cultural heritage review thresholds remain TODO/placeholders.
 - Assessment thresholds must remain `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA` until later legal review.
-- Real criteria must be finalized later through MOLEG Open API integration and expert review.
+- Real criteria must be finalized later through reviewed MOLEG Open API integration and expert review.
+- MOLEG API calls are disabled by default and require explicit environment configuration.
 
 ## Windows PowerShell Local Run
 
@@ -261,7 +262,7 @@ threshold = TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
 legal_basis = TODO_MOLEG_API_ARTICLE_CHECK
 ```
 
-The following are not implemented in Phase 3:
+The following are not implemented in Phase 4:
 
 - Environmental impact assessment threshold finalization
 - Traffic impact assessment threshold finalization
@@ -282,7 +283,34 @@ legal_basis_placeholder = TODO_MOLEG_API_ARTICLE_CHECK or another TODO/PENDING p
 legal_references = []
 ```
 
-The MOLEG adapter is a stub/interface layer in Phase 3. It does not perform external network calls and does not parse XML. Article mapping remains pending until a later phase.
+The Phase 3 legal-reference tables remain placeholder-oriented. Article mapping remains pending until a later reviewed integration phase.
+
+## Phase 4 MOLEG Ingest Foundation
+
+Phase 4 prepares for later MOLEG Open API integration without building real legal criteria or real article mappings.
+
+Environment settings:
+
+```text
+MOLEG_API_ENABLED=false
+MOLEG_API_BASE_URL=
+MOLEG_API_KEY=
+```
+
+Default behavior is safe: `MOLEG_API_ENABLED=false`, empty base URL, and empty API key. With these defaults, the application does not perform external MOLEG network calls. The HTTP adapter raises a disabled-configuration error before any request is attempted unless the integration is explicitly enabled and configured.
+
+Phase 4 adds:
+
+```text
+MolegHttpAdapter
+DisabledMolegAdapter
+LawIngestService
+MinimalMolegPayloadParser
+GET /api/laws
+GET /api/laws/{law_id}/articles
+```
+
+The ingest service accepts a minimal internal payload shape used by tests and stores rows in `laws`, `law_articles`, and `law_article_versions`. Tests use only `TEST_*_DO_NOT_USE` fake values. Real law names, real article numbers, real assessment thresholds, API keys, external XML parsing, RAG, and React remain out of scope.
 
 Baekhyeon MICE may be used only as a generic validation input. There is no Baekhyeon-specific branch, step code, or hardcoded logic.
 
@@ -322,7 +350,7 @@ Baekhyeon MICE may be used only as a generic validation input. There is no Baekh
 
 ## Assessment Response Policy
 
-- Do not determine whether an assessment is required in Phase 3.
+- Do not determine whether an assessment is required in Phase 4.
 - Keep thresholds as `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA`.
 - Mark assessment status as legal review required.
 - Finalize criteria later through MOLEG Open API and expert review.
@@ -350,6 +378,6 @@ curl.exe http://localhost:8000/health
 ```powershell
 git status
 git add .
-git commit -m "Add phase 3 legal reference foundation"
+git commit -m "Add phase 4 moleg ingest foundation"
 git status
 ```

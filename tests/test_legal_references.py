@@ -9,7 +9,7 @@ from app.services.legal_reference_service import (
     TODO_MOLEG_API_ARTICLE_CHECK,
     is_pending_legal_reference_status,
 )
-from app.services.moleg_adapter import MolegAdapter, MolegArticleLookupRequest, StubMolegAdapter
+from app.services.moleg_adapter import MolegArticleLookupRequest, StubMolegAdapter
 
 
 client = TestClient(app)
@@ -153,14 +153,3 @@ def test_moleg_stub_returns_pending_without_network_call():
 
     assert result.mapping_status == PENDING_MOLEG_API_MAPPING
     assert result.raw_payload is None
-
-
-def test_moleg_adapter_network_implementation_is_deferred():
-    adapter = MolegAdapter()
-
-    try:
-        adapter.lookup_article(MolegArticleLookupRequest(law_name=TEST_LAW_NAME))
-    except NotImplementedError as exc:
-        assert "Phase 3.5" in str(exc)
-    else:
-        raise AssertionError("MolegAdapter must not perform real API calls in Phase 3")
