@@ -705,3 +705,108 @@ tr:hover td {
     grid-template-columns: 1fr;
   }
 }
+
+.checkStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  font-weight: 900;
+  white-space: nowrap;
+  border: 1px solid #d0d5dd;
+  background: #f8fafc;
+  color: #475467;
+}
+
+.checkStatusBadge.progress {
+  border-color: #fedf89;
+  background: #fffaeb;
+  color: #b54708;
+}
+
+.checkStatusBadge.complete {
+  border-color: #a7f3d0;
+  background: #ecfdf3;
+  color: #067647;
+}
+
+.roadmap-complete .roadmapSummary,
+.roadmap-complete .procedureDetailCard {
+  border-color: #a7f3d0;
+  box-shadow: 0 0 0 1px rgba(6, 118, 71, 0.08);
+}
+
+.roadmap-complete .roadmapMarker span {
+  background: #067647;
+  border-color: #ecfdf3;
+}
+
+.roadmap-progress .roadmapMarker span {
+  background: #b54708;
+  border-color: #fffaeb;
+}
+
+.procedureChecklist {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.9rem;
+  margin: 1rem 0;
+}
+
+.checklistHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.checklistHeader h4 {
+  margin-bottom: 0.25rem;
+}
+
+.checklistItems {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.checklistItem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 0.6rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #fbfcfe;
+  padding: 0.75rem;
+  font-weight: 500;
+}
+
+.checklistItem input {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.2rem;
+}
+
+.checklistItem span {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.checklistItem strong {
+  color: #344054;
+}
+
+.checklistItem small {
+  color: #667085;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .checklistHeader {
+    flex-direction: column;
+  }
+}

@@ -1,6 +1,7 @@
 ﻿import type { LegalReference, ProcedureStep } from "../api/types";
 import { formatDate, formatList, formatStatus } from "../utils/formatters";
 import { labelFor } from "../utils/labels";
+import { ProcedureChecklist, type ChecklistStatus } from "./ProcedureChecklist";
 
 function StatusBadge({ value }: { value: string | null | undefined }) {
   return <span className={`statusBadge status-${value ?? "unknown"}`}>{formatStatus(value)}</span>;
@@ -47,9 +48,11 @@ function LegalReferenceCards({ references }: { references: LegalReference[] }) {
 
 interface ProcedureStepDetailProps {
   step: ProcedureStep;
+  checklistStatus: ChecklistStatus;
+  onChecklistStatusChange: (status: ChecklistStatus) => void;
 }
 
-export function ProcedureStepDetail({ step }: ProcedureStepDetailProps) {
+export function ProcedureStepDetail({ step, checklistStatus, onChecklistStatusChange }: ProcedureStepDetailProps) {
   return (
     <article className="procedureDetailCard">
       <div className="cardTitle">
@@ -62,6 +65,8 @@ export function ProcedureStepDetail({ step }: ProcedureStepDetailProps) {
       </div>
 
       <p>{step.description || "단계 설명 정보가 없습니다."}</p>
+
+      <ProcedureChecklist step={step} status={checklistStatus} onStatusChange={onChecklistStatusChange} />
 
       <dl className="definitionGrid compactDefinition">
         <dt>{labelFor("estimated_duration")}</dt>

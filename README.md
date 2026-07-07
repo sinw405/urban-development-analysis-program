@@ -2,7 +2,7 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 11.
+Current stage: Phase 12.
 
 Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
@@ -397,7 +397,7 @@ VITE_API_BASE_URL=http://localhost:8000
 Local frontend run:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\??ш끽維뽳쭛?λ쨬??우툓???癲????굿????됰슣維????ш끽維곩ㅇ??쒑쳸紐꾧덧??frontend
+cd C:\Users\poiu2\Desktop\????썹땟戮녹춿?貫夷???고닍????????援온?????곗뒩泳??????썹땟怨⒲뀋???묒낯筌뤾쑨???frontend
 npm install
 npm run dev
 ```
@@ -452,7 +452,7 @@ TEST law update event with impacted_step_codes
 After seeding, open the frontend:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\?熬곣뫖六삥뤆?녿츊???驪???㉱???釉뚯뫒???熬곣뫁夷?윜諛몄굡??frontend
+cd C:\Users\poiu2\Desktop\??ш끽維뽳쭛?λ쨬??우툓???癲????굿????됰슣維????ш끽維곩ㅇ??쒑쳸紐꾧덧??frontend
 npm install
 npm run dev
 ```
@@ -660,3 +660,40 @@ docs/manual_test_phase11.md
 ```
 
 Phase 11 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.
+
+## Phase 12 Procedure Checklist UI
+
+Phase 12 adds a frontend-only checklist UI to each procedure step in the roadmap. It does not add authentication, server persistence, database migrations, backend API changes, or changes to `analysis_results.result_payload`.
+
+Checklist items are generated only from the existing analysis response categories:
+
+```text
+Legal reference check
+Required documents check
+Related agencies check
+Estimated duration check
+Notes and cautions check
+```
+
+The UI displays these as Korean work-check items and shows Korean empty states when the response has no data, such as no connected legal references or no registered required documents.
+
+Step status is managed in React state for the current screen only:
+
+```text
+誘명솗???뺤씤以??뺤씤?꾨즺
+```
+
+Refreshing the browser resets checklist state in Phase 12. The same roadmap and checklist UI appears in both immediate analysis results and stored analysis details:
+
+```text
+/analyze
+/analyses/:analysisId
+```
+
+Manual browser checklist:
+
+```text
+docs/manual_test_phase12.md
+```
+
+Phase 12 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.
