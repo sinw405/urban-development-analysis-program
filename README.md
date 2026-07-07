@@ -2,9 +2,9 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 4.
+Current stage: Phase 5.
 
-Phase 4 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, and Phase 3 legal-reference foundation. It adds MOLEG Open API configuration, adapter boundaries, and a fake-response ingest pipeline foundation. It does not finalize legal articles, assessment thresholds, or real law data.
+Phase 5 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, YAML rule-engine flow, Phase 3 legal-reference foundation, and Phase 4 MOLEG ingest foundation. It adds an as_of-based law article version lookup foundation. It does not finalize legal articles, assessment thresholds, or real law data.
 
 ## Important Limits
 
@@ -312,6 +312,31 @@ GET /api/laws/{law_id}/articles
 
 The ingest service accepts a minimal internal payload shape used by tests and stores rows in `laws`, `law_articles`, and `law_article_versions`. Tests use only `TEST_*_DO_NOT_USE` fake values. Real law names, real article numbers, real assessment thresholds, API keys, external XML parsing, RAG, and React remain out of scope.
 
+## Phase 5 Law Version Lookup Foundation
+
+Phase 5 adds service and internal API support for looking up stored law article versions by an `as_of` date. This works only with data already stored in `laws`, `law_articles`, and `law_article_versions`; it does not call the MOLEG API and does not create real legal criteria.
+
+Version selection rule:
+
+```text
+current: latest effective_date less than or equal to as_of
+previous: effective_date less than or equal to as_of but older than current
+scheduled: effective_date greater than as_of
+unknown_effective_date: effective_date is not stored
+```
+
+Internal API endpoints:
+
+```text
+GET /api/laws
+GET /api/laws/{law_id}/articles
+GET /api/laws/{law_id}/articles?as_of=YYYY-MM-DD
+GET /api/laws/{law_id}/articles/{article_id}/versions
+GET /api/laws/{law_id}/articles/{article_id}/versions?as_of=YYYY-MM-DD
+```
+
+Phase 5 tests use only `TEST_*_DO_NOT_USE` fixtures, including fake law, article, and version text. Real law names, real article numbers, real thresholds, external MOLEG calls, RAG, and React remain out of scope.
+
 Baekhyeon MICE may be used only as a generic validation input. There is no Baekhyeon-specific branch, step code, or hardcoded logic.
 
 ### Analyze Response Example
@@ -350,7 +375,7 @@ Baekhyeon MICE may be used only as a generic validation input. There is no Baekh
 
 ## Assessment Response Policy
 
-- Do not determine whether an assessment is required in Phase 4.
+- Do not determine whether an assessment is required in Phase 5.
 - Keep thresholds as `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA`.
 - Mark assessment status as legal review required.
 - Finalize criteria later through MOLEG Open API and expert review.
@@ -378,6 +403,6 @@ curl.exe http://localhost:8000/health
 ```powershell
 git status
 git add .
-git commit -m "Add phase 4 moleg ingest foundation"
+git commit -m "Add phase 5 law version lookup foundation"
 git status
 ```
