@@ -2,7 +2,7 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 10.
+Current stage: Phase 11.
 
 Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
@@ -397,7 +397,7 @@ VITE_API_BASE_URL=http://localhost:8000
 Local frontend run:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\?熬곣뫖六삥뤆?녿츊???驪???㉱???釉뚯뫒???熬곣뫁夷?윜諛몄굡??frontend
+cd C:\Users\poiu2\Desktop\??ш끽維뽳쭛?λ쨬??우툓???癲????굿????됰슣維????ш끽維곩ㅇ??쒑쳸紐꾧덧??frontend
 npm install
 npm run dev
 ```
@@ -452,7 +452,7 @@ TEST law update event with impacted_step_codes
 After seeding, open the frontend:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\?袁⑸뻻揶쏆뮆而??毓??온???브쑴苑??袁⑥쨮域밸챶??frontend
+cd C:\Users\poiu2\Desktop\?熬곣뫖六삥뤆?녿츊???驪???㉱???釉뚯뫒???熬곣뫁夷?윜諛몄굡??frontend
 npm install
 npm run dev
 ```
@@ -630,3 +630,33 @@ http://localhost:5173/analyses/{analysisId}
 ```
 
 Phase 10 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.
+
+## Phase 11 Procedure Roadmap UI
+
+Phase 11 improves the analysis result display with a procedure roadmap and step detail UI. It does not change backend API response shapes or `analysis_results.result_payload` storage.
+
+Added frontend components:
+
+```text
+frontend/src/components/ProcedureRoadmap.tsx
+frontend/src/components/ProcedureStepDetail.tsx
+```
+
+The roadmap displays backend-provided procedure steps in sequence. Each step shows the step number, name, description, step code, legal-reference count, required documents, related agencies, and estimated duration. The step detail panel shows legal references, required documents, related agencies, duration, and notes with Korean empty states when data is missing.
+
+The same `AnalysisResult` component is still used by both screens:
+
+```text
+/analyze
+/analyses/:analysisId
+```
+
+This means immediate analysis results and stored analysis details share the same roadmap UI. Raw JSON remains hidden under developer-only expandable sections.
+
+Manual browser checklist:
+
+```text
+docs/manual_test_phase11.md
+```
+
+Phase 11 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.

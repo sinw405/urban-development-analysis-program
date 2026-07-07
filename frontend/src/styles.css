@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   color: #1f2933;
   background: #f4f6f8;
   font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
@@ -526,14 +526,17 @@ tr:hover td {
   .panelHeader,
   .cardTitle,
   .pageTitle,
-  .sectionHeading {
+  .sectionHeading,
+  .roadmapSummary {
     align-items: flex-start;
     flex-direction: column;
   }
 
   .dashboardGrid,
   .formGrid,
-  .summaryGrid {
+  .summaryGrid,
+  .roadmapFacts,
+  .detailColumns {
     grid-template-columns: 1fr;
   }
 
@@ -543,5 +546,162 @@ tr:hover td {
 
   .formActions button {
     width: 100%;
+  }
+}
+
+.procedureRoadmap {
+  display: grid;
+  gap: 1rem;
+}
+
+.roadmapItem {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: 1rem;
+  position: relative;
+}
+
+.roadmapItem:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 1.48rem;
+  top: 3.2rem;
+  bottom: -1rem;
+  width: 2px;
+  background: #d8dee8;
+}
+
+.roadmapMarker {
+  display: flex;
+  justify-content: center;
+  padding-top: 0.15rem;
+  position: relative;
+  z-index: 1;
+}
+
+.roadmapMarker span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  background: #0f62fe;
+  color: #ffffff;
+  font-weight: 900;
+  border: 4px solid #edf5ff;
+}
+
+.roadmapContent {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.roadmapSummary,
+.procedureDetailCard {
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.roadmapSummary {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.roadmapSummary h3 {
+  margin-bottom: 0.35rem;
+}
+
+.roadmapBadges {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.roadmapFacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.roadmapFacts span {
+  display: grid;
+  gap: 0.2rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #fbfcfe;
+  padding: 0.75rem;
+  color: #4b5563;
+}
+
+.roadmapFacts strong {
+  color: #344054;
+}
+
+.procedureDetailCard {
+  background: #fbfcfe;
+}
+
+.detailColumns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.detailColumns section,
+.legalReferenceSection {
+  border: 1px solid #e4e7ec;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.85rem;
+}
+
+.detailColumns h4,
+.legalReferenceSection h4 {
+  margin-bottom: 0.45rem;
+}
+
+.detailColumns p,
+.legalReferenceSection p {
+  margin-bottom: 0;
+}
+
+.legalReferenceSection {
+  margin-top: 0.85rem;
+}
+
+
+@media (max-width: 900px) {
+  .roadmapItem {
+    grid-template-columns: 2.6rem minmax(0, 1fr);
+  }
+
+  .roadmapItem:not(:last-child)::before {
+    left: 1.28rem;
+  }
+
+  .roadmapMarker span {
+    width: 2.6rem;
+    height: 2.6rem;
+  }
+
+  .roadmapSummary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .roadmapBadges {
+    justify-content: flex-start;
+  }
+
+  .roadmapFacts,
+  .detailColumns {
+    grid-template-columns: 1fr;
   }
 }
