@@ -2,7 +2,7 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 9.
+Current stage: Phase 9.5.
 
 Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
@@ -397,7 +397,7 @@ VITE_API_BASE_URL=http://localhost:8000
 Local frontend run:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\?꾩떆媛쒕컻?ъ뾽_愿??遺꾩꽍_?꾨줈洹몃옩\frontend
+cd C:\Users\poiu2\Desktop\?袁⑸뻻揶쏆뮆而??毓??온???브쑴苑??袁⑥쨮域밸챶??frontend
 npm install
 npm run dev
 ```
@@ -452,7 +452,7 @@ TEST law update event with impacted_step_codes
 After seeding, open the frontend:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\도시개발사업_관련_분석_프로그램\frontend
+cd C:\Users\poiu2\Desktop\?꾩떆媛쒕컻?ъ뾽_愿??遺꾩꽍_?꾨줈洹몃옩\frontend
 npm install
 npm run dev
 ```
@@ -543,3 +543,46 @@ git add .
 git commit -m "Add phase 9 local demo testing flow"
 git status
 ```
+
+## Phase 9.5 Korean Dashboard UX
+
+Phase 9.5 improves the React MVP so that local browser testing is easier for Korean users. It is a frontend UI/UX cleanup phase only. Backend API response shapes and `analysis_results.result_payload` storage remain unchanged.
+
+Main UI changes:
+
+```text
+Korean navigation labels and active menu state
+Dashboard cards for analysis, law update events, development status, and local test guidance
+Korean form labels, help text, loading messages, empty states, and error messages
+Analysis result summary, procedure table, and legal-reference cards
+Law update event table with Korean labels and status text
+Raw API response hidden under a developer-only expandable section
+```
+
+Common frontend label helpers were added under:
+
+```text
+frontend/src/utils/labels.ts
+frontend/src/utils/formatters.ts
+```
+
+The UI still displays only backend-provided metadata such as IDs, keys, status, effective date, and source. It does not invent real law names, article numbers, or legal criteria. TEST_*_DO_NOT_USE data remains development-only.
+
+Manual browser checklist:
+
+```text
+docs/manual_test_phase9_5.md
+```
+
+The frontend remains a local npm workflow. Run the backend, apply migrations, seed demo data, and then start Vite:
+
+```powershell
+docker compose up --build --detach
+docker compose exec backend alembic upgrade head
+docker compose exec backend python -m app.dev_seed
+cd frontend
+npm install
+npm run dev
+```
+
+Real MOLEG data integration, RAG, production UI workflows, real legal article mapping, and final criteria remain later-phase work.
