@@ -1,4 +1,4 @@
-from fastapi.testclient import TestClient
+﻿from fastapi.testclient import TestClient
 
 from app.main import app
 
@@ -36,6 +36,7 @@ def test_analyze_returns_phase2_procedure_structure_and_persistence_ids():
         "related_agencies",
         "estimated_duration",
         "legal_basis_placeholder",
+        "legal_references",
         "notes",
     }
     assert set(data["procedures"][0]) == expected_fields
@@ -46,6 +47,7 @@ def test_analyze_returns_phase2_procedure_structure_and_persistence_ids():
 
     for step in data["procedures"]:
         assert "TODO" in " ".join(step["legal_basis_placeholder"])
+        assert step["legal_references"] == []
 
     for item in data["assessments"]:
         assert item["threshold"] == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"

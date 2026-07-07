@@ -1,4 +1,4 @@
-from logging.config import fileConfig
+﻿from logging.config import fileConfig
 from pathlib import Path
 import sys
 
@@ -12,7 +12,14 @@ if str(BACKEND_DIR) not in sys.path:
 
 from app.core.config import get_settings
 from app.core.database import Base
-from app.models import AnalysisResult, Project  # noqa: F401
+from app.models import (  # noqa: F401
+    AnalysisResult,
+    Law,
+    LawArticle,
+    LawArticleVersion,
+    ProcedureLegalReference,
+    Project,
+)
 
 config = context.config
 config.set_main_option("sqlalchemy.url", get_settings().database_url)

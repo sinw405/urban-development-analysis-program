@@ -1,10 +1,10 @@
-# Urban Development Analysis Program
+﻿# Urban Development Analysis Program
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 1.5.
+Current stage: Phase 3.
 
-Phase 1.5 keeps the Phase 1 PostgreSQL storage and lookup base, then adds Alembic migrations and paginated analysis lookup. MOLEG Open API and RAG are not integrated yet.
+Phase 3 keeps the existing FastAPI, PostgreSQL, Alembic, persistence, and YAML rule-engine flow, then adds a legal-reference data model foundation for future MOLEG article mapping. It is a legal-connection preparation stage only. MOLEG Open API calls, API keys, XML parsing, RAG, React, article finalization, and assessment threshold finalization are not integrated yet.
 
 ## Important Limits
 
@@ -205,6 +205,7 @@ required_documents
 related_agencies
 estimated_duration
 legal_basis_placeholder
+legal_references
 notes
 ```
 
@@ -260,7 +261,7 @@ threshold = TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
 legal_basis = TODO_MOLEG_API_ARTICLE_CHECK
 ```
 
-The following are not implemented in Phase 2:
+The following are not implemented in Phase 3:
 
 - Environmental impact assessment threshold finalization
 - Traffic impact assessment threshold finalization
@@ -269,6 +270,19 @@ The following are not implemented in Phase 2:
 - MOLEG Open API integration
 - RAG
 - React frontend
+
+## Phase 3 Legal Reference Foundation
+
+Phase 3 adds database tables for laws, law articles, law article versions, and procedure legal references. These tables are preparation for later MOLEG article mapping only.
+
+Procedure responses now include:
+
+```text
+legal_basis_placeholder = TODO_MOLEG_API_ARTICLE_CHECK or another TODO/PENDING placeholder
+legal_references = []
+```
+
+The MOLEG adapter is a stub/interface layer in Phase 3. It does not perform external network calls and does not parse XML. Article mapping remains pending until a later phase.
 
 Baekhyeon MICE may be used only as a generic validation input. There is no Baekhyeon-specific branch, step code, or hardcoded logic.
 
@@ -294,6 +308,7 @@ Baekhyeon MICE may be used only as a generic validation input. There is no Baekh
       "related_agencies": [],
       "estimated_duration": "TODO_EXPERT_REVIEW",
       "legal_basis_placeholder": ["TODO_MOLEG_API_ARTICLE_CHECK"],
+      "legal_references": [],
       "notes": []
     }
   ],
@@ -307,7 +322,7 @@ Baekhyeon MICE may be used only as a generic validation input. There is no Baekh
 
 ## Assessment Response Policy
 
-- Do not determine whether an assessment is required in Phase 1.5.
+- Do not determine whether an assessment is required in Phase 3.
 - Keep thresholds as `TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA`.
 - Mark assessment status as legal review required.
 - Finalize criteria later through MOLEG Open API and expert review.
@@ -335,6 +350,6 @@ curl.exe http://localhost:8000/health
 ```powershell
 git status
 git add .
-git commit -m "Add migrations and paginated analysis queries"
+git commit -m "Add phase 3 legal reference foundation"
 git status
 ```

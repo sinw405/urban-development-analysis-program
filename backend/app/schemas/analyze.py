@@ -1,4 +1,5 @@
-from datetime import datetime
+﻿from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -21,7 +22,8 @@ class ProcedureStep(BaseModel):
     related_agencies: list[str]
     estimated_duration: str
     legal_basis_placeholder: list[str]
-    notes: list[str] = []
+    legal_references: list[dict[str, Any]] = Field(default_factory=list)
+    notes: list[str] = Field(default_factory=list)
 
 
 class AssessmentItem(BaseModel):
@@ -30,7 +32,7 @@ class AssessmentItem(BaseModel):
     threshold: str
     legal_basis: str
     required_action: str
-    notes: list[str] = []
+    notes: list[str] = Field(default_factory=list)
     assessment_code: str | None = None
 
 

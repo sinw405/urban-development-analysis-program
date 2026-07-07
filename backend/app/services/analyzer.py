@@ -1,4 +1,4 @@
-from typing import Any
+﻿from typing import Any
 
 from app.schemas.analyze import (
     AnalyzeRequest,
@@ -70,6 +70,7 @@ def _step_from_rule(step: dict[str, Any]) -> ProcedureStep:
         related_agencies=step.get("related_agencies", []),
         estimated_duration=step.get("estimated_duration", "TODO_EXPERT_REVIEW"),
         legal_basis_placeholder=step.get("legal_basis_placeholder", ["TODO_MOLEG_API_ARTICLE_CHECK"]),
+        legal_references=[],
         notes=step.get("notes", []),
     )
 

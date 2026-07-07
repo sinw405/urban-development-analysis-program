@@ -1,4 +1,4 @@
-from fastapi.testclient import TestClient
+﻿from fastapi.testclient import TestClient
 
 from app.main import app
 
@@ -50,6 +50,7 @@ def test_list_and_get_analysis_results():
     assert "step_name" in first_step
     assert "sequence" in first_step
     assert "legal_basis_placeholder" in first_step
+    assert first_step["legal_references"] == []
     assert "order" not in first_step
     assert "legal_basis" not in first_step
     assert len(detail["result_payload"]["assessments"]) == 4
