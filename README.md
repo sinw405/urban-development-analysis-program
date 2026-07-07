@@ -2,7 +2,7 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 9.5.
+Current stage: Phase 10.
 
 Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
@@ -397,7 +397,7 @@ VITE_API_BASE_URL=http://localhost:8000
 Local frontend run:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\?袁⑸뻻揶쏆뮆而??毓??온???브쑴苑??袁⑥쨮域밸챶??frontend
+cd C:\Users\poiu2\Desktop\?熬곣뫖六삥뤆?녿츊???驪???㉱???釉뚯뫒???熬곣뫁夷?윜諛몄굡??frontend
 npm install
 npm run dev
 ```
@@ -452,7 +452,7 @@ TEST law update event with impacted_step_codes
 After seeding, open the frontend:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\?꾩떆媛쒕컻?ъ뾽_愿??遺꾩꽍_?꾨줈洹몃옩\frontend
+cd C:\Users\poiu2\Desktop\?袁⑸뻻揶쏆뮆而??毓??온???브쑴苑??袁⑥쨮域밸챶??frontend
 npm install
 npm run dev
 ```
@@ -586,3 +586,47 @@ npm run dev
 ```
 
 Real MOLEG data integration, RAG, production UI workflows, real legal article mapping, and final criteria remain later-phase work.
+
+## Phase 10 Analysis History UI
+
+Phase 10 connects the existing backend analysis history APIs to the React frontend. It does not change backend response shapes or `analysis_results.result_payload` storage.
+
+Added browser screens:
+
+```text
+/analyses              Analysis history list
+/analyses/:analysisId  Stored analysis detail
+```
+
+The analysis history list calls `GET /api/analyses` and then reads each visible item through `GET /api/analyses/{analysis_id}` to calculate display-only counts such as procedure count and legal-reference count. This keeps the backend API unchanged.
+
+The analysis detail screen reuses the same `AnalysisResult` component used by the `/analyze` screen. Stored `result_payload` is displayed as analysis summary, procedure list, and step-level legal references. Raw JSON remains hidden inside developer-only expandable sections.
+
+The dashboard now includes a recent analysis history section. It shows recent stored analyses and links to the full history list. If the recent-history API request fails, the dashboard keeps rendering the other cards and shows a separate Korean error message for that section only.
+
+Manual browser checklist:
+
+```text
+docs/manual_test_phase10.md
+```
+
+Browser test flow:
+
+```powershell
+docker compose up --build --detach
+docker compose exec backend alembic upgrade head
+docker compose exec backend python -m app.dev_seed
+cd frontend
+npm install
+npm run dev
+```
+
+Then open:
+
+```text
+http://localhost:5173/analyze
+http://localhost:5173/analyses
+http://localhost:5173/analyses/{analysisId}
+```
+
+Phase 10 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.

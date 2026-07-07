@@ -1,4 +1,4 @@
-﻿export const fieldLabels: Record<string, string> = {
+export const fieldLabels: Record<string, string> = {
   project_name: "사업명",
   location: "위치",
   area_m2: "사업면적",
@@ -22,6 +22,9 @@
   effective_date: "시행일",
   source: "출처",
   analysis_id: "분석 ID",
+  created_at: "생성일",
+  procedure_count: "절차 수",
+  legal_reference_count: "법령 근거 연결 수",
   project_id: "사업 ID",
   step_code: "단계 코드",
   step_name: "단계명",

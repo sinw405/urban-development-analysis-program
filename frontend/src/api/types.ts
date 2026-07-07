@@ -1,4 +1,4 @@
-export interface AnalyzeRequest {
+﻿export interface AnalyzeRequest {
   project_name: string;
   location: string;
   area_square_meters: number;
@@ -68,6 +68,39 @@ export interface AnalyzeResponse {
   project_id: number | null;
   analysis_id: number | null;
   created_at: string | null;
+}
+
+export interface AnalysisSummary {
+  analysis_id: number;
+  project_id: number;
+  project_name: string;
+  location: string;
+  area_square_meters: number;
+  local_government: string;
+  created_at: string;
+}
+
+export interface AnalysisListResponse {
+  items: AnalysisSummary[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+export interface AnalysisDetail {
+  analysis_id: number;
+  project_id: number;
+  project_name: string;
+  request_payload: Record<string, unknown>;
+  result_payload: AnalyzeResponse;
+  rule_version: string | null;
+  created_at: string;
+}
+
+export interface AnalysisHistoryRow extends AnalysisSummary {
+  as_of: string | null;
+  procedure_count: number;
+  legal_reference_count: number;
 }
 
 export interface LawUpdateEvent {

@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   color: #1f2933;
   background: #f4f6f8;
   font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
@@ -488,6 +488,39 @@ tr:hover td {
   overflow: auto;
 }
 
+
+.smallButton {
+  padding: 0.45rem 0.7rem;
+  font-size: 0.92rem;
+  white-space: nowrap;
+}
+
+.recentList {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.recentItem {
+  display: grid;
+  gap: 0.25rem;
+  width: 100%;
+  text-align: left;
+  border-color: #d8dee8;
+  background: #fbfcfe;
+}
+
+.recentItem strong {
+  color: #1f2933;
+}
+
+.recentItem span {
+  color: #667085;
+  font-weight: 500;
+}
+
+.compactDetails {
+  margin-top: 1rem;
+}
 @media (max-width: 900px) {
   .topbar,
   .panelHeader,

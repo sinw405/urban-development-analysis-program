@@ -2,8 +2,10 @@
 import { Navigation } from "./components/Navigation";
 import { Dashboard } from "./views/Dashboard";
 import { AnalysisForm } from "./views/AnalysisForm";
+import { AnalysisDetailView } from "./views/AnalysisDetailView";
+import { AnalysesList } from "./views/AnalysesList";
 import { LawUpdates } from "./views/LawUpdates";
-import { getRouteFromLocation, Route } from "./router";
+import { getAnalysisIdFromRoute, getRouteFromLocation, Route } from "./router";
 
 export function App() {
   const [route, setRoute] = useState<Route>(getRouteFromLocation());
@@ -21,6 +23,8 @@ export function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  const analysisId = getAnalysisIdFromRoute(route);
+
   return (
     <div className="appShell">
       <header className="topbar">
@@ -33,6 +37,8 @@ export function App() {
       <main>
         {route === "/" && <Dashboard onNavigate={navigate} />}
         {route === "/analyze" && <AnalysisForm />}
+        {route === "/analyses" && <AnalysesList onNavigate={navigate} />}
+        {analysisId !== null && <AnalysisDetailView analysisId={analysisId} onNavigate={navigate} />}
         {route === "/law-updates" && <LawUpdates />}
       </main>
       <footer className="appFooter">
