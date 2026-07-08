@@ -2,7 +2,7 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 14.
+Current version: v0.1 MVP. This is a local execution version for demonstrating the urban development project procedure analysis flow. Actual permitting decisions require original legal text, permitting authority consultation, and expert review.
 
 Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
@@ -873,4 +873,15 @@ npm typecheck/build 실패가 없는지 확인
 
 ```text
 docs/manual_test_phase15.md
+```
+## v0.1 MVP Release Documents
+
+현재 버전은 v0.1 MVP로, 도시개발사업 절차 분석 흐름을 시연하기 위한 로컬 실행용 버전입니다. 실제 인허가 판단에는 관계 법령 원문, 인허가권자 협의 및 전문가 검토가 필요합니다.
+
+```text
+docs/release_notes_v0.1.md
+docs/final_feature_summary.md
+docs/known_limitations.md
+docs/manual_test_phase15.md
+docs/manual_test_phase16.md
 ```
