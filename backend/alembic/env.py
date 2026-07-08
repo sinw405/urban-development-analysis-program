@@ -18,6 +18,10 @@ from app.models import (  # noqa: F401
     LawArticle,
     LawArticleVersion,
     LawUpdateEvent,
+    OfficialLawSourceEvidence,
+    OfficialLawIngestRun,
+    OfficialLawDocument,
+    OfficialLawArticleRecord,
     ProcedureLegalReference,
     Project,
 )

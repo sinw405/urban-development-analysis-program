@@ -221,3 +221,30 @@ export interface LegalReferenceVerifyPreviewRequest {
 export interface LegalReferenceVerifyPreviewResponse {
   items: LegalReferenceVerificationResult[];
 }
+
+
+export interface MolegDiagnosticResult {
+  live_configured: boolean;
+  has_secret: boolean;
+  base_url: string | null;
+  endpoint: string;
+  result: string;
+  reason_type: string;
+  secret_exposed: boolean;
+}
+
+export interface OfficialLawIngestPreviewRequest {
+  query: string;
+  source_mode?: "mock" | "live";
+}
+
+export interface OfficialLawIngestPreviewResponse {
+  status: string;
+  source_mode: "mock" | "live" | string;
+  selected_candidate: OfficialLawCandidate | null;
+  document_id: number | null;
+  ingest_run_id: number;
+  article_count: number;
+  provider_reason: string | null;
+  secret_exposed: boolean;
+}

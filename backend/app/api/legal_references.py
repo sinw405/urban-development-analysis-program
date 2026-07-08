@@ -2,8 +2,16 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.schemas.official_law_source import LegalReferenceVerifyPreviewRequest, LegalReferenceVerifyPreviewResponse
+from app.schemas.official_law_source import (
+    LegalReferenceVerifyPreviewRequest,
+    LegalReferenceVerifyPreviewResponse,
+    MolegDiagnosticResult,
+    OfficialLawIngestPreviewRequest,
+    OfficialLawIngestPreviewResponse,
+)
 from app.services.legal_reference_verification_service import list_verification_previews
+from app.services.moleg_diagnostic_service import diagnose_moleg_connectivity
+from app.services.official_law_persistence_service import ingest_live_document_preview
 
 
 router = APIRouter(tags=["legal-references"])
@@ -21,3 +29,16 @@ def verify_legal_references_preview(
             source_mode=request.source_mode,
         )
     )
+
+
+@router.get("/legal-references/official-laws/diagnostic", response_model=MolegDiagnosticResult)
+def diagnose_official_law_source() -> MolegDiagnosticResult:
+    return diagnose_moleg_connectivity()
+
+
+@router.post("/legal-references/official-laws/ingest-preview", response_model=OfficialLawIngestPreviewResponse)
+def ingest_official_law_preview(
+    request: OfficialLawIngestPreviewRequest,
+    db: Session = Depends(get_db),
+) -> OfficialLawIngestPreviewResponse:
+    return ingest_live_document_preview(db=db, query=request.query)

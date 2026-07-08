@@ -112,6 +112,32 @@ class LegalReferenceVerificationResult(BaseModel):
     provider_reason: str | None = None
 
 
+class MolegDiagnosticResult(BaseModel):
+    live_configured: bool
+    has_secret: bool
+    base_url: str | None = None
+    endpoint: str
+    result: str
+    reason_type: str
+    secret_exposed: bool = False
+
+
+class OfficialLawIngestPreviewRequest(BaseModel):
+    query: str
+    source_mode: LawSourceMode = "mock"
+
+
+class OfficialLawIngestPreviewResponse(BaseModel):
+    status: str
+    source_mode: LawSourceMode
+    selected_candidate: OfficialLawCandidate | None = None
+    document_id: int | None = None
+    ingest_run_id: int
+    article_count: int = 0
+    provider_reason: str | None = None
+    secret_exposed: bool = False
+
+
 class LegalReferenceVerifyPreviewRequest(BaseModel):
     procedure_reference_ids: list[int] | None = None
     source_mode: LawSourceMode = "mock"
