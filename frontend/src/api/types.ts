@@ -124,3 +124,43 @@ export interface LawUpdateListResponse {
   items: LawUpdateEvent[];
   since: string | null;
 }
+
+export interface OfficialLawArticleSnapshot {
+  law_name: string;
+  article_number_text: string;
+  article_title: string | null;
+  article_text: string;
+  effective_date: string | null;
+  source_url: string;
+  source_type: "mock_official" | string;
+}
+
+export interface CandidateLegalReferenceSnapshot {
+  procedure_reference_id: number;
+  step_code: string;
+  reference_quality: "candidate" | "verified" | "missing" | string;
+  reference_status: string;
+  law_name: string | null;
+  law_key: string | null;
+  article_number_text: string | null;
+  article_title: string | null;
+  article_key: string | null;
+}
+
+export interface LegalReferenceVerificationResult {
+  procedure_reference_id: number;
+  step_code: string;
+  match_status: "matched" | "partial" | "unmatched" | string;
+  can_promote_to_verified: boolean;
+  reason: string;
+  candidate_reference: CandidateLegalReferenceSnapshot;
+  official_source_snapshot: OfficialLawArticleSnapshot | null;
+}
+
+export interface LegalReferenceVerifyPreviewRequest {
+  procedure_reference_ids?: number[] | null;
+}
+
+export interface LegalReferenceVerifyPreviewResponse {
+  items: LegalReferenceVerificationResult[];
+}

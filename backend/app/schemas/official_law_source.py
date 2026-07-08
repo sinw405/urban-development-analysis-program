@@ -1,0 +1,55 @@
+from datetime import date
+
+from pydantic import BaseModel, Field
+
+
+MATCH_STATUS_MATCHED = "matched"
+MATCH_STATUS_PARTIAL = "partial"
+MATCH_STATUS_UNMATCHED = "unmatched"
+
+
+class OfficialLawMetadata(BaseModel):
+    law_name: str
+    effective_date: date | None = None
+    source_url: str
+    source_type: str = "mock_official"
+
+
+class OfficialLawArticleSnapshot(BaseModel):
+    law_name: str
+    article_number_text: str
+    article_title: str | None = None
+    article_text: str
+    effective_date: date | None = None
+    source_url: str
+    source_type: str = "mock_official"
+
+
+class CandidateLegalReferenceSnapshot(BaseModel):
+    procedure_reference_id: int
+    step_code: str
+    reference_quality: str
+    reference_status: str
+    law_name: str | None = None
+    law_key: str | None = None
+    article_number_text: str | None = None
+    article_title: str | None = None
+    article_key: str | None = None
+
+
+class LegalReferenceVerificationResult(BaseModel):
+    procedure_reference_id: int
+    step_code: str
+    match_status: str = Field(..., pattern="^(matched|partial|unmatched)$")
+    can_promote_to_verified: bool
+    reason: str
+    candidate_reference: CandidateLegalReferenceSnapshot
+    official_source_snapshot: OfficialLawArticleSnapshot | None = None
+
+
+class LegalReferenceVerifyPreviewRequest(BaseModel):
+    procedure_reference_ids: list[int] | None = None
+
+
+class LegalReferenceVerifyPreviewResponse(BaseModel):
+    items: list[LegalReferenceVerificationResult]
