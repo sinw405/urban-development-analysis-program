@@ -1,4 +1,5 @@
 ﻿import type { LegalReference, ProcedureStep } from "../api/types";
+import type { NormalizedProcedureStep } from "../utils/analysisSummary";
 import { formatDate, formatList, formatStatus } from "../utils/formatters";
 import { labelFor } from "../utils/labels";
 import { ProcedureChecklist, type ChecklistStatus } from "./ProcedureChecklist";
@@ -9,7 +10,7 @@ function StatusBadge({ value }: { value: string | null | undefined }) {
 
 function LegalReferenceCards({ references }: { references: LegalReference[] }) {
   if (references.length === 0) {
-    return <p className="emptyState">연결된 법령 근거가 없습니다.</p>;
+    return <p className="emptyState">근거 미연결</p>;
   }
 
   return (
@@ -27,17 +28,19 @@ function LegalReferenceCards({ references }: { references: LegalReference[] }) {
               <dt>{labelFor("law_id")}</dt>
               <dd>{reference.law_id ?? "-"}</dd>
               <dt>{labelFor("law_key")}</dt>
-              <dd>{reference.law_key ?? "-"}</dd>
+              <dd>{reference.law_key ?? "법령 키 확인 필요"}</dd>
               <dt>{labelFor("article_id")}</dt>
               <dd>{reference.article_id ?? "-"}</dd>
               <dt>{labelFor("article_key")}</dt>
-              <dd>{reference.article_key ?? "-"}</dd>
+              <dd>{reference.article_key ?? "조문 키 확인 필요"}</dd>
               <dt>{labelFor("version_status")}</dt>
               <dd>{formatStatus(statusValue)}</dd>
               <dt>{labelFor("effective_date")}</dt>
               <dd>{formatDate(current?.effective_date)}</dd>
               <dt>{labelFor("source")}</dt>
-              <dd>{current?.source ?? "-"}</dd>
+              <dd>{current?.source ?? "출처 확인 필요"}</dd>
+              <dt>근거 연결 상태</dt>
+              <dd>{reference.placeholder || reference.reference_status || "확인 필요"}</dd>
             </dl>
           </article>
         );
@@ -48,50 +51,53 @@ function LegalReferenceCards({ references }: { references: LegalReference[] }) {
 
 interface ProcedureStepDetailProps {
   step: ProcedureStep;
+  normalizedStep: NormalizedProcedureStep;
   checklistStatus: ChecklistStatus;
   onChecklistStatusChange: (status: ChecklistStatus) => void;
 }
 
-export function ProcedureStepDetail({ step, checklistStatus, onChecklistStatusChange }: ProcedureStepDetailProps) {
+export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onChecklistStatusChange }: ProcedureStepDetailProps) {
   return (
     <article className="procedureDetailCard">
       <div className="cardTitle">
         <div>
           <p className="eyebrow">단계 상세</p>
-          <h3>{step.step_name || "단계명 정보 없음"}</h3>
-          <p className="muted"><code>{step.step_code}</code></p>
+          <h3>{normalizedStep.title}</h3>
+          <p className="muted"><code>{normalizedStep.stepCode}</code></p>
         </div>
-        <span className="badge">법령 근거 {step.legal_references.length}개</span>
+        <span className="badge">{normalizedStep.legalReferenceState}</span>
       </div>
 
-      <p>{step.description || "단계 설명 정보가 없습니다."}</p>
+      <p>{normalizedStep.description}</p>
 
       <ProcedureChecklist step={step} status={checklistStatus} onStatusChange={onChecklistStatusChange} />
 
       <dl className="definitionGrid compactDefinition">
         <dt>{labelFor("estimated_duration")}</dt>
-        <dd>{step.estimated_duration || "예상 소요기간 정보가 없습니다."}</dd>
+        <dd>{normalizedStep.durationState}</dd>
         <dt>조문 확인 상태</dt>
         <dd>{step.legal_basis_placeholder.length > 0 ? step.legal_basis_placeholder.join(", ") : "확인 필요"}</dd>
+        <dt>데이터 누락 여부</dt>
+        <dd>{normalizedStep.hasMissingData ? "확인 필요 항목 있음" : "기본 데이터 연결됨"}</dd>
       </dl>
 
       <div className="detailColumns">
         <section>
           <h4>필요 서류</h4>
-          <p>{formatList(step.required_documents, "등록된 필요 서류가 없습니다.")}</p>
+          <p>{formatList(normalizedStep.requiredDocuments, "서류 확인 필요")}</p>
         </section>
         <section>
-          <h4>협의기관</h4>
-          <p>{formatList(step.related_agencies, "등록된 협의기관 정보가 없습니다.")}</p>
+          <h4>협의/담당 기관</h4>
+          <p>{formatList(normalizedStep.relatedAgencies, "기관 확인 필요")}</p>
         </section>
         <section>
-          <h4>비고</h4>
-          <p>{formatList(step.notes, "등록된 비고가 없습니다.")}</p>
+          <h4>비고/주의사항</h4>
+          <p>{formatList(normalizedStep.notes, "확인 필요")}</p>
         </section>
       </div>
 
       <section className="legalReferenceSection">
-        <h4>법령 근거</h4>
+        <h4>근거 법령</h4>
         <LegalReferenceCards references={step.legal_references} />
       </section>
     </article>

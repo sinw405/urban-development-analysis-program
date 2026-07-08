@@ -1,24 +1,14 @@
-﻿import type { AnalyzeResponse, ProcedureStep } from "../api/types";
+﻿import type { AnalyzeResponse } from "../api/types";
 import type { ChecklistStatus } from "./ProcedureChecklist";
-import { countLegalReferences, formatArea, formatDate, formatList } from "../utils/formatters";
-import { labelFor } from "../utils/labels";
+import { normalizeAnalysisSummary } from "../utils/analysisSummary";
 
 interface AnalysisReportProps {
   result: AnalyzeResponse;
   checklistStatuses: Record<string, ChecklistStatus>;
 }
 
-function getStatus(statuses: Record<string, ChecklistStatus>, stepCode: string): ChecklistStatus {
-  return statuses[stepCode] ?? "미확인";
-}
-
-function countByStatus(steps: ProcedureStep[], statuses: Record<string, ChecklistStatus>, status: ChecklistStatus): number {
-  return steps.filter((step) => getStatus(statuses, step.step_code) === status).length;
-}
-
 export function AnalysisReport({ result, checklistStatuses }: AnalysisReportProps) {
-  const legalReferenceCount = countLegalReferences(result.procedures);
-  const orderedSteps = [...result.procedures].sort((left, right) => left.sequence - right.sequence);
+  const summary = normalizeAnalysisSummary(result, checklistStatuses);
 
   return (
     <section className="analysisReport" aria-label="보고서형 분석 결과">
@@ -36,96 +26,90 @@ export function AnalysisReport({ result, checklistStatuses }: AnalysisReportProp
       </div>
 
       <dl className="reportSummaryGrid">
-        <div>
-          <dt>{labelFor("project_name")}</dt>
-          <dd>{result.project_name || "사업명 정보 없음"}</dd>
-        </div>
-        <div>
-          <dt>{labelFor("analysis_id")}</dt>
-          <dd>{result.analysis_id ?? "-"}</dd>
-        </div>
-        <div>
-          <dt>{labelFor("project_id")}</dt>
-          <dd>{result.project_id ?? "-"}</dd>
-        </div>
-        <div>
-          <dt>{labelFor("as_of")}</dt>
-          <dd>{formatDate(result.as_of)}</dd>
-        </div>
-        <div>
-          <dt>{labelFor("created_at")}</dt>
-          <dd>{formatDate(result.created_at)}</dd>
-        </div>
-        <div>
-          <dt>{labelFor("area_square_meters")}</dt>
-          <dd>{formatArea(result.area_square_meters)}</dd>
-        </div>
-        <div>
-          <dt>절차 단계 수</dt>
-          <dd>{result.procedures.length}개</dd>
-        </div>
-        <div>
-          <dt>법령 근거 연결 수</dt>
-          <dd>{legalReferenceCount}개</dd>
-        </div>
-        <div>
-          <dt>체크리스트 진행</dt>
-          <dd>완료 {countByStatus(result.procedures, checklistStatuses, "확인완료")}개 / 확인중 {countByStatus(result.procedures, checklistStatuses, "확인중")}개</dd>
-        </div>
+        <div><dt>사업명</dt><dd>{summary.projectName}</dd></div>
+        <div><dt>분석 ID</dt><dd>{summary.analysisId ?? "-"}</dd></div>
+        <div><dt>프로젝트 ID</dt><dd>{summary.projectId ?? "-"}</dd></div>
+        <div><dt>기준일</dt><dd>{summary.asOf}</dd></div>
+        <div><dt>생성일</dt><dd>{summary.createdAt}</dd></div>
+        <div><dt>사업면적</dt><dd>{summary.area}</dd></div>
+        <div><dt>전체 절차 수</dt><dd>{summary.procedureCount}개</dd></div>
+        <div><dt>근거 법령 연결 수</dt><dd>{summary.legalReferenceCount}개</dd></div>
+        <div><dt>근거 미연결 수</dt><dd>{summary.missingLegalReferenceCount}개</dd></div>
+        <div><dt>서류 확인 필요</dt><dd>{summary.missingDocumentCount}개 단계</dd></div>
+        <div><dt>기관 확인 필요</dt><dd>{summary.missingAgencyCount}개 단계</dd></div>
+        <div><dt>기간 확인 필요</dt><dd>{summary.missingDurationCount}개 단계</dd></div>
+        <div><dt>체크 완료</dt><dd>{summary.checklistCompleteCount}개 단계</dd></div>
+        <div><dt>체크 확인중</dt><dd>{summary.checklistProgressCount}개 단계</dd></div>
+        <div><dt>체크 미확인</dt><dd>{summary.checklistPendingCount}개 단계</dd></div>
       </dl>
 
       <section className="reportSection">
         <h3>사업 개요</h3>
         <dl className="definitionGrid">
-          <dt>{labelFor("location")}</dt>
-          <dd>{result.location || "위치 정보 없음"}</dd>
-          <dt>{labelFor("implementation_method")}</dt>
-          <dd>{result.implementation_method || "시행방식 정보 없음"}</dd>
-          <dt>{labelFor("implementer_type")}</dt>
-          <dd>{result.implementer_type || "시행자 유형 정보 없음"}</dd>
-          <dt>{labelFor("local_government")}</dt>
-          <dd>{result.local_government || "관할 지자체 정보 없음"}</dd>
+          <dt>위치</dt><dd>{summary.location}</dd>
+          <dt>시행방식</dt><dd>{summary.implementationMethod}</dd>
+          <dt>시행자 유형</dt><dd>{summary.implementerType}</dd>
+          <dt>관할 지자체</dt><dd>{summary.localGovernment}</dd>
         </dl>
       </section>
 
       <section className="reportSection">
-        <h3>절차 로드맵 요약</h3>
-        {orderedSteps.length === 0 ? (
-          <p className="emptyState">표시할 절차 정보가 없습니다.</p>
+        <h3>확인 필요 항목 요약</h3>
+        {summary.missingItems.length === 0 ? (
+          <p>현재 표시 가능한 범위에서는 별도 확인 필요 항목이 없습니다.</p>
         ) : (
-          <ol className="reportStepList">
-            {orderedSteps.map((step) => (
-              <li key={step.step_code}>
-                <strong>{step.sequence}. {step.step_name || "단계명 정보 없음"}</strong>
-                <span>{step.step_code}</span>
-                <span>법령 근거 {step.legal_references.length}개 · 체크 상태 {getStatus(checklistStatuses, step.step_code)}</span>
-              </li>
-            ))}
-          </ol>
+          <ul className="missingSummaryList">
+            {summary.missingItems.map((item) => <li key={item}>{item}</li>)}
+          </ul>
         )}
+      </section>
+
+      <section className="reportSection">
+        <h3>단계별 요약 테이블</h3>
+        <div className="tableWrap">
+          <table>
+            <thead>
+              <tr>
+                <th>단계</th>
+                <th>근거 법령</th>
+                <th>필요 서류</th>
+                <th>협의/담당 기관</th>
+                <th>예상 기간</th>
+                <th>확인상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              {summary.steps.map((step) => (
+                <tr key={step.stepCode}>
+                  <td>{step.sequence}. {step.title}</td>
+                  <td>{step.legalReferenceState}</td>
+                  <td>{step.requiredDocumentState}</td>
+                  <td>{step.relatedAgencyState}</td>
+                  <td>{step.durationState}</td>
+                  <td>{step.checklistStatus}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section className="reportSection">
         <h3>단계별 상세 요약</h3>
         <div className="reportStepCards">
-          {orderedSteps.map((step) => (
-            <article className="reportStepCard" key={step.step_code}>
+          {summary.steps.map((step) => (
+            <article className="reportStepCard" key={step.stepCode}>
               <div className="cardTitle compactTitle">
-                <h4>{step.sequence}. {step.step_name || "단계명 정보 없음"}</h4>
-                <span className="badge neutral">{getStatus(checklistStatuses, step.step_code)}</span>
+                <h4>{step.sequence}. {step.title}</h4>
+                <span className="badge neutral">{step.checklistStatus}</span>
               </div>
-              <p>{step.description || "단계 설명 정보가 없습니다."}</p>
+              <p>{step.description}</p>
               <dl className="definitionGrid">
-                <dt>{labelFor("estimated_duration")}</dt>
-                <dd>{step.estimated_duration || "예상 소요기간 정보가 없습니다."}</dd>
-                <dt>필요 서류</dt>
-                <dd>{formatList(step.required_documents, "등록된 필요 서류가 없습니다.")}</dd>
-                <dt>협의기관</dt>
-                <dd>{formatList(step.related_agencies, "등록된 협의기관 정보가 없습니다.")}</dd>
-                <dt>법령 근거</dt>
-                <dd>{step.legal_references.length > 0 ? `${step.legal_references.length}개 연결` : "연결된 법령 근거가 없습니다."}</dd>
-                <dt>체크리스트 요약</dt>
-                <dd>현재 화면 기준 상태: {getStatus(checklistStatuses, step.step_code)}</dd>
+                <dt>예상 소요기간</dt><dd>{step.durationState}</dd>
+                <dt>필요 서류</dt><dd>{step.requiredDocumentState}</dd>
+                <dt>협의/담당 기관</dt><dd>{step.relatedAgencyState}</dd>
+                <dt>근거 법령</dt><dd>{step.legalReferenceState}</dd>
+                <dt>데이터 누락</dt><dd>{step.hasMissingData ? "확인 필요" : "기본 데이터 연결됨"}</dd>
               </dl>
             </article>
           ))}
@@ -134,7 +118,7 @@ export function AnalysisReport({ result, checklistStatuses }: AnalysisReportProp
 
       <section className="reportSection reportDisclaimer">
         <h3>참고 및 고지</h3>
-        <p>본 화면은 개발 검증용 분석 결과를 보기 쉽게 정리한 자료입니다. 실제 법령 근거, 조문번호, 기준값은 후속 단계에서 법제처 연동과 전문가 검토를 거쳐 확정해야 합니다.</p>
+        <p>본 분석 결과는 도시개발사업 절차 검토를 위한 참고자료이며, 최종 적용 여부는 관계 법령 원문, 인허가권자 협의 및 전문가 검토를 통해 확인해야 합니다.</p>
       </section>
     </section>
   );

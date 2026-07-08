@@ -3,8 +3,9 @@ import { AnalysisReport } from "../components/AnalysisReport";
 import type { ChecklistStatus } from "../components/ProcedureChecklist";
 import { ProcedureRoadmap } from "../components/ProcedureRoadmap";
 import type { AnalyzeResponse } from "../api/types";
-import { countLegalReferences, formatArea, formatDate, formatStatus } from "../utils/formatters";
+import { formatStatus } from "../utils/formatters";
 import { labelFor } from "../utils/labels";
+import { normalizeAnalysisSummary } from "../utils/analysisSummary";
 
 interface AnalysisResultProps {
   result: AnalyzeResponse | null;
@@ -39,7 +40,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
     );
   }
 
-  const legalReferenceCount = countLegalReferences(result.procedures);
+  const summary = normalizeAnalysisSummary(result, checklistStatuses);
 
   function updateChecklistStatus(stepCode: string, status: ChecklistStatus) {
     setChecklistStatuses((current) => ({ ...current, [stepCode]: status }));
@@ -53,50 +54,35 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
             <p className="eyebrow">분석 결과</p>
             <h2>분석 요약</h2>
           </div>
-          <span className="badge neutral">{result.created_at ?? "생성 시각 확인 필요"}</span>
+          <span className="badge neutral">{summary.createdAt}</span>
         </div>
         <dl className="summaryGrid">
-          <div>
-            <dt>{labelFor("analysis_id")}</dt>
-            <dd>{result.analysis_id ?? "-"}</dd>
-          </div>
-          <div>
-            <dt>{labelFor("project_name")}</dt>
-            <dd>{result.project_name}</dd>
-          </div>
-          <div>
-            <dt>{labelFor("as_of")}</dt>
-            <dd>{formatDate(result.as_of)}</dd>
-          </div>
-          <div>
-            <dt>생성된 절차 수</dt>
-            <dd>{result.procedures.length}개</dd>
-          </div>
-          <div>
-            <dt>법령 근거 연결 수</dt>
-            <dd>{legalReferenceCount}개</dd>
-          </div>
-          <div>
-            <dt>{labelFor("area_square_meters")}</dt>
-            <dd>{formatArea(result.area_square_meters)}</dd>
-          </div>
+          <div><dt>{labelFor("analysis_id")}</dt><dd>{summary.analysisId ?? "-"}</dd></div>
+          <div><dt>{labelFor("project_name")}</dt><dd>{summary.projectName}</dd></div>
+          <div><dt>{labelFor("as_of")}</dt><dd>{summary.asOf}</dd></div>
+          <div><dt>전체 절차 수</dt><dd>{summary.procedureCount}개</dd></div>
+          <div><dt>법령 근거 연결 수</dt><dd>{summary.legalReferenceCount}개</dd></div>
+          <div><dt>근거 미연결 수</dt><dd>{summary.missingLegalReferenceCount}개</dd></div>
+          <div><dt>{labelFor("area_square_meters")}</dt><dd>{summary.area}</dd></div>
+          <div><dt>서류 확인 필요</dt><dd>{summary.missingDocumentCount}개 단계</dd></div>
+          <div><dt>기관 확인 필요</dt><dd>{summary.missingAgencyCount}개 단계</dd></div>
         </dl>
-      </section>
-
-      <section className="panel reportPanel">
-        <AnalysisReport result={result} checklistStatuses={checklistStatuses} />
       </section>
 
       <section className="panel">
         <div className="panelHeader">
           <div>
-            <p className="eyebrow">절차 로드맵</p>
+            <p className="eyebrow">절차 로드맵 및 체크리스트</p>
             <h2>절차 진행 흐름</h2>
-            <p className="muted">분석 엔진이 반환한 절차를 순서대로 표시하고, 단계별 필요 정보와 법령 근거를 함께 보여줍니다.</p>
+            <p className="muted">절차별 근거 연결, 필요 서류, 협의기관, 기간과 실무 확인상태를 함께 표시합니다.</p>
           </div>
-          <span className="badge neutral">{result.procedures.length}개 단계</span>
+          <span className="badge neutral">{summary.procedureCount}개 단계</span>
         </div>
         <ProcedureRoadmap steps={result.procedures} stepStatuses={checklistStatuses} onStepStatusChange={updateChecklistStatus} />
+      </section>
+
+      <section className="panel reportPanel">
+        <AnalysisReport result={result} checklistStatuses={checklistStatuses} />
       </section>
 
       {result.assessments.length > 0 && (

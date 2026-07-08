@@ -1,5 +1,6 @@
-import type { ProcedureStep } from "../api/types";
+﻿import type { ProcedureStep } from "../api/types";
 import { formatList } from "../utils/formatters";
+import { normalizeProcedureSteps } from "../utils/analysisSummary";
 import type { ChecklistStatus } from "./ProcedureChecklist";
 import { ProcedureStepDetail } from "./ProcedureStepDetail";
 
@@ -20,59 +21,60 @@ function statusClass(status: ChecklistStatus): string {
 }
 
 export function ProcedureRoadmap({ steps, stepStatuses, onStepStatusChange }: ProcedureRoadmapProps) {
+  const normalizedSteps = normalizeProcedureSteps(steps, stepStatuses);
 
-  if (!steps || steps.length === 0) {
+  if (normalizedSteps.length === 0) {
     return <p className="emptyState">표시할 절차 정보가 없습니다.</p>;
-  }
-
-  const orderedSteps = [...steps].sort((left, right) => left.sequence - right.sequence);
-
-  function getStepStatus(stepCode: string): ChecklistStatus {
-    return stepStatuses[stepCode] ?? "미확인";
-  }
-
-  function updateStepStatus(stepCode: string, status: ChecklistStatus) {
-    onStepStatusChange(stepCode, status);
   }
 
   return (
     <section className="procedureRoadmap" aria-label="절차 로드맵">
-      {orderedSteps.map((step, index) => {
-        const status = getStepStatus(step.step_code);
-        return (
-          <div className={`roadmapItem roadmap-${statusClass(status)}`} key={step.step_code}>
-            <div className="roadmapMarker" aria-hidden="true">
-              <span>{index + 1}</span>
-            </div>
-            <div className="roadmapContent">
-              <div className="roadmapSummary">
-                <div>
-                  <p className="eyebrow">{step.sequence}단계</p>
-                  <h3>{step.step_name || "단계명 정보 없음"}</h3>
-                  <p>{step.description || "단계 설명 정보가 없습니다."}</p>
-                </div>
-                <div className="roadmapBadges">
-                  <span className="badge neutral">{step.step_code}</span>
-                  <span className={`checkStatusBadge ${statusClass(status)}`}>{status}</span>
-                  <span className="badge">법령 근거 {step.legal_references.length}개</span>
-                </div>
-              </div>
-
-              <div className="roadmapFacts">
-                <span><strong>예상 소요기간</strong>{step.estimated_duration || "정보 없음"}</span>
-                <span><strong>필요 서류</strong>{formatList(step.required_documents, "정보 없음")}</span>
-                <span><strong>협의기관</strong>{formatList(step.related_agencies, "정보 없음")}</span>
-              </div>
-
-              <ProcedureStepDetail
-                step={step}
-                checklistStatus={status}
-                onChecklistStatusChange={(nextStatus) => updateStepStatus(step.step_code, nextStatus)}
-              />
-            </div>
+      {normalizedSteps.map((step, index) => (
+        <div className={`roadmapItem roadmap-${statusClass(step.checklistStatus)}`} key={step.stepCode}>
+          <div className="roadmapMarker" aria-hidden="true">
+            <span>{index + 1}</span>
           </div>
-        );
-      })}
+          <div className="roadmapContent">
+            <div className="roadmapSummary">
+              <div>
+                <p className="eyebrow">{step.sequence}단계</p>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </div>
+              <div className="roadmapBadges">
+                <span className="badge neutral">{step.stepCode}</span>
+                <span className={`checkStatusBadge ${statusClass(step.checklistStatus)}`}>{step.checklistStatus}</span>
+                <span className="badge">{step.legalReferenceState}</span>
+              </div>
+            </div>
+
+            <div className="roadmapFacts">
+              <span><strong>예상 소요기간</strong>{step.durationState}</span>
+              <span><strong>필요 서류</strong>{step.requiredDocumentState}</span>
+              <span><strong>협의/인허가 기관</strong>{step.relatedAgencyState}</span>
+            </div>
+
+            {step.hasMissingData && (
+              <div className="missingDataNotice">
+                <strong>확인 필요 항목</strong>
+                <span>{formatList([
+                  step.legalReferenceCount === 0 ? "근거 미연결" : "",
+                  step.requiredDocumentCount === 0 ? "서류 확인 필요" : "",
+                  step.relatedAgencyCount === 0 ? "기관 확인 필요" : "",
+                  step.durationState === "기간 확인 필요" ? "기간 확인 필요" : ""
+                ].filter(Boolean), "확인 필요 항목 없음")}</span>
+              </div>
+            )}
+
+            <ProcedureStepDetail
+              step={step.raw}
+              normalizedStep={step}
+              checklistStatus={step.checklistStatus}
+              onChecklistStatusChange={(nextStatus) => onStepStatusChange(step.stepCode, nextStatus)}
+            />
+          </div>
+        </div>
+      ))}
     </section>
   );
 }

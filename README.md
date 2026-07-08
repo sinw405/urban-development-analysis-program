@@ -2,7 +2,7 @@
 
 This project analyzes general urban development projects with a FastAPI backend, PostgreSQL persistence, Alembic migrations, and YAML-based rule files.
 
-Current stage: Phase 13.
+Current stage: Phase 14.
 
 Phase 9 keeps the existing backend foundations and React frontend MVP. It adds a TEST-only local demo seed and manual browser verification flow for analysis legal references and law update events. It does not finalize legal articles, assessment thresholds, or real law data.
 
@@ -397,7 +397,7 @@ VITE_API_BASE_URL=http://localhost:8000
 Local frontend run:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\?????밸븶筌믩끃異?縕ュㅇ???怨좊땷?????????댁삩??????怨쀫뮝力???????밸븶?ⓥ뮧????臾믩궚嶺뚮ㅎ????frontend
+cd C:\Users\poiu2\Desktop\?????諛몃마嶺뚮??껆빊?潁뺛깷?????⑥쥓???????????곸궔???????⑥ル츧癲???????諛몃마??λ??????얜?沅싷┼??뀕????frontend
 npm install
 npm run dev
 ```
@@ -452,7 +452,7 @@ TEST law update event with impacted_step_codes
 After seeding, open the frontend:
 
 ```powershell
-cd C:\Users\poiu2\Desktop\????썹땟戮녹춿?貫夷???고닍????????援온?????곗뒩泳??????썹땟怨⒲뀋???묒낯筌뤾쑨???frontend
+cd C:\Users\poiu2\Desktop\?????밸븶筌믩끃異?縕ュㅇ???怨좊땷?????????댁삩??????怨쀫뮝力???????밸븶?ⓥ뮧????臾믩궚嶺뚮ㅎ????frontend
 npm install
 npm run dev
 ```
@@ -680,8 +680,7 @@ The UI displays these as Korean work-check items and shows Korean empty states w
 Step status is managed in React state for the current screen only:
 
 ```text
-沃섎챸????類ㅼ뵥餓??類ㅼ뵥?袁⑥┷
-```
+亦껋꼶梨????筌먦끉逾ι쨹??筌먦끉逾?熬곣뫁??```
 
 Refreshing the browser resets checklist state in Phase 12. The same roadmap and checklist UI appears in both immediate analysis results and stored analysis details:
 
@@ -728,7 +727,7 @@ Development TEST data notice
 Reference disclaimer
 ```
 
-The `?몄뇙?섍린` button calls `window.print()`. Users can use the browser print dialog to print or save as PDF. Print-specific CSS hides navigation, buttons, input forms, and developer raw JSON sections so the report is easier to read on paper or in browser-generated PDFs.
+The `?紐꾨뇵??띾┛` button calls `window.print()`. Users can use the browser print dialog to print or save as PDF. Print-specific CSS hides navigation, buttons, input forms, and developer raw JSON sections so the report is easier to read on paper or in browser-generated PDFs.
 
 Manual browser checklist:
 
@@ -737,3 +736,39 @@ docs/manual_test_phase13.md
 ```
 
 Phase 13 continues the existing placeholder policy. It does not add real law names, real article numbers, final legal criteria, MOLEG network calls, or RAG.
+
+## Phase 14 Analysis Result Data Consistency
+
+Phase 14 improves how the frontend interprets and displays `result_payload` data. It does not change backend API response shapes, database schema, migrations, or `analysis_results.result_payload` storage.
+
+A shared normalization utility was added:
+
+```text
+frontend/src/utils/analysisSummary.ts
+```
+
+The utility derives stable display values for project summary, procedure counts, legal-reference counts, missing-reference counts, checklist status counts, step titles, descriptions, legal references, required documents, related agencies, estimated duration, status, and missing-data indicators.
+
+Data missing display policy:
+
+```text
+No legal reference -> 洹쇨굅 誘몄뿰寃?No agency -> 湲곌? ?뺤씤 ?꾩슂
+No required document -> ?쒕쪟 ?뺤씤 ?꾩슂
+No duration or TODO duration -> 湲곌컙 ?뺤씤 ?꾩슂
+No status -> 誘명솗??```
+
+The procedure roadmap and report view now use the same normalized summary data so missing data is displayed consistently. The report also shows a clearer reference notice:
+
+```text
+蹂?遺꾩꽍 寃곌낵???꾩떆媛쒕컻?ъ뾽 ?덉감 寃?좊? ?꾪븳 李멸퀬?먮즺?대ŉ, 理쒖쥌 ?곸슜 ?щ???愿怨?踰뺣졊 ?먮Ц, ?명뿀媛沅뚯옄 ?묒쓽 諛??꾨Ц媛 寃?좊? ?듯빐 ?뺤씤?댁빞 ?⑸땲??
+```
+
+Phase 14 does not invent law names, article numbers, agencies, documents, or legal criteria. It only displays values already present in stored/backend response data, or explicit Korean missing-data states.
+
+Manual browser checklist:
+
+```text
+docs/manual_test_phase14.md
+```
+
+Server PDF generation remains unimplemented. Browser print/PDF output from Phase 13 remains the current print path.

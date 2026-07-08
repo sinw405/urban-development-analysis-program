@@ -1010,3 +1010,29 @@ tr:hover td {
     text-decoration: none;
   }
 }
+
+.missingDataNotice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  border: 1px solid #fedf89;
+  border-radius: 8px;
+  background: #fffaeb;
+  color: #92400e;
+  padding: 0.65rem 0.75rem;
+}
+
+.missingDataNotice strong {
+  color: #b54708;
+}
+
+.missingSummaryList {
+  margin: 0;
+  padding-left: 1.25rem;
+  color: #475467;
+}
+
+.missingSummaryList li + li {
+  margin-top: 0.35rem;
+}
