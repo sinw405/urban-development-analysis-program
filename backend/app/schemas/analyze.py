@@ -1,4 +1,4 @@
-﻿from datetime import date, datetime
+from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -25,6 +25,7 @@ class LegalReferenceVersion(BaseModel):
 class LegalReference(BaseModel):
     step_code: str
     reference_status: str
+    reference_quality: str = "candidate"
     placeholder: str
     law_id: int | None = None
     law_key: str | None = None
@@ -47,6 +48,7 @@ class ProcedureStep(BaseModel):
     estimated_duration: str
     legal_basis_placeholder: list[str]
     legal_references: list[LegalReference] = Field(default_factory=list)
+    legal_reference_status: str = "missing"
     notes: list[str] = Field(default_factory=list)
 
 

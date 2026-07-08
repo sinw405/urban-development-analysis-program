@@ -94,12 +94,15 @@ def test_demo_seed_legal_reference_is_visible_in_analyze_response():
         core_steps = [step for step in data["procedures"] if step["step_code"] in TEST_CORE_PROCEDURE_STEP_CODES]
         assert len(core_steps) == len(TEST_CORE_PROCEDURE_STEP_CODES)
         assert all(len(step["legal_references"]) == 1 for step in core_steps)
+        assert all(step["legal_reference_status"] == "candidate" for step in core_steps)
+        assert all(step["legal_references"][0]["reference_quality"] == "candidate" for step in core_steps)
 
         target_step = next(step for step in data["procedures"] if step["step_code"] == TEST_PROCEDURE_STEP_CODE)
         reference = target_step["legal_references"][0]
 
         assert reference["law_key"] == TEST_LAW_KEY
         assert reference["article_key"] == TEST_ARTICLE_KEY
+        assert reference["reference_quality"] == "candidate"
         assert reference["current_version"]["temporal_status"] == "current"
         assert any(version["temporal_status"] == "scheduled" for version in reference["versions"])
         assert "law_name" not in reference
@@ -148,6 +151,7 @@ def test_demo_seed_keeps_existing_analyze_shape_and_placeholders():
     assert "procedures" in data
     assert "assessments" in data
     assert data["procedures"][0]["legal_references"] == []
+    assert data["procedures"][0]["legal_reference_status"] == "missing"
     for item in data["assessments"]:
         assert item["threshold"] == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
         assert item["legal_basis"] == TODO_MOLEG_API_ARTICLE_CHECK
@@ -168,3 +172,34 @@ def test_demo_seed_uses_test_only_names():
     assert TEST_PROCEDURE_STEP_CODE == "PROJECT_BASIC_REVIEW"
     assert len(TEST_CORE_PROCEDURE_STEP_CODES) == 11
     assert all("TEST_" not in step_code for step_code in TEST_CORE_PROCEDURE_STEP_CODES)
+
+def test_demo_seed_branch_steps_without_references_are_missing_quality():
+    _delete_demo_seed_rows()
+    db = SessionLocal()
+    try:
+        seed_demo_data(db)
+    finally:
+        db.close()
+
+    try:
+        response = client.post(
+            "/api/analyze",
+            json={
+                "project_name": TEST_PROJECT_NAME,
+                "location": "TEST_LOCATION_DO_NOT_USE",
+                "area_square_meters": 100000,
+                "implementation_method": "mixed",
+                "implementer_type": "public_private_spc",
+                "local_government": "TEST_LOCAL_GOVERNMENT_DO_NOT_USE",
+                "as_of": "2099-06-15",
+            },
+        )
+        assert response.status_code == 200
+        data = response.json()
+        branch_steps = [step for step in data["procedures"] if step["step_code"] not in TEST_CORE_PROCEDURE_STEP_CODES]
+
+        assert branch_steps
+        assert all(step["legal_references"] == [] for step in branch_steps)
+        assert all(step["legal_reference_status"] == "missing" for step in branch_steps)
+    finally:
+        _delete_demo_seed_rows()

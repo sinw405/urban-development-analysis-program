@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   color: #1f2933;
   background: #f4f6f8;
   font-family: Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
@@ -1035,4 +1035,35 @@ tr:hover td {
 
 .missingSummaryList li + li {
   margin-top: 0.35rem;
+}
+.referenceQualityBadge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border: 1px solid #d7dde8;
+  background: #f6f8fb;
+  color: #2f3a4a;
+  white-space: nowrap;
+}
+
+.referenceQualityBadge.verified {
+  border-color: #9cc7a5;
+  background: #edf8ef;
+  color: #1f6b35;
+}
+
+.referenceQualityBadge.candidate {
+  border-color: #e7c36d;
+  background: #fff8df;
+  color: #7a5600;
+}
+
+.referenceQualityBadge.missing {
+  border-color: #d6dbe4;
+  background: #f2f4f7;
+  color: #687386;
 }

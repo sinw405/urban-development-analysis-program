@@ -981,3 +981,42 @@ Local ordinance mapping
 Reviewed duration guidance
 Expert review before any 검증 완료 status is used
 ```
+## Phase 19 Legal Reference Quality
+
+Phase 19 adds legal reference quality status so candidate TEST references are not mistaken for verified legal grounds.
+
+Quality states:
+
+```text
+candidate -> 후보근거
+verified -> 검증완료
+missing -> 근거미확인
+```
+
+API additions keep existing fields and add supplemental fields:
+
+```text
+procedures[].legal_reference_status
+procedures[].legal_references[].reference_quality
+```
+
+Current Phase 18 demo seed references for the 11 core common procedure steps are displayed as `candidate`. Steps without references are displayed as `missing`. Phase 19 does not mark any reference as `verified` and does not add MOLEG network calls, external data fetching, DB migrations, server PDF generation, or actual law article finalization.
+
+Candidate-reference notice shown in the UI/report/browser print-PDF path:
+
+```text
+본 법령 근거는 현재 후보 데이터 기준으로 연결된 항목이며, 공식 법령 원문 및 인허가권자 확인이 필요합니다.
+```
+
+PDF/print verification scope:
+
+```text
+Phase 19 updates the browser print/PDF report component so reference quality status and the candidate-reference notice are included in the printable report layout.
+Actual PDF file saving is still a manual browser print-environment check. No automated PDF file generation or server-side PDF API was added.
+```
+
+Detailed quality policy:
+
+```text
+docs/legal_reference_quality_phase19.md
+```

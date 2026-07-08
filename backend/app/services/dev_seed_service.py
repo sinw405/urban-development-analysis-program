@@ -175,6 +175,7 @@ def _get_or_create_procedure_reference(db: Session, law_id: int, article_id: int
             placeholder=TODO_MOLEG_API_ARTICLE_CHECK,
             notes_json={
                 "fixture": "TEST_DEMO_REFERENCE_DO_NOT_USE",
+                "reference_quality": "candidate",
                 "verification_status": "검증 필요",
                 "coverage_role": "core_procedure_candidate",
             },

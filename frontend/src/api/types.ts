@@ -1,4 +1,4 @@
-﻿export interface AnalyzeRequest {
+export interface AnalyzeRequest {
   project_name: string;
   location: string;
   area_square_meters: number;
@@ -19,6 +19,7 @@ export interface LegalReferenceVersion {
 export interface LegalReference {
   step_code: string;
   reference_status: string;
+  reference_quality: "candidate" | "verified" | "missing" | string;
   placeholder: string;
   law_id: number | null;
   law_key: string | null;
@@ -41,6 +42,7 @@ export interface ProcedureStep {
   estimated_duration: string;
   legal_basis_placeholder: string[];
   legal_references: LegalReference[];
+  legal_reference_status: "candidate" | "verified" | "missing" | string;
   notes: string[];
 }
 

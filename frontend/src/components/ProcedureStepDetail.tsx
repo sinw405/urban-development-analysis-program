@@ -1,5 +1,6 @@
 import type { LegalReference, ProcedureStep } from "../api/types";
 import type { NormalizedProcedureStep } from "../utils/analysisSummary";
+import { CANDIDATE_LEGAL_REFERENCE_NOTICE, legalReferenceQualityLabel } from "../utils/analysisSummary";
 import { formatDate, formatList, formatStatus } from "../utils/formatters";
 import { labelFor } from "../utils/labels";
 import { ProcedureChecklist, type ChecklistStatus } from "./ProcedureChecklist";
@@ -8,9 +9,15 @@ function StatusBadge({ value }: { value: string | null | undefined }) {
   return <span className={`statusBadge status-${value ?? "unknown"}`}>{formatStatus(value)}</span>;
 }
 
+function qualityClass(value: string | null | undefined): string {
+  if (value === "verified") return "verified";
+  if (value === "candidate") return "candidate";
+  return "missing";
+}
+
 function LegalReferenceCards({ references }: { references: LegalReference[] }) {
   if (references.length === 0) {
-    return <p className="emptyState">근거 미연결</p>;
+    return <p className="emptyState">근거미확인</p>;
   }
 
   return (
@@ -18,13 +25,16 @@ function LegalReferenceCards({ references }: { references: LegalReference[] }) {
       {references.map((reference, index) => {
         const current = reference.current_version;
         const statusValue = current?.temporal_status ?? current?.version_status ?? reference.reference_status;
+        const quality = reference.reference_quality ?? "candidate";
         return (
           <article className="legalReferenceCard" key={`${reference.step_code}-${reference.article_id ?? index}`}>
             <div className="cardTitle compactTitle">
               <h4>법령 근거 {index + 1}</h4>
-              <StatusBadge value={statusValue} />
+              <span className={`referenceQualityBadge ${qualityClass(quality)}`}>{legalReferenceQualityLabel(quality)}</span>
             </div>
             <dl className="definitionGrid">
+              <dt>근거 상태</dt>
+              <dd>{legalReferenceQualityLabel(quality)}</dd>
               <dt>{labelFor("law_id")}</dt>
               <dd>{reference.law_id ?? "-"}</dd>
               <dt>{labelFor("law_key")}</dt>
@@ -34,12 +44,12 @@ function LegalReferenceCards({ references }: { references: LegalReference[] }) {
               <dt>{labelFor("article_key")}</dt>
               <dd>{reference.article_key ?? "조문 키 확인 필요"}</dd>
               <dt>{labelFor("version_status")}</dt>
-              <dd>{formatStatus(statusValue)}</dd>
+              <dd><StatusBadge value={statusValue} /></dd>
               <dt>{labelFor("effective_date")}</dt>
               <dd>{formatDate(current?.effective_date)}</dd>
               <dt>{labelFor("source")}</dt>
               <dd>{current?.source ?? "출처 확인 필요"}</dd>
-              <dt>근거 연결 상태</dt>
+              <dt>연결 상태</dt>
               <dd>{reference.placeholder || reference.reference_status || "확인 필요"}</dd>
               <dt>조문 링크</dt>
               <dd>링크 확인 필요</dd>
@@ -67,10 +77,16 @@ export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onC
           <h3>{normalizedStep.title}</h3>
           <p className="muted"><code>{normalizedStep.stepCode}</code></p>
         </div>
-        <span className="badge">{normalizedStep.legalReferenceState}</span>
+        <span className={`referenceQualityBadge ${qualityClass(normalizedStep.legalReferenceQuality)}`}>{normalizedStep.legalReferenceState}</span>
       </div>
 
       <p>{normalizedStep.description}</p>
+
+      {normalizedStep.legalReferenceQuality === "candidate" && (
+        <div className="noticeBox compactNotice">
+          {CANDIDATE_LEGAL_REFERENCE_NOTICE}
+        </div>
+      )}
 
       <ProcedureChecklist step={step} status={checklistStatus} onStatusChange={onChecklistStatusChange} />
 
@@ -89,7 +105,7 @@ export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onC
           <p>{formatList(normalizedStep.requiredDocuments, "서류 확인 필요")}</p>
         </section>
         <section>
-          <h4>협의/담당 기관</h4>
+          <h4>협의/인허가 기관</h4>
           <p>{formatList(normalizedStep.relatedAgencies, "기관 확인 필요")}</p>
         </section>
         <section>

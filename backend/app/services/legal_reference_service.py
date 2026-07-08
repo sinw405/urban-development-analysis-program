@@ -1,4 +1,4 @@
-﻿from datetime import date
+from datetime import date
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
@@ -11,12 +11,34 @@ PENDING_MOLEG_API_MAPPING = "PENDING_MOLEG_API_MAPPING"
 TODO_MOLEG_API_ARTICLE_CHECK = "TODO_MOLEG_API_ARTICLE_CHECK"
 EXPERT_REVIEW_REQUIRED = "EXPERT_REVIEW_REQUIRED"
 
+LEGAL_REFERENCE_QUALITY_CANDIDATE = "candidate"
+LEGAL_REFERENCE_QUALITY_VERIFIED = "verified"
+LEGAL_REFERENCE_QUALITY_MISSING = "missing"
+
 LEGAL_REFERENCE_PENDING_STATUSES = {
     PENDING_MOLEG_API_MAPPING,
     TODO_MOLEG_API_ARTICLE_CHECK,
     EXPERT_REVIEW_REQUIRED,
 }
 
+
+
+def _reference_quality(reference: ProcedureLegalReference) -> str:
+    notes = reference.notes_json or {}
+    quality = notes.get("reference_quality")
+    if quality in {LEGAL_REFERENCE_QUALITY_CANDIDATE, LEGAL_REFERENCE_QUALITY_VERIFIED}:
+        return quality
+    if reference.reference_status == LEGAL_REFERENCE_QUALITY_VERIFIED:
+        return LEGAL_REFERENCE_QUALITY_VERIFIED
+    return LEGAL_REFERENCE_QUALITY_CANDIDATE
+
+
+def _step_reference_status(references: list[LegalReference]) -> str:
+    if not references:
+        return LEGAL_REFERENCE_QUALITY_MISSING
+    if all(reference.reference_quality == LEGAL_REFERENCE_QUALITY_VERIFIED for reference in references):
+        return LEGAL_REFERENCE_QUALITY_VERIFIED
+    return LEGAL_REFERENCE_QUALITY_CANDIDATE
 
 def empty_legal_references() -> list[LegalReference]:
     return []
@@ -59,6 +81,7 @@ def _serialize_procedure_reference(
     return LegalReference(
         step_code=reference.step_code,
         reference_status=reference.reference_status,
+        reference_quality=_reference_quality(reference),
         placeholder=reference.placeholder,
         law_id=None if law is None else law.id,
         law_key=None if law is None else law.law_key,
@@ -112,4 +135,5 @@ def attach_legal_references(
 
     for step in result.procedures:
         step.legal_references = references_by_step_code.get(step.step_code, [])
+        step.legal_reference_status = _step_reference_status(step.legal_references)
     return result
