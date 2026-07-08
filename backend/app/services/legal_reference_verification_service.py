@@ -155,6 +155,7 @@ def _result(
         candidate_reference=candidate,
         official_source_snapshot=official,
         source_mode="live" if source_mode == "live" else "mock",
+        provider_reason=reason,
     )
 
 

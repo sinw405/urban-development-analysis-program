@@ -17,6 +17,8 @@ def test_moleg_settings_default_to_disabled(monkeypatch):
     monkeypatch.delenv("MOLEG_API_ENABLED", raising=False)
     monkeypatch.delenv("MOLEG_API_BASE_URL", raising=False)
     monkeypatch.delenv("MOLEG_API_KEY", raising=False)
+    monkeypatch.delenv("MOLEG_OC", raising=False)
+    get_settings.cache_clear()
 
     settings = get_settings()
 
@@ -45,6 +47,8 @@ def test_http_moleg_adapter_requires_enabled_configuration(monkeypatch):
     monkeypatch.setenv("MOLEG_API_ENABLED", "false")
     monkeypatch.delenv("MOLEG_API_BASE_URL", raising=False)
     monkeypatch.delenv("MOLEG_API_KEY", raising=False)
+    monkeypatch.delenv("MOLEG_OC", raising=False)
+    get_settings.cache_clear()
     adapter = MolegHttpAdapter(settings=get_settings())
 
     with pytest.raises(MolegApiDisabledError):
@@ -55,6 +59,8 @@ def test_http_moleg_adapter_requires_api_key_when_enabled(monkeypatch):
     monkeypatch.setenv("MOLEG_API_ENABLED", "true")
     monkeypatch.setenv("MOLEG_API_BASE_URL", "https://test.invalid")
     monkeypatch.delenv("MOLEG_API_KEY", raising=False)
+    monkeypatch.delenv("MOLEG_OC", raising=False)
+    get_settings.cache_clear()
     adapter = MolegHttpAdapter(settings=get_settings())
 
     with pytest.raises(MolegApiDisabledError):

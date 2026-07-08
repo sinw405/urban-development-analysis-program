@@ -125,6 +125,59 @@ export interface LawUpdateListResponse {
   since: string | null;
 }
 
+
+export interface OfficialLawPagination {
+  page: number | null;
+  page_size: number | null;
+  total_count: number | null;
+  total_pages: number | null;
+}
+
+export interface OfficialLawCandidate {
+  title: string;
+  short_title: string | null;
+  law_id: string | null;
+  mst: string | null;
+  promulgation_date: string | null;
+  enforcement_date: string | null;
+  is_current: boolean | null;
+  source_url: string;
+  match_score: number;
+  match_reason: string;
+}
+
+export interface OfficialLawArticle {
+  article_no: string;
+  article_title: string | null;
+  article_text: string;
+  paragraphs: string[];
+  source_anchor: string | null;
+  source_hint: string | null;
+}
+
+export interface OfficialLawDocument {
+  title: string;
+  law_id: string | null;
+  mst: string | null;
+  enforcement_date: string | null;
+  articles: OfficialLawArticle[];
+  raw_available: boolean;
+  normalized_at: string;
+  provider_reason: string;
+  sanitized_source_url: string;
+}
+
+export interface OfficialLawSearchResult {
+  source_mode: "mock" | "live" | string;
+  status: string;
+  query: string;
+  candidates: OfficialLawCandidate[];
+  selected_candidate: OfficialLawCandidate | null;
+  pagination: OfficialLawPagination | null;
+  sanitized_source_url: string;
+  provider_reason: string;
+}
+
 export interface OfficialLawArticleSnapshot {
   law_name: string;
   article_number_text: string;
@@ -157,6 +210,7 @@ export interface LegalReferenceVerificationResult {
   candidate_reference: CandidateLegalReferenceSnapshot;
   official_source_snapshot: OfficialLawArticleSnapshot | null;
   source_mode: "mock" | "live" | string;
+  provider_reason: string | null;
 }
 
 export interface LegalReferenceVerifyPreviewRequest {

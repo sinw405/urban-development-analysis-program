@@ -208,7 +208,10 @@ def test_verify_preview_statuses_remain_compatible_without_live_api():
 def test_moleg_live_smoke_searches_urban_development_law_and_normalizes_articles():
     provider = MolegOpenApiLawSourceProvider()
 
-    candidates = provider.search_law_candidates(URBAN_DEVELOPMENT_LAW)
+    try:
+        candidates = provider.search_law_candidates(URBAN_DEVELOPMENT_LAW)
+    except LawSourceProviderError as exc:
+        pytest.skip(f"MOLEG live smoke returned source_error: {type(exc).__name__}")
     selected = provider._select_law_candidate(candidates, URBAN_DEVELOPMENT_LAW)
 
     assert selected is not None

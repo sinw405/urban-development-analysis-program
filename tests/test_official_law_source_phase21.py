@@ -135,7 +135,10 @@ def test_provider_error_does_not_crash_verification_or_expose_secret():
 def test_moleg_live_smoke_normalizes_response():
     provider = MolegOpenApiLawSourceProvider()
 
-    results = provider.search_articles(law_name="?????", keyword="?3?")
+    try:
+        results = provider.search_articles(law_name="?????", keyword="?3?")
+    except LawSourceProviderError as exc:
+        pytest.skip(f"MOLEG live smoke returned source_error: {type(exc).__name__}")
 
     assert provider.configured is True
     assert isinstance(results, list)
