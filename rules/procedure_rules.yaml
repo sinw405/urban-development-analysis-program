@@ -128,6 +128,17 @@ common_steps:
     notes:
       - "Plan contents must be verified against current statutes and ordinances."
 
+  - step_code: "IMPLEMENTER_DESIGNATION_REVIEW"
+    step_name: "Implementer designation review"
+    sequence: 75
+    description: "Review whether implementer designation or implementer confirmation is required for the project workflow. Exact legal applicability must be verified later."
+    required_documents: []
+    related_agencies: []
+    estimated_duration: "TODO_EXPERT_REVIEW"
+    legal_basis_placeholder:
+      - "TODO_MOLEG_API_ARTICLE_CHECK"
+    notes:
+      - "Added in Phase 17 as a core workflow coverage placeholder. Required documents, agencies, duration, and legal article references remain confirmation-required."
   - step_code: "IMPLEMENTATION_PLAN_AUTHORIZATION"
     step_name: "Implementation plan authorization"
     sequence: 90

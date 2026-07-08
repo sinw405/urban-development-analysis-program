@@ -32,6 +32,7 @@ def test_common_steps_are_returned():
 
     assert "PROJECT_BASIC_REVIEW" in codes
     assert "RELATED_AGENCY_CONSULTATION" in codes
+    assert "IMPLEMENTER_DESIGNATION_REVIEW" in codes
     assert "COMPLETION_INSPECTION" in codes
 
 

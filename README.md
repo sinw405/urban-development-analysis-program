@@ -885,3 +885,54 @@ docs/known_limitations.md
 docs/manual_test_phase15.md
 docs/manual_test_phase16.md
 ```
+## Phase 17 Legal Data Coverage
+
+Phase 17 starts the first legal-data coverage improvement after the v0.1 MVP release tag. It focuses on procedure and legal-reference data quality, not new screens or schema changes.
+
+Status:
+
+```text
+v0.1-mvp tag: already created
+Existing API compatibility: maintained
+DB migration: not added
+Server PDF generation API: still not implemented
+Automatic legal original-text collection: still not implemented
+Raw JSON policy: developer detail section only
+```
+
+Phase 17 adds a common placeholder procedure step for implementer designation review:
+
+```text
+IMPLEMENTER_DESIGNATION_REVIEW
+```
+
+This step improves core workflow coverage but intentionally keeps documents, agencies, duration, and legal article references as confirmation-required values. No actual law name, article number, agency, document, or criteria was invented.
+
+Data missing display policy remains:
+
+```text
+근거 미연결
+기관 확인 필요
+서류 확인 필요
+기간 확인 필요
+미확인
+링크 확인 필요
+```
+
+Coverage and manual verification documents:
+
+```text
+docs/legal_data_coverage_phase17.md
+docs/manual_test_phase17.md
+```
+
+Next enhancement candidates:
+
+```text
+Official legal article mapping after source verification
+Verified article titles and article URLs
+Jurisdiction-specific ordinance mapping
+Validated required documents and agency lists
+Reviewed duration ranges
+Additional confirmed legal references per step
+```

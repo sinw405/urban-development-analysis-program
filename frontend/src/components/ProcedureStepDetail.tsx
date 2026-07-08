@@ -1,4 +1,4 @@
-﻿import type { LegalReference, ProcedureStep } from "../api/types";
+import type { LegalReference, ProcedureStep } from "../api/types";
 import type { NormalizedProcedureStep } from "../utils/analysisSummary";
 import { formatDate, formatList, formatStatus } from "../utils/formatters";
 import { labelFor } from "../utils/labels";
@@ -41,6 +41,8 @@ function LegalReferenceCards({ references }: { references: LegalReference[] }) {
               <dd>{current?.source ?? "출처 확인 필요"}</dd>
               <dt>근거 연결 상태</dt>
               <dd>{reference.placeholder || reference.reference_status || "확인 필요"}</dd>
+              <dt>조문 링크</dt>
+              <dd>링크 확인 필요</dd>
             </dl>
           </article>
         );
