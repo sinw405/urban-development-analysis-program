@@ -11,6 +11,7 @@ from app.services.dev_seed_service import (
     TEST_ARTICLE_TEXT,
     TEST_PROJECT_NAME,
     TEST_PROCEDURE_STEP_CODE,
+    TEST_CORE_PROCEDURE_STEP_CODES,
     TEST_VERSION_CURRENT,
     TEST_VERSION_SCHEDULED,
     seed_demo_data,
@@ -52,12 +53,16 @@ def test_demo_seed_is_idempotent_and_creates_expected_test_rows():
         assert first["test_step_code"] == TEST_PROCEDURE_STEP_CODE
         assert db.scalar(select(func.count()).select_from(Law).where(Law.law_key == TEST_LAW_KEY)) == 1
         assert db.scalar(select(func.count()).select_from(LawArticle).where(LawArticle.article_key == TEST_ARTICLE_KEY)) == 1
+        assert db.scalar(select(func.count()).select_from(LawArticle).where(LawArticle.law_id == first["law_id"])) == len(TEST_CORE_PROCEDURE_STEP_CODES)
+        assert db.scalar(select(func.count()).select_from(ProcedureLegalReference).where(ProcedureLegalReference.law_id == first["law_id"])) == len(TEST_CORE_PROCEDURE_STEP_CODES)
         assert db.scalar(select(func.count()).select_from(LawUpdateEvent).where(LawUpdateEvent.law_id == first["law_id"])) == 1
         assert db.scalar(
             select(func.count()).select_from(LawArticleVersion).where(
-                LawArticleVersion.law_article_id == first["article_id"]
+                LawArticleVersion.law_article_id.in_(
+                    select(LawArticle.id).where(LawArticle.law_id == first["law_id"])
+                )
             )
-        ) == 2
+        ) == len(TEST_CORE_PROCEDURE_STEP_CODES) * 2
     finally:
         db.close()
         _delete_demo_seed_rows()
@@ -86,6 +91,10 @@ def test_demo_seed_legal_reference_is_visible_in_analyze_response():
         )
         assert response.status_code == 200
         data = response.json()
+        core_steps = [step for step in data["procedures"] if step["step_code"] in TEST_CORE_PROCEDURE_STEP_CODES]
+        assert len(core_steps) == len(TEST_CORE_PROCEDURE_STEP_CODES)
+        assert all(len(step["legal_references"]) == 1 for step in core_steps)
+
         target_step = next(step for step in data["procedures"] if step["step_code"] == TEST_PROCEDURE_STEP_CODE)
         reference = target_step["legal_references"][0]
 
@@ -157,3 +166,5 @@ def test_demo_seed_uses_test_only_names():
 
     assert all("TEST_" in value and "DO_NOT_USE" in value for value in values)
     assert TEST_PROCEDURE_STEP_CODE == "PROJECT_BASIC_REVIEW"
+    assert len(TEST_CORE_PROCEDURE_STEP_CODES) == 11
+    assert all("TEST_" not in step_code for step_code in TEST_CORE_PROCEDURE_STEP_CODES)

@@ -936,3 +936,48 @@ Validated required documents and agency lists
 Reviewed duration ranges
 Additional confirmed legal references per step
 ```
+## Phase 18 Core Legal Reference Coverage
+
+Phase 18 expands TEST legal reference candidate coverage for the 11 core common procedure steps. It does not finalize actual law names, article numbers, article titles, agencies, required documents, criteria, or URLs.
+
+Core common procedure recheck result:
+
+```text
+Core common procedure candidates: 11
+TEST candidate legal reference connected core steps: 11
+Verified legal mappings: 0
+Verification-required candidate mappings: 11
+DB migration: not added
+Existing API compatibility: maintained
+Server PDF generation API: still not implemented
+Automatic legal original-text collection: still not implemented
+```
+
+Verification status policy:
+
+```text
+검증 완료: official source and expert review completed; not used in Phase 18
+후보 연결: TEST legal reference connected for coverage verification
+검증 필요: official source, article, ordinance, agency, document, and expert validation required
+근거 미연결: no legal reference connected
+```
+
+The demo seed now connects TEST-only legal reference candidates to all core common steps. Method-specific and implementer-specific branch steps may still remain `근거 미연결` until separately verified. The `/law-updates` TEST event remains focused on `PROJECT_BASIC_REVIEW`.
+
+Documents:
+
+```text
+docs/legal_data_coverage_phase18.md
+docs/manual_test_phase18.md
+```
+
+Next enhancement candidates:
+
+```text
+Official article mapping for urban development statutes after source verification
+Verified article titles and article URLs
+Validated document and agency datasets
+Local ordinance mapping
+Reviewed duration guidance
+Expert review before any 검증 완료 status is used
+```

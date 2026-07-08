@@ -97,3 +97,17 @@ def test_baekhyeon_mice_input_uses_generic_rule_engine_only():
     assert "SPC_GOVERNANCE_REVIEW" in codes
     assert not any("BAEKHYEON" in code.upper() for code in codes)
     assert not any("MICE" in code.upper() for code in codes)
+
+def test_core_common_procedure_coverage_after_phase18():
+    data = analyze("unknown method", "unknown implementer")
+    procedures = data["procedures"]
+    codes = step_codes(data)
+
+    assert len(procedures) == 11
+    assert "IMPLEMENTER_DESIGNATION_REVIEW" in codes
+
+    designation_step = next(step for step in procedures if step["step_code"] == "IMPLEMENTER_DESIGNATION_REVIEW")
+    assert designation_step["required_documents"] == []
+    assert designation_step["related_agencies"] == []
+    assert designation_step["estimated_duration"] == "TODO_EXPERT_REVIEW"
+    assert designation_step["legal_basis_placeholder"] == ["TODO_MOLEG_API_ARTICLE_CHECK"]
