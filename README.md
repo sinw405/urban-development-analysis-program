@@ -772,3 +772,105 @@ docs/manual_test_phase14.md
 ```
 
 Server PDF generation remains unimplemented. Browser print/PDF output from Phase 13 remains the current print path.
+
+## Phase 15 Final QA and Release Readiness
+
+Phase 15는 현재 로컬 MVP의 최종 QA와 릴리즈 준비 상태를 점검하는 단계입니다. 백엔드 API, DB schema, Alembic migration, 서버 PDF 생성, 인증, RAG, 실제 법제처 네트워크 연동은 추가하지 않았습니다.
+
+로컬 실행 가이드:
+
+```powershell
+docker compose up --build --detach
+docker compose exec backend alembic upgrade head
+docker compose exec backend python -m app.dev_seed
+docker compose exec backend pytest
+
+cd frontend
+npm install
+npm run typecheck
+npm run build
+npm run dev
+```
+
+주요 화면 URL:
+
+```text
+http://localhost:5173/
+http://localhost:5173/analyze
+http://localhost:5173/analyses
+http://localhost:5173/analyses/{analysisId}
+http://localhost:5173/law-updates
+```
+
+브라우저 인쇄/PDF 저장 방법:
+
+```text
+1. 신규 분석 결과 또는 저장 분석 상세 화면을 엽니다.
+2. 보고서형 요약 섹션을 확인합니다.
+3. 화면의 인쇄 버튼 또는 브라우저 인쇄 기능을 사용합니다.
+4. 필요한 경우 브라우저 인쇄 대화상자에서 PDF로 저장합니다.
+```
+
+서버에서 PDF 파일을 생성하는 API는 아직 구현하지 않았습니다. 현재 출력 방식은 브라우저 인쇄/PDF 저장입니다.
+
+현재 제공하는 주요 기능:
+
+```text
+React 화면에서 사업 분석 요청
+저장된 분석 이력 목록 및 상세 조회
+절차 로드맵과 단계 상세 표시
+프론트엔드 화면 상태 기반 단계별 체크리스트
+보고서형 요약 및 브라우저 인쇄/PDF 보기
+TEST 데이터 기반 법령 근거 연결 데모
+개발 검증용 법령 개정 감지 내역 표시
+```
+
+최종 QA 범위:
+
+```text
+대시보드
+신규 분석 실행 흐름
+저장 분석 목록
+저장 분석 상세
+없는 분석 ID 처리
+법령 개정 감지 화면
+브라우저 인쇄/PDF 출력
+좁은 화면 레이아웃 기본 점검
+raw JSON은 개발자용 상세 영역에만 표시되는지 확인
+```
+
+데이터 및 법적 한계:
+
+```text
+이 프로그램은 도시개발사업 절차 검토를 위한 참고자료입니다.
+법적 유권해석, 법률 의견, 최종 인허가 판단을 대체하지 않습니다.
+최종 적용 여부는 관계 법령 원문, 인허가권자 협의 및 전문가 검토를 통해 확인해야 합니다.
+실제 법령 조문 데이터셋, 지자체 조례, 판단 기준은 후속 검증과 보강이 필요합니다.
+```
+
+문제 발생 시 확인 항목:
+
+```text
+백엔드 서버가 http://localhost:8000 에서 실행 중인지 확인
+프론트엔드 Vite 서버가 http://localhost:5173 에서 실행 중인지 확인
+DB migration이 적용되었는지 확인
+TEST 데이터가 필요하면 demo seed가 실행되었는지 확인
+npm typecheck/build 실패가 없는지 확인
+```
+
+다음 고도화 후보:
+
+```text
+실제 도시개발법/시행령/시행규칙 조문 데이터셋 보강
+심의/평가 대상 판별 규칙 고도화
+지자체 조례 연동
+서버 PDF 생성 API
+사용자별 체크리스트 상태 저장
+배포 환경 구성
+```
+
+최종 수동 QA 문서:
+
+```text
+docs/manual_test_phase15.md
+```
