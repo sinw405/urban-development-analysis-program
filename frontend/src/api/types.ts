@@ -150,15 +150,17 @@ export interface CandidateLegalReferenceSnapshot {
 export interface LegalReferenceVerificationResult {
   procedure_reference_id: number;
   step_code: string;
-  match_status: "matched" | "partial" | "unmatched" | string;
+  match_status: "matched" | "partial" | "unmatched" | "source_unavailable" | "source_error" | string;
   can_promote_to_verified: boolean;
   reason: string;
   candidate_reference: CandidateLegalReferenceSnapshot;
   official_source_snapshot: OfficialLawArticleSnapshot | null;
+  source_mode: "mock" | "live" | string;
 }
 
 export interface LegalReferenceVerifyPreviewRequest {
   procedure_reference_ids?: number[] | null;
+  source_mode?: "mock" | "live";
 }
 
 export interface LegalReferenceVerifyPreviewResponse {

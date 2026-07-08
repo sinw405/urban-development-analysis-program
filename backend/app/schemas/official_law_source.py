@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -6,6 +7,10 @@ from pydantic import BaseModel, Field
 MATCH_STATUS_MATCHED = "matched"
 MATCH_STATUS_PARTIAL = "partial"
 MATCH_STATUS_UNMATCHED = "unmatched"
+MATCH_STATUS_SOURCE_UNAVAILABLE = "source_unavailable"
+MATCH_STATUS_SOURCE_ERROR = "source_error"
+
+LawSourceMode = Literal["mock", "live"]
 
 
 class OfficialLawMetadata(BaseModel):
@@ -40,15 +45,17 @@ class CandidateLegalReferenceSnapshot(BaseModel):
 class LegalReferenceVerificationResult(BaseModel):
     procedure_reference_id: int
     step_code: str
-    match_status: str = Field(..., pattern="^(matched|partial|unmatched)$")
+    match_status: str = Field(..., pattern="^(matched|partial|unmatched|source_unavailable|source_error)$")
     can_promote_to_verified: bool
     reason: str
     candidate_reference: CandidateLegalReferenceSnapshot
     official_source_snapshot: OfficialLawArticleSnapshot | None = None
+    source_mode: LawSourceMode = "mock"
 
 
 class LegalReferenceVerifyPreviewRequest(BaseModel):
     procedure_reference_ids: list[int] | None = None
+    source_mode: LawSourceMode = "mock"
 
 
 class LegalReferenceVerifyPreviewResponse(BaseModel):

@@ -18,5 +18,6 @@ def verify_legal_references_preview(
         items=list_verification_previews(
             db=db,
             procedure_reference_ids=request.procedure_reference_ids,
+            source_mode=request.source_mode,
         )
     )

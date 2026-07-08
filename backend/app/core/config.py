@@ -10,6 +10,16 @@ def _env_flag(name: str, default: bool = False) -> bool:
     return raw_value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _env_float(name: str, default: float) -> float:
+    raw_value = os.getenv(name)
+    if raw_value is None or not raw_value.strip():
+        return default
+    try:
+        return float(raw_value)
+    except ValueError:
+        return default
+
+
 class Settings:
     app_name = "Urban Development Analysis API"
     project_root = Path(__file__).resolve().parents[3]
@@ -32,19 +42,31 @@ class Settings:
 
     @property
     def moleg_api_base_url(self) -> str:
-        return os.getenv("MOLEG_API_BASE_URL", "")
+        return os.getenv("MOLEG_API_BASE_URL", "").strip()
 
     @property
     def moleg_api_key(self) -> str:
-        return os.getenv("MOLEG_API_KEY", "")
+        return (os.getenv("MOLEG_API_KEY") or os.getenv("MOLEG_OC") or "").strip()
+
+    @property
+    def moleg_api_timeout_seconds(self) -> float:
+        return _env_float("MOLEG_API_TIMEOUT_SECONDS", default=5.0)
 
     @property
     def moleg_api_enabled(self) -> bool:
         return _env_flag("MOLEG_API_ENABLED", default=False)
 
     @property
+    def moleg_live_test_enabled(self) -> bool:
+        return _env_flag("MOLEG_LIVE_TEST_ENABLED", default=False)
+
+    @property
     def moleg_api_configured(self) -> bool:
         return self.moleg_api_enabled and bool(self.moleg_api_base_url) and bool(self.moleg_api_key)
+
+    @property
+    def moleg_live_test_configured(self) -> bool:
+        return self.moleg_live_test_enabled and self.moleg_api_configured
 
 
 @lru_cache

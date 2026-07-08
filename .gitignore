@@ -14,3 +14,5 @@ postgres_data/
 *.log
 .pytest_cache/
 pytest-cache-files-*/
+.env.local
+*.env.local
