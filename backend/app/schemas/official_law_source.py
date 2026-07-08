@@ -1,5 +1,5 @@
 from datetime import date
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -18,6 +18,8 @@ class OfficialLawMetadata(BaseModel):
     effective_date: date | None = None
     source_url: str
     source_type: str = "mock_official"
+    official_law_id: str | None = None
+    raw_payload_redacted: dict[str, Any] | None = Field(default=None, exclude=True)
 
 
 class OfficialLawArticleSnapshot(BaseModel):
@@ -28,6 +30,8 @@ class OfficialLawArticleSnapshot(BaseModel):
     effective_date: date | None = None
     source_url: str
     source_type: str = "mock_official"
+    official_law_id: str | None = None
+    raw_payload_redacted: dict[str, Any] | None = Field(default=None, exclude=True)
 
 
 class CandidateLegalReferenceSnapshot(BaseModel):

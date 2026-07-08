@@ -2,6 +2,12 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+load_dotenv(PROJECT_ROOT / ".env", override=False)
+
 
 def _env_flag(name: str, default: bool = False) -> bool:
     raw_value = os.getenv(name)
@@ -22,7 +28,7 @@ def _env_float(name: str, default: float) -> float:
 
 class Settings:
     app_name = "Urban Development Analysis API"
-    project_root = Path(__file__).resolve().parents[3]
+    project_root = PROJECT_ROOT
 
     @property
     def database_url(self) -> str:

@@ -133,6 +133,7 @@ export interface OfficialLawArticleSnapshot {
   effective_date: string | null;
   source_url: string;
   source_type: "mock_official" | string;
+  official_law_id?: string | null;
 }
 
 export interface CandidateLegalReferenceSnapshot {
