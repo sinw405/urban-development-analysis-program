@@ -243,6 +243,27 @@ export interface MolegDiagnosticResult {
   secret_exposed: boolean;
 }
 
+
+export interface MolegLiveDiagnosticResult {
+  live_configured: boolean;
+  has_secret: boolean;
+  secret_exposed: boolean;
+  sanitized_base_url: string | null;
+  sanitized_endpoint: string;
+  final_url_sanitized: string | null;
+  request_method: string;
+  query_keys: string[];
+  timeout_seconds: number;
+  status_code: number | null;
+  reason_type: string;
+  error_class: string | null;
+  error_message_sanitized: string | null;
+  elapsed_ms: number;
+  response_content_type: string | null;
+  response_preview_sanitized: string | null;
+  suggested_next_action: string;
+  result: string;
+}
 export interface OfficialLawIngestPreviewRequest {
   query: string;
   source_mode?: "mock" | "live" | "official_db" | "fallback";

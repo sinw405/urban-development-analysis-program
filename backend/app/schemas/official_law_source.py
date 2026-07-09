@@ -136,6 +136,27 @@ class MolegDiagnosticResult(BaseModel):
     secret_exposed: bool = False
 
 
+
+class MolegLiveDiagnosticResult(BaseModel):
+    live_configured: bool
+    has_secret: bool
+    secret_exposed: bool = False
+    sanitized_base_url: str | None = None
+    sanitized_endpoint: str
+    final_url_sanitized: str | None = None
+    request_method: str = "GET"
+    query_keys: list[str] = Field(default_factory=list)
+    timeout_seconds: float
+    status_code: int | None = None
+    reason_type: str
+    error_class: str | None = None
+    error_message_sanitized: str | None = None
+    elapsed_ms: int
+    response_content_type: str | None = None
+    response_preview_sanitized: str | None = None
+    suggested_next_action: str
+    result: str
+
 class OfficialLawIngestPreviewRequest(BaseModel):
     query: str
     source_mode: LawSourceMode = "mock"

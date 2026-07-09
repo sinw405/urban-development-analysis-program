@@ -6,7 +6,6 @@ from typing import Any, Protocol
 from urllib.parse import urljoin
 from xml.etree import ElementTree
 
-import httpx
 
 from app.core.config import get_settings
 from app.schemas.official_law_source import (
@@ -17,6 +16,11 @@ from app.schemas.official_law_source import (
     OfficialLawMetadata,
     OfficialLawPagination,
     OfficialLawSearchResult,
+)
+from app.services.moleg_live_client import (
+    MolegLiveClient,
+    MolegLiveClientError,
+    MolegLiveClientUnavailable,
 )
 
 MOLEG_LAW_SEARCH_PATH = "/DRF/lawSearch.do"
@@ -269,30 +273,16 @@ class MolegOpenApiLawSourceProvider:
         return {"OC": self.api_key, "type": result_type}
 
     def _request_payload(self, path: str, params: dict[str, str]) -> dict[str, Any] | list[Any]:
-        if not self.configured:
-            raise LawSourceProviderUnavailable("MOLEG API is not configured.")
-
         try:
-            response = httpx.get(
-                urljoin(f"{self.base_url}/", path.lstrip("/")),
-                params=params,
-                timeout=self.timeout_seconds,
-            )
-            response.raise_for_status()
-            content_type = response.headers.get("content-type", "")
-            if "json" in content_type.lower() or params.get("type") == MOLEG_JSON_TYPE:
-                try:
-                    return response.json()
-                except ValueError:
-                    if params.get("type") == MOLEG_JSON_TYPE:
-                        raise
-            return _xml_text_to_dict(response.text)
-        except httpx.TimeoutException as exc:
-            raise LawSourceProviderError("MOLEG API request timed out.") from exc
-        except httpx.HTTPError as exc:
+            return MolegLiveClient(
+                base_url=self.base_url,
+                api_key=self.api_key,
+                timeout_seconds=self.timeout_seconds,
+            ).request_payload(path=path, params=params)
+        except MolegLiveClientUnavailable as exc:
+            raise LawSourceProviderUnavailable("MOLEG API is not configured.") from exc
+        except MolegLiveClientError as exc:
             raise LawSourceProviderError("MOLEG API request failed.") from exc
-        except (ValueError, ElementTree.ParseError) as exc:
-            raise LawSourceProviderError("MOLEG API response could not be parsed.") from exc
 
     def _normalize_law_search_result(
         self,

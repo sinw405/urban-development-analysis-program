@@ -6,12 +6,13 @@ from app.schemas.official_law_source import (
     LegalReferenceVerifyPreviewRequest,
     LegalReferenceVerifyPreviewResponse,
     MolegDiagnosticResult,
+    MolegLiveDiagnosticResult,
     OfficialLawIngestPreviewRequest,
     OfficialLawIngestPreviewResponse,
     OfficialLawSnapshotStatusResponse,
 )
 from app.services.legal_reference_verification_service import list_verification_previews
-from app.services.moleg_diagnostic_service import diagnose_moleg_connectivity
+from app.services.moleg_diagnostic_service import diagnose_moleg_connectivity, diagnose_moleg_live_only
 from app.services.official_law_db_source_service import get_official_law_snapshot_status
 from app.services.official_law_persistence_service import ingest_live_document_preview
 
@@ -36,6 +37,11 @@ def verify_legal_references_preview(
 @router.get("/legal-references/official-laws/diagnostic", response_model=MolegDiagnosticResult)
 def diagnose_official_law_source() -> MolegDiagnosticResult:
     return diagnose_moleg_connectivity()
+
+
+@router.get("/legal-references/moleg-live-diagnostic", response_model=MolegLiveDiagnosticResult)
+def diagnose_moleg_live_source() -> MolegLiveDiagnosticResult:
+    return diagnose_moleg_live_only()
 
 
 @router.get("/legal-references/official-law-snapshot", response_model=OfficialLawSnapshotStatusResponse)
