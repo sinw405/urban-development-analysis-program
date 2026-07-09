@@ -28,9 +28,11 @@ def import_official_law_file(
     query: str | None = None,
     source_provider: str = "moleg_manual_upload",
     source_mode: str = MANUAL_SOURCE_MODE,
+    evidence_type: str = MANUAL_EVIDENCE_TYPE,
+    run_type: str = "official_law_manual_import",
 ) -> OfficialLawManualImportResponse:
     path = Path(file_path).expanduser()
-    run = create_ingest_run(db=db, query=query or path.name, source_mode=source_mode, run_type="official_law_manual_import")
+    run = create_ingest_run(db=db, query=query or path.name, source_mode=source_mode, run_type=run_type)
     try:
         payload = _load_payload(path)
         provider = MolegOpenApiLawSourceProvider(base_url="manual://official-law-file", api_key="MANUAL_IMPORT_NO_SECRET")
@@ -61,7 +63,7 @@ def import_official_law_file(
         add_source_evidence(
             db=db,
             run=run,
-            evidence_type=MANUAL_EVIDENCE_TYPE,
+            evidence_type=evidence_type,
             summary=redact_secret_values(
                 {
                     "file_name": path.name,

@@ -1,0 +1,8 @@
+{
+  "source_provider": "MOLEG",
+  "mode": "official_seed",
+  "law_title": "<LAW_TITLE>",
+  "source_file": "<OFFICIAL_SOURCE_FILE>",
+  "source_format": "json",
+  "expected_min_article_count": 1
+}

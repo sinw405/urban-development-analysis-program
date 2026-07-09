@@ -168,7 +168,7 @@ export interface OfficialLawDocument {
 }
 
 export interface OfficialLawSearchResult {
-  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db" | string;
   status: string;
   query: string;
   candidates: OfficialLawCandidate[];
@@ -209,7 +209,7 @@ export interface LegalReferenceVerificationResult {
   reason: string;
   candidate_reference: CandidateLegalReferenceSnapshot;
   official_source_snapshot: OfficialLawArticleSnapshot | null;
-  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db" | string;
   provider_reason: string | null;
   source_error: boolean;
   reason_type: string | null;
@@ -225,7 +225,7 @@ export interface LegalReferenceVerificationResult {
 
 export interface LegalReferenceVerifyPreviewRequest {
   procedure_reference_ids?: number[] | null;
-  source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db";
+  source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db";
 }
 
 export interface LegalReferenceVerifyPreviewResponse {
@@ -294,12 +294,12 @@ export interface OfficialLawManualImportRequest {
   file_path: string;
   query?: string | null;
   source_provider?: string;
-  source_mode?: "official_manual" | "official_manual_db" | "mock" | "live" | "official_db" | "fallback";
+  source_mode?: "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db" | "mock" | "live" | "official_db" | "fallback";
 }
 
 export interface OfficialLawManualImportResponse {
   status: string;
-  source_mode: "official_manual" | "official_manual_db" | "mock" | "live" | "official_db" | "fallback" | string;
+  source_mode: "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db" | "mock" | "live" | "official_db" | "fallback" | string;
   source_provider: string;
   document_id: number | null;
   ingest_run_id: number | null;
@@ -309,14 +309,57 @@ export interface OfficialLawManualImportResponse {
   error_message_sanitized: string | null;
   secret_exposed: boolean;
 }
+
+export interface OfficialLawSeedManifest {
+  source_provider: string;
+  mode: string;
+  law_title: string;
+  law_short_title: string | null;
+  law_id: string | null;
+  mst: string | null;
+  enforcement_date: string | null;
+  promulgation_date: string | null;
+  document_status: string | null;
+  source_file: string;
+  source_format: "json" | "xml";
+  expected_min_article_count: number;
+  is_current: boolean | null;
+  notes: string | null;
+}
+
+export interface OfficialLawSeedImportRequest {
+  manifest_path: string;
+}
+
+export interface OfficialLawSeedImportResponse {
+  success: boolean;
+  status: string;
+  source_mode: "official_seed" | "official_seed_db" | "official_manual" | "official_manual_db" | "mock" | "live" | "official_db" | "fallback" | string;
+  source_mode_detail: string | null;
+  document_id: number | null;
+  document_count: number;
+  article_count: number;
+  ingest_run_id: number | null;
+  ingest_status: string | null;
+  source_provider: string | null;
+  law_title: string | null;
+  law_id: string | null;
+  mst: string | null;
+  enforcement_date: string | null;
+  secret_exposed: boolean;
+  evidence_type: string | null;
+  warnings: string[];
+  reason_type: string | null;
+  error_message_sanitized: string | null;
+}
 export interface OfficialLawIngestPreviewRequest {
   query: string;
-  source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db";
+  source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db";
 }
 
 export interface OfficialLawIngestPreviewResponse {
   status: string;
-  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db" | string;
   selected_candidate: OfficialLawCandidate | null;
   document_id: number | null;
   ingest_run_id: number;

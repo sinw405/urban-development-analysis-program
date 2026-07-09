@@ -1,0 +1,8 @@
+{
+  "source_provider": "MOLEG_SEED_TEST",
+  "mode": "official_seed",
+  "law_title": "TEST_PHASE28_MISSING_SOURCE",
+  "source_file": "missing_seed_source.json",
+  "source_format": "json",
+  "expected_min_article_count": 1
+}

@@ -1,0 +1,16 @@
+{
+  "source_provider": "MOLEG",
+  "mode": "official_seed",
+  "law_title": "<LAW_TITLE>",
+  "law_short_title": "<LAW_SHORT_TITLE>",
+  "law_id": "<LAW_ID>",
+  "mst": "<MST>",
+  "enforcement_date": "<ENFORCEMENT_DATE>",
+  "promulgation_date": "<PROMULGATION_DATE>",
+  "document_status": "normalized",
+  "source_file": "<OFFICIAL_SOURCE_FILE>",
+  "source_format": "json",
+  "expected_min_article_count": 1,
+  "is_current": true,
+  "notes": "Replace all placeholders before import. Placeholder manifests are rejected."
+}

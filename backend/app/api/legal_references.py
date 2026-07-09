@@ -12,6 +12,8 @@ from app.schemas.official_law_source import (
     OfficialLawIngestPreviewResponse,
     OfficialLawManualImportRequest,
     OfficialLawManualImportResponse,
+    OfficialLawSeedImportRequest,
+    OfficialLawSeedImportResponse,
     OfficialLawSnapshotStatusResponse,
 )
 from app.services.legal_reference_verification_service import list_verification_previews
@@ -20,6 +22,7 @@ from app.services.moleg_transport_probe_service import diagnose_moleg_transport
 from app.services.official_law_db_source_service import get_official_law_snapshot_status
 from app.services.official_law_manual_import_service import import_official_law_file
 from app.services.official_law_persistence_service import ingest_live_document_preview
+from app.services.official_law_seed_import_service import import_official_law_seed
 
 
 router = APIRouter(tags=["legal-references"])
@@ -71,6 +74,14 @@ def import_official_law_manual_file(
         source_provider=request.source_provider,
         source_mode=request.source_mode,
     )
+
+
+@router.post("/legal-references/official-law-seed-import", response_model=OfficialLawSeedImportResponse)
+def import_official_law_seed_file(
+    request: OfficialLawSeedImportRequest,
+    db: Session = Depends(get_db),
+) -> OfficialLawSeedImportResponse:
+    return import_official_law_seed(db=db, manifest_path=request.manifest_path)
 
 
 @router.post("/legal-references/official-laws/ingest-preview", response_model=OfficialLawIngestPreviewResponse)

@@ -1,0 +1,8 @@
+{
+  "source_provider": "MOLEG_SEED_TEST",
+  "mode": "official_seed",
+  "law_title": "TEST_PHASE27_MANUAL_LAW_DO_NOT_USE",
+  "source_file": "moleg_manual_import_sample.json",
+  "source_format": "json",
+  "expected_min_article_count": 99
+}

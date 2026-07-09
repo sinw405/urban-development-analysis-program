@@ -193,7 +193,7 @@ def _result(
         reason=reason,
         candidate_reference=candidate,
         official_source_snapshot=official,
-        source_mode=source_mode if source_mode in {"official_db", "live", "mock", "fallback"} else "mock",
+        source_mode=source_mode if source_mode in {"official_db", "live", "mock", "fallback", "official_manual", "official_manual_db", "official_seed", "official_seed_db"} else "mock",
         provider_reason=reason,
         source_error=source_error or match_status in {MATCH_STATUS_SOURCE_ERROR, MATCH_STATUS_SOURCE_UNAVAILABLE},
         reason_type=reason_type or (match_status if match_status in {MATCH_STATUS_SOURCE_ERROR, MATCH_STATUS_SOURCE_UNAVAILABLE} else None),
@@ -203,6 +203,7 @@ def _result(
         evidence_type=None if official is None else official.evidence_type,
         sanitized_url=None if official is None else official.source_url,
         source_hint=None if official is None else official.source_hint,
+        source_mode_detail=None if official is None else official.source_mode_detail,
     )
 
 

@@ -1,0 +1,16 @@
+{
+  "source_provider": "MOLEG_SEED_TEST",
+  "mode": "official_seed",
+  "law_title": "TEST_PHASE27_MANUAL_XML_LAW_DO_NOT_USE",
+  "law_short_title": "TEST_PHASE27_MANUAL_XML_LAW_DO_NOT_USE",
+  "law_id": "PHASE27_MANUAL_LAW_ID_XML",
+  "mst": "PHASE27_MANUAL_MST_XML",
+  "enforcement_date": "20990101",
+  "promulgation_date": "20990101",
+  "document_status": "normalized",
+  "source_file": "moleg_manual_import_sample.xml",
+  "source_format": "xml",
+  "expected_min_article_count": 1,
+  "is_current": true,
+  "notes": "TEST fixture only; not official legal content."
+}

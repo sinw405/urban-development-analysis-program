@@ -10,7 +10,16 @@ MATCH_STATUS_UNMATCHED = "unmatched"
 MATCH_STATUS_SOURCE_UNAVAILABLE = "source_unavailable"
 MATCH_STATUS_SOURCE_ERROR = "source_error"
 
-LawSourceMode = Literal["mock", "live", "official_db", "fallback", "official_manual", "official_manual_db"]
+LawSourceMode = Literal[
+    "mock",
+    "live",
+    "official_db",
+    "fallback",
+    "official_manual",
+    "official_manual_db",
+    "official_seed",
+    "official_seed_db",
+]
 
 
 class OfficialLawMetadata(BaseModel):
@@ -24,6 +33,7 @@ class OfficialLawMetadata(BaseModel):
     article_count: int | None = None
     evidence_type: str | None = None
     source_hint: str | None = None
+    source_mode_detail: str | None = None
 
 
 class OfficialLawArticleSnapshot(BaseModel):
@@ -40,6 +50,7 @@ class OfficialLawArticleSnapshot(BaseModel):
     article_count: int | None = None
     evidence_type: str | None = None
     source_hint: str | None = None
+    source_mode_detail: str | None = None
 
 
 class OfficialLawPagination(BaseModel):
@@ -128,6 +139,7 @@ class LegalReferenceVerificationResult(BaseModel):
     sanitized_url: str | None = None
     source_hint: str | None = None
     as_of: date | None = None
+    source_mode_detail: str | None = None
 
 
 class MolegDiagnosticResult(BaseModel):
@@ -206,6 +218,49 @@ class OfficialLawManualImportResponse(BaseModel):
     secret_exposed: bool = False
 
 
+class OfficialLawSeedManifest(BaseModel):
+    source_provider: str
+    mode: str
+    law_title: str
+    law_short_title: str | None = None
+    law_id: str | None = None
+    mst: str | None = None
+    enforcement_date: str | None = None
+    promulgation_date: str | None = None
+    document_status: str | None = None
+    source_file: str
+    source_format: Literal["json", "xml"]
+    expected_min_article_count: int = 1
+    is_current: bool | None = None
+    notes: str | None = None
+
+
+class OfficialLawSeedImportRequest(BaseModel):
+    manifest_path: str
+
+
+class OfficialLawSeedImportResponse(BaseModel):
+    success: bool
+    status: str
+    source_mode: LawSourceMode
+    source_mode_detail: str | None = None
+    document_id: int | None = None
+    document_count: int = 0
+    article_count: int = 0
+    ingest_run_id: int | None = None
+    ingest_status: str | None = None
+    source_provider: str | None = None
+    law_title: str | None = None
+    law_id: str | None = None
+    mst: str | None = None
+    enforcement_date: str | None = None
+    secret_exposed: bool = False
+    evidence_type: str | None = None
+    warnings: list[str] = Field(default_factory=list)
+    reason_type: str | None = None
+    error_message_sanitized: str | None = None
+
+
 class OfficialLawIngestPreviewRequest(BaseModel):
     query: str
     source_mode: LawSourceMode = "mock"
@@ -236,6 +291,15 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     latest_source_provider: str | None = None
     latest_mode: str | None = None
     latest_error_reason: str | None = None
+    seed_import_count: int = 0
+    latest_seed_import_status: str | None = None
+    latest_seed_law_title: str | None = None
+    latest_seed_law_id: str | None = None
+    latest_seed_mst: str | None = None
+    latest_seed_enforcement_date: date | None = None
+    has_urban_development_law: bool = False
+    has_urban_development_enforcement_decree: bool = False
+    has_urban_development_enforcement_rule: bool = False
 
 
 class LegalReferenceVerifyPreviewRequest(BaseModel):
