@@ -98,6 +98,10 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
     ingest_run_count = db.scalar(select(func.count()).select_from(OfficialLawIngestRun)) or 0
     latest_run = db.scalar(select(OfficialLawIngestRun).order_by(OfficialLawIngestRun.started_at.desc(), OfficialLawIngestRun.id.desc()).limit(1))
     latest_document = db.scalar(select(OfficialLawDocument).order_by(OfficialLawDocument.normalized_at.desc(), OfficialLawDocument.id.desc()).limit(1))
+    latest_manual_run = db.scalar(select(OfficialLawIngestRun).where(OfficialLawIngestRun.source_mode == "official_manual").order_by(OfficialLawIngestRun.started_at.desc(), OfficialLawIngestRun.id.desc()).limit(1))
+    source_modes = list(db.scalars(select(OfficialLawDocument.source_mode).distinct().order_by(OfficialLawDocument.source_mode)).all())
+    manual_run_count = db.scalar(select(func.count()).select_from(OfficialLawIngestRun).where(OfficialLawIngestRun.source_mode == "official_manual")) or 0
+    manual_document_count = db.scalar(select(func.count()).select_from(OfficialLawDocument).where(OfficialLawDocument.source_mode == "official_manual")) or 0
     has_current_documents = bool(db.scalar(select(func.count()).select_from(OfficialLawDocument).where(OfficialLawDocument.is_current.is_(True))) or 0)
     return OfficialLawSnapshotStatusResponse(
         document_count=document_count,
@@ -107,8 +111,13 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
         source_provider=None if latest_document is None else latest_document.source_provider,
         last_normalized_at=None if latest_document is None else latest_document.normalized_at,
         has_current_documents=has_current_documents,
+        source_modes=source_modes,
+        manual_import_count=manual_run_count,
+        latest_manual_import_status=None if latest_manual_run is None else latest_manual_run.status,
+        latest_source_provider=None if latest_document is None else latest_document.source_provider,
+        latest_mode=None if latest_document is None else latest_document.source_mode,
+        latest_error_reason=None if latest_run is None else latest_run.error_reason,
     )
-
 
 def _article_snapshot(document: OfficialLawDocument, article: OfficialLawArticleRecord, article_count: int) -> OfficialLawArticleSnapshot:
     return OfficialLawArticleSnapshot(

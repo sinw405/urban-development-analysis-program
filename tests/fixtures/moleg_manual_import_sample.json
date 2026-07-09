@@ -1,0 +1,38 @@
+{
+  "LawSearch": {
+    "totalCnt": "1",
+    "page": "1",
+    "display": "20",
+    "law": [
+      {
+        "법령명한글": "TEST_PHASE27_MANUAL_LAW_DO_NOT_USE",
+        "법령약칭명": "TEST_PHASE27_MANUAL_LAW_DO_NOT_USE",
+        "MST": "PHASE27_MANUAL_MST_JSON",
+        "법령ID": "PHASE27_MANUAL_LAW_ID_JSON",
+        "시행일자": "20990101",
+        "현행여부": "현행"
+      }
+    ]
+  },
+  "법령": {
+    "기본정보": {
+      "법령명한글": "TEST_PHASE27_MANUAL_LAW_DO_NOT_USE",
+      "법령ID": "PHASE27_MANUAL_LAW_ID_JSON",
+      "시행일자": "20990101"
+    },
+    "조문": {
+      "조문단위": [
+        {
+          "조문번호": "TEST_PHASE27_ARTICLE_JSON",
+          "조문제목": "TEST_PHASE27_ARTICLE_TITLE_JSON",
+          "조문내용": "TEST_PHASE27_ARTICLE_TEXT_JSON"
+        },
+        {
+          "조문번호": "TEST_PHASE27_ARTICLE_JSON_2",
+          "조문제목": "TEST_PHASE27_ARTICLE_TITLE_JSON_2",
+          "조문내용": "TEST_PHASE27_ARTICLE_TEXT_JSON_2"
+        }
+      ]
+    }
+  }
+}

@@ -10,7 +10,7 @@ MATCH_STATUS_UNMATCHED = "unmatched"
 MATCH_STATUS_SOURCE_UNAVAILABLE = "source_unavailable"
 MATCH_STATUS_SOURCE_ERROR = "source_error"
 
-LawSourceMode = Literal["mock", "live", "official_db", "fallback"]
+LawSourceMode = Literal["mock", "live", "official_db", "fallback", "official_manual", "official_manual_db"]
 
 
 class OfficialLawMetadata(BaseModel):
@@ -20,6 +20,10 @@ class OfficialLawMetadata(BaseModel):
     source_type: str = "mock_official"
     official_law_id: str | None = None
     raw_payload_redacted: dict[str, Any] | None = Field(default=None, exclude=True)
+    official_document_id: int | None = None
+    article_count: int | None = None
+    evidence_type: str | None = None
+    source_hint: str | None = None
 
 
 class OfficialLawArticleSnapshot(BaseModel):
@@ -136,7 +140,6 @@ class MolegDiagnosticResult(BaseModel):
     secret_exposed: bool = False
 
 
-
 class MolegLiveDiagnosticResult(BaseModel):
     live_configured: bool
     has_secret: bool
@@ -156,6 +159,52 @@ class MolegLiveDiagnosticResult(BaseModel):
     response_preview_sanitized: str | None = None
     suggested_next_action: str
     result: str
+
+
+class MolegTransportDiagnosticResponse(BaseModel):
+    live_configured: bool
+    has_secret: bool
+    secret_exposed: bool = False
+    sanitized_base_url: str | None = None
+    sanitized_endpoint: str
+    host: str | None = None
+    port: int | None = None
+    scheme: str | None = None
+    proxy_detected: bool = False
+    dns_ok: bool | None = None
+    socket_ok: bool | None = None
+    tls_ok: bool | None = None
+    http_ok: bool | None = None
+    endpoint_ok: bool | None = None
+    status_code: int | None = None
+    reason_type: str
+    error_class: str | None = None
+    error_message_sanitized: str | None = None
+    elapsed_ms: int
+    suggested_next_action: str
+    final_url_sanitized: str | None = None
+    response_preview_sanitized: str | None = None
+
+
+class OfficialLawManualImportRequest(BaseModel):
+    file_path: str
+    query: str | None = None
+    source_provider: str = "moleg_manual_upload"
+    source_mode: LawSourceMode = "official_manual"
+
+
+class OfficialLawManualImportResponse(BaseModel):
+    status: str
+    source_mode: LawSourceMode
+    source_provider: str
+    document_id: int | None = None
+    ingest_run_id: int | None = None
+    article_count: int = 0
+    provider_reason: str | None = None
+    reason_type: str | None = None
+    error_message_sanitized: str | None = None
+    secret_exposed: bool = False
+
 
 class OfficialLawIngestPreviewRequest(BaseModel):
     query: str
@@ -181,6 +230,12 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     source_provider: str | None = None
     last_normalized_at: datetime | None = None
     has_current_documents: bool = False
+    source_modes: list[str] = Field(default_factory=list)
+    manual_import_count: int = 0
+    latest_manual_import_status: str | None = None
+    latest_source_provider: str | None = None
+    latest_mode: str | None = None
+    latest_error_reason: str | None = None
 
 
 class LegalReferenceVerifyPreviewRequest(BaseModel):

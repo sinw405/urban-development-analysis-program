@@ -168,7 +168,7 @@ export interface OfficialLawDocument {
 }
 
 export interface OfficialLawSearchResult {
-  source_mode: "mock" | "live" | "official_db" | "fallback" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | string;
   status: string;
   query: string;
   candidates: OfficialLawCandidate[];
@@ -209,7 +209,7 @@ export interface LegalReferenceVerificationResult {
   reason: string;
   candidate_reference: CandidateLegalReferenceSnapshot;
   official_source_snapshot: OfficialLawArticleSnapshot | null;
-  source_mode: "mock" | "live" | "official_db" | "fallback" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | string;
   provider_reason: string | null;
   source_error: boolean;
   reason_type: string | null;
@@ -225,7 +225,7 @@ export interface LegalReferenceVerificationResult {
 
 export interface LegalReferenceVerifyPreviewRequest {
   procedure_reference_ids?: number[] | null;
-  source_mode?: "mock" | "live" | "official_db" | "fallback";
+  source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db";
 }
 
 export interface LegalReferenceVerifyPreviewResponse {
@@ -264,14 +264,59 @@ export interface MolegLiveDiagnosticResult {
   suggested_next_action: string;
   result: string;
 }
+
+export interface MolegTransportDiagnosticResponse {
+  live_configured: boolean;
+  has_secret: boolean;
+  secret_exposed: boolean;
+  sanitized_base_url: string | null;
+  sanitized_endpoint: string;
+  host: string | null;
+  port: number | null;
+  scheme: string | null;
+  proxy_detected: boolean;
+  dns_ok: boolean | null;
+  socket_ok: boolean | null;
+  tls_ok: boolean | null;
+  http_ok: boolean | null;
+  endpoint_ok: boolean | null;
+  status_code: number | null;
+  reason_type: string;
+  error_class: string | null;
+  error_message_sanitized: string | null;
+  elapsed_ms: number;
+  suggested_next_action: string;
+  final_url_sanitized: string | null;
+  response_preview_sanitized: string | null;
+}
+
+export interface OfficialLawManualImportRequest {
+  file_path: string;
+  query?: string | null;
+  source_provider?: string;
+  source_mode?: "official_manual" | "official_manual_db" | "mock" | "live" | "official_db" | "fallback";
+}
+
+export interface OfficialLawManualImportResponse {
+  status: string;
+  source_mode: "official_manual" | "official_manual_db" | "mock" | "live" | "official_db" | "fallback" | string;
+  source_provider: string;
+  document_id: number | null;
+  ingest_run_id: number | null;
+  article_count: number;
+  provider_reason: string | null;
+  reason_type: string | null;
+  error_message_sanitized: string | null;
+  secret_exposed: boolean;
+}
 export interface OfficialLawIngestPreviewRequest {
   query: string;
-  source_mode?: "mock" | "live" | "official_db" | "fallback";
+  source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db";
 }
 
 export interface OfficialLawIngestPreviewResponse {
   status: string;
-  source_mode: "mock" | "live" | "official_db" | "fallback" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | string;
   selected_candidate: OfficialLawCandidate | null;
   document_id: number | null;
   ingest_run_id: number;

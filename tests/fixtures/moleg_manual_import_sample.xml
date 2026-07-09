@@ -1,0 +1,26 @@
+<root>
+  <LawSearch>
+    <law>
+      <법령명한글>TEST_PHASE27_MANUAL_XML_LAW_DO_NOT_USE</법령명한글>
+      <법령약칭명>TEST_PHASE27_MANUAL_XML_LAW_DO_NOT_USE</법령약칭명>
+      <MST>PHASE27_MANUAL_MST_XML</MST>
+      <법령ID>PHASE27_MANUAL_LAW_ID_XML</법령ID>
+      <시행일자>20990101</시행일자>
+      <현행여부>현행</현행여부>
+    </law>
+  </LawSearch>
+  <법령>
+    <기본정보>
+      <법령명한글>TEST_PHASE27_MANUAL_XML_LAW_DO_NOT_USE</법령명한글>
+      <법령ID>PHASE27_MANUAL_LAW_ID_XML</법령ID>
+      <시행일자>20990101</시행일자>
+    </기본정보>
+    <조문>
+      <조문단위>
+        <조문번호>TEST_PHASE27_ARTICLE_XML</조문번호>
+        <조문제목>TEST_PHASE27_ARTICLE_TITLE_XML</조문제목>
+        <조문내용>TEST_PHASE27_ARTICLE_TEXT_XML</조문내용>
+      </조문단위>
+    </조문>
+  </법령>
+</root>
