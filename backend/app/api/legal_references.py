@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+﻿from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -23,6 +23,7 @@ from app.services.official_law_db_source_service import get_official_law_snapsho
 from app.services.official_law_manual_import_service import import_official_law_file
 from app.services.official_law_persistence_service import ingest_live_document_preview
 from app.services.official_law_seed_import_service import import_official_law_seed
+from app.services.procedure_article_candidate_service import resolve_procedure_article_candidates
 
 
 router = APIRouter(tags=["legal-references"])
@@ -55,6 +56,24 @@ def diagnose_moleg_live_source() -> MolegLiveDiagnosticResult:
 @router.get("/legal-references/moleg-transport-diagnostic", response_model=MolegTransportDiagnosticResponse)
 def diagnose_moleg_transport_source() -> MolegTransportDiagnosticResponse:
     return diagnose_moleg_transport()
+
+
+@router.get("/legal-references/procedure-article-candidates")
+def get_procedure_article_candidates(
+    procedure_code: str | None = Query(default=None),
+    law_title: str | None = Query(default=None),
+    source_mode_detail: str | None = Query(default=None),
+    include_unmatched: bool = Query(default=False),
+    db: Session = Depends(get_db),
+):
+    return resolve_procedure_article_candidates(
+        db=db,
+        procedure_code=procedure_code,
+        law_title=law_title,
+        source_mode_detail=source_mode_detail,
+        include_unmatched=include_unmatched,
+        persist=True,
+    )
 
 
 @router.get("/legal-references/official-law-snapshot", response_model=OfficialLawSnapshotStatusResponse)

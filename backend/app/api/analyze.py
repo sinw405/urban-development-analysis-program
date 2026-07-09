@@ -6,6 +6,7 @@ from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
 from app.services.analysis_repository import create_project_with_analysis
 from app.services.analyzer import analyze_project
 from app.services.legal_reference_service import attach_legal_references
+from app.services.procedure_article_candidate_service import attach_article_candidates_to_analysis
 
 
 router = APIRouter(tags=["analysis"])
@@ -15,6 +16,7 @@ router = APIRouter(tags=["analysis"])
 def analyze(request: AnalyzeRequest, db: Session = Depends(get_db)) -> AnalyzeResponse:
     result = analyze_project(request)
     attach_legal_references(db=db, result=result, as_of=request.as_of)
+    attach_article_candidates_to_analysis(db=db, procedure_steps=result.procedures)
     result.warnings.append("Analysis request and result were stored in PostgreSQL.")
     analysis = create_project_with_analysis(
         db=db,

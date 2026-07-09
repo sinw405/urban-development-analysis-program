@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from datetime import date
 
@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models import OfficialLawArticleRecord, OfficialLawDocument, OfficialLawIngestRun
 from app.schemas.official_law_source import OfficialLawArticleSnapshot, OfficialLawMetadata, OfficialLawSnapshotStatusResponse
+from app.services.procedure_article_candidate_service import get_candidate_diagnostic_counts
 
 
 class OfficialLawDbSnapshotProvider:
@@ -105,6 +106,7 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
     manual_run_count = db.scalar(select(func.count()).select_from(OfficialLawIngestRun).where(OfficialLawIngestRun.source_mode == "official_manual")) or 0
     seed_run_count = db.scalar(select(func.count()).select_from(OfficialLawIngestRun).where(OfficialLawIngestRun.source_mode == "official_seed")) or 0
     documents = db.scalars(select(OfficialLawDocument)).all()
+    candidate_counts = get_candidate_diagnostic_counts(db)
     return OfficialLawSnapshotStatusResponse(
         document_count=document_count,
         article_count=article_count,
@@ -128,6 +130,7 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
         has_urban_development_law=_has_document_title(documents, "도시개발법"),
         has_urban_development_enforcement_decree=_has_document_title(documents, "도시개발법 시행령"),
         has_urban_development_enforcement_rule=_has_document_title(documents, "도시개발법 시행규칙"),
+        **candidate_counts,
     )
 
 

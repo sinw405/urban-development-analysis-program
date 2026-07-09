@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 
 import httpx
 import pytest
@@ -17,6 +17,7 @@ from app.models import (
     OfficialLawIngestRun,
     OfficialLawSourceEvidence,
     ProcedureLegalReference,
+    ProcedureOfficialArticleCandidate,
 )
 from app.services.legal_reference_service import TODO_MOLEG_API_ARTICLE_CHECK
 from app.services.moleg_transport_probe_service import diagnose_moleg_transport
@@ -52,6 +53,7 @@ def _cleanup() -> None:
             db.execute(delete(OfficialLawIngestRun).where(OfficialLawIngestRun.id.in_(run_ids)))
         document_ids = list(db.scalars(select(OfficialLawDocument.id).where(OfficialLawDocument.mst.in_([MST_JSON, MST_XML]))).all())
         if document_ids:
+            db.execute(delete(ProcedureOfficialArticleCandidate).where(ProcedureOfficialArticleCandidate.document_id.in_(document_ids)))
             db.execute(delete(OfficialLawArticleRecord).where(OfficialLawArticleRecord.document_id.in_(document_ids)))
             db.execute(delete(OfficialLawDocument).where(OfficialLawDocument.id.in_(document_ids)))
         db.commit()

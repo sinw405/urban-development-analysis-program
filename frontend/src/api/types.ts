@@ -1,4 +1,4 @@
-export interface AnalyzeRequest {
+﻿export interface AnalyzeRequest {
   project_name: string;
   location: string;
   area_square_meters: number;
@@ -32,6 +32,28 @@ export interface LegalReference {
   notes: Record<string, unknown>;
 }
 
+export interface ProcedureArticleCandidate {
+  id?: number | null;
+  procedure_code: string;
+  procedure_name: string | null;
+  article_id: number | null;
+  document_id: number | null;
+  law_title: string;
+  law_short_title: string | null;
+  law_id: string | null;
+  mst: string | null;
+  article_no: string | null;
+  article_title: string | null;
+  article_anchor: string | null;
+  match_method: string;
+  match_score: number;
+  match_status: "candidate" | "weak_candidate" | "no_match" | "needs_review" | string;
+  confidence_level: "high" | "medium" | "low" | "unknown" | string;
+  source_mode: string;
+  source_mode_detail: string | null;
+  is_confirmed: boolean;
+}
+
 export interface ProcedureStep {
   step_code: string;
   step_name: string;
@@ -43,6 +65,10 @@ export interface ProcedureStep {
   legal_basis_placeholder: string[];
   legal_references: LegalReference[];
   legal_reference_status: "candidate" | "verified" | "missing" | string;
+  official_article_candidates: ProcedureArticleCandidate[];
+  legal_reference_candidates: ProcedureArticleCandidate[];
+  reference_candidate_count: number;
+  reference_status: "official_candidate_available" | "no_official_candidate" | "fixture_only" | "needs_seed_data" | string;
   notes: string[];
 }
 
@@ -210,6 +236,7 @@ export interface LegalReferenceVerificationResult {
   candidate_reference: CandidateLegalReferenceSnapshot;
   official_source_snapshot: OfficialLawArticleSnapshot | null;
   source_mode: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db" | string;
+  source_mode_detail: string | null;
   provider_reason: string | null;
   source_error: boolean;
   reason_type: string | null;
@@ -352,6 +379,22 @@ export interface OfficialLawSeedImportResponse {
   reason_type: string | null;
   error_message_sanitized: string | null;
 }
+
+export interface ProcedureArticleCandidateGroup {
+  procedure_code: string;
+  procedure_name: string;
+  candidates: ProcedureArticleCandidate[];
+}
+
+export interface ProcedureArticleCandidateResponse {
+  items: ProcedureArticleCandidateGroup[];
+  unmatched_steps: Array<{
+    procedure_code: string;
+    procedure_name: string;
+    match_status: string;
+  }>;
+  warnings: string[];
+}
 export interface OfficialLawIngestPreviewRequest {
   query: string;
   source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db";
@@ -377,4 +420,23 @@ export interface OfficialLawSnapshotStatusResponse {
   source_provider: string | null;
   last_normalized_at: string | null;
   has_current_documents: boolean;
+  source_modes?: string[];
+  manual_import_count?: number;
+  latest_manual_import_status?: string | null;
+  seed_import_count?: number;
+  latest_seed_import_status?: string | null;
+  latest_seed_law_title?: string | null;
+  latest_seed_law_id?: string | null;
+  latest_seed_mst?: string | null;
+  latest_seed_enforcement_date?: string | null;
+  has_urban_development_law?: boolean;
+  has_urban_development_enforcement_decree?: boolean;
+  has_urban_development_enforcement_rule?: boolean;
+  procedure_candidate_count?: number;
+  confirmed_reference_count?: number;
+  unconfirmed_candidate_count?: number;
+  unmatched_procedure_count?: number;
+  candidate_source_modes?: string[];
+  latest_candidate_generated_at?: string | null;
+  has_candidates_for_analyze_steps?: boolean;
 }

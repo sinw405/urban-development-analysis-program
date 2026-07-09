@@ -1,7 +1,7 @@
-from sqlalchemy import delete, func, select
+﻿from sqlalchemy import delete, func, select
 
 from app.core.database import SessionLocal
-from app.models import OfficialLawArticleRecord, OfficialLawDocument, OfficialLawIngestRun, OfficialLawSourceEvidence
+from app.models import OfficialLawArticleRecord, OfficialLawDocument, OfficialLawIngestRun, OfficialLawSourceEvidence, ProcedureOfficialArticleCandidate
 from app.services.moleg_diagnostic_service import diagnose_moleg_connectivity
 from app.services.official_law_persistence_service import (
     INGEST_STATUS_SOURCE_ERROR,
@@ -70,6 +70,7 @@ def _cleanup_phase24_rows():
             db.execute(delete(OfficialLawIngestRun).where(OfficialLawIngestRun.id.in_(run_ids)))
         document_ids = list(db.scalars(select(OfficialLawDocument.id).where(OfficialLawDocument.mst == "241111")).all())
         if document_ids:
+            db.execute(delete(ProcedureOfficialArticleCandidate).where(ProcedureOfficialArticleCandidate.document_id.in_(document_ids)))
             db.execute(delete(OfficialLawArticleRecord).where(OfficialLawArticleRecord.document_id.in_(document_ids)))
             db.execute(delete(OfficialLawDocument).where(OfficialLawDocument.id.in_(document_ids)))
         db.commit()

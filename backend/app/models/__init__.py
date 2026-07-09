@@ -8,6 +8,7 @@ from app.models.official_law_document import OfficialLawDocument
 from app.models.official_law_ingest_run import OfficialLawIngestRun
 from app.models.official_law_source_evidence import OfficialLawSourceEvidence
 from app.models.procedure_legal_reference import ProcedureLegalReference
+from app.models.procedure_official_article_candidate import ProcedureOfficialArticleCandidate
 from app.models.project import Project
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "OfficialLawIngestRun",
     "OfficialLawSourceEvidence",
     "ProcedureLegalReference",
+    "ProcedureOfficialArticleCandidate",
     "Project",
 ]

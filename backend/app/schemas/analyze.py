@@ -1,4 +1,4 @@
-from datetime import date, datetime
+﻿from datetime import date, datetime
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -38,6 +38,28 @@ class LegalReference(BaseModel):
     notes: dict[str, Any] = Field(default_factory=dict)
 
 
+class ProcedureArticleCandidate(BaseModel):
+    id: int | None = None
+    procedure_code: str
+    procedure_name: str | None = None
+    article_id: int | None = None
+    document_id: int | None = None
+    law_title: str
+    law_short_title: str | None = None
+    law_id: str | None = None
+    mst: str | None = None
+    article_no: str | None = None
+    article_title: str | None = None
+    article_anchor: str | None = None
+    match_method: str
+    match_score: float
+    match_status: str
+    confidence_level: str
+    source_mode: str
+    source_mode_detail: str | None = None
+    is_confirmed: bool = False
+
+
 class ProcedureStep(BaseModel):
     step_code: str
     step_name: str
@@ -49,6 +71,10 @@ class ProcedureStep(BaseModel):
     legal_basis_placeholder: list[str]
     legal_references: list[LegalReference] = Field(default_factory=list)
     legal_reference_status: str = "missing"
+    official_article_candidates: list[ProcedureArticleCandidate] = Field(default_factory=list)
+    legal_reference_candidates: list[ProcedureArticleCandidate] = Field(default_factory=list)
+    reference_candidate_count: int = 0
+    reference_status: str = "needs_seed_data"
     notes: list[str] = Field(default_factory=list)
 
 

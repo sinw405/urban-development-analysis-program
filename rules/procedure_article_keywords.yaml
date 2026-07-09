@@ -1,0 +1,46 @@
+﻿version: "0.1.0"
+phase: "Phase29 procedure article candidate keywords"
+notes:
+  - "Keywords are search hints only and are not confirmed legal references."
+  - "Do not put article numbers, thresholds, or final legal criteria in this file."
+steps:
+  - procedure_code: "PROJECT_BASIC_REVIEW"
+    procedure_name: "Project basic review"
+    preferred_laws:
+      - "도시개발법"
+      - "도시개발법 시행령"
+      - "TEST_PHASE27_MANUAL_LAW_DO_NOT_USE"
+    keywords:
+      - "사업"
+      - "기본"
+      - "TEST_PHASE27_ARTICLE_TITLE_JSON"
+    required: false
+  - procedure_code: "ZONE_DESIGNATION_REVIEW"
+    procedure_name: "Urban development zone designation proposal or review"
+    preferred_laws:
+      - "도시개발법"
+      - "도시개발법 시행령"
+    keywords:
+      - "구역 지정"
+      - "개발계획"
+    required: false
+  - procedure_code: "RESIDENT_OPINION_HEARING"
+    procedure_name: "Resident opinion hearing and public notice"
+    preferred_laws:
+      - "도시개발법"
+      - "도시개발법 시행령"
+    keywords:
+      - "주민"
+      - "의견"
+      - "공람"
+      - "공고"
+    required: false
+  - procedure_code: "RELATED_AGENCY_CONSULTATION"
+    procedure_name: "Related agency consultation"
+    preferred_laws:
+      - "도시개발법"
+      - "도시개발법 시행령"
+    keywords:
+      - "협의"
+      - "관계 기관"
+    required: false

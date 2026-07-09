@@ -1,4 +1,4 @@
-from datetime import date, datetime
+﻿from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -300,6 +300,13 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     has_urban_development_law: bool = False
     has_urban_development_enforcement_decree: bool = False
     has_urban_development_enforcement_rule: bool = False
+    procedure_candidate_count: int = 0
+    confirmed_reference_count: int = 0
+    unconfirmed_candidate_count: int = 0
+    unmatched_procedure_count: int = 0
+    candidate_source_modes: list[str] = Field(default_factory=list)
+    latest_candidate_generated_at: datetime | None = None
+    has_candidates_for_analyze_steps: bool = False
 
 
 class LegalReferenceVerifyPreviewRequest(BaseModel):
