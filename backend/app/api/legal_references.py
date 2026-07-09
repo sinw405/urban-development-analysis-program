@@ -15,6 +15,9 @@ from app.schemas.official_law_source import (
     OfficialLawSeedImportRequest,
     OfficialLawSeedImportResponse,
     OfficialLawSnapshotStatusResponse,
+    ProcedureArticleCandidateActionResponse,
+    ProcedureArticleCandidateConfirmationRequest,
+    ProcedureArticleCandidateUnconfirmRequest,
 )
 from app.services.legal_reference_verification_service import list_verification_previews
 from app.services.moleg_diagnostic_service import diagnose_moleg_connectivity, diagnose_moleg_live_only
@@ -23,7 +26,11 @@ from app.services.official_law_db_source_service import get_official_law_snapsho
 from app.services.official_law_manual_import_service import import_official_law_file
 from app.services.official_law_persistence_service import ingest_live_document_preview
 from app.services.official_law_seed_import_service import import_official_law_seed
-from app.services.procedure_article_candidate_service import resolve_procedure_article_candidates
+from app.services.procedure_article_candidate_service import (
+    confirm_procedure_article_candidate,
+    resolve_procedure_article_candidates,
+    unconfirm_procedure_article_candidate,
+)
 
 
 router = APIRouter(tags=["legal-references"])
@@ -63,6 +70,7 @@ def get_procedure_article_candidates(
     procedure_code: str | None = Query(default=None),
     law_title: str | None = Query(default=None),
     source_mode_detail: str | None = Query(default=None),
+    is_confirmed: bool | None = Query(default=None),
     include_unmatched: bool = Query(default=False),
     db: Session = Depends(get_db),
 ):
@@ -71,9 +79,46 @@ def get_procedure_article_candidates(
         procedure_code=procedure_code,
         law_title=law_title,
         source_mode_detail=source_mode_detail,
+        is_confirmed=is_confirmed,
         include_unmatched=include_unmatched,
         persist=True,
     )
+
+
+@router.patch("/legal-references/procedure-article-candidates/{candidate_id}/confirm", response_model=ProcedureArticleCandidateActionResponse)
+def confirm_procedure_article_candidate_endpoint(
+    candidate_id: int,
+    request: ProcedureArticleCandidateConfirmationRequest,
+    db: Session = Depends(get_db),
+) -> ProcedureArticleCandidateActionResponse:
+    return confirm_procedure_article_candidate(db=db, candidate_id=candidate_id, request=request)
+
+
+@router.post("/legal-references/procedure-article-candidates/{candidate_id}/confirm", response_model=ProcedureArticleCandidateActionResponse)
+def confirm_procedure_article_candidate_endpoint_post(
+    candidate_id: int,
+    request: ProcedureArticleCandidateConfirmationRequest,
+    db: Session = Depends(get_db),
+) -> ProcedureArticleCandidateActionResponse:
+    return confirm_procedure_article_candidate(db=db, candidate_id=candidate_id, request=request)
+
+
+@router.patch("/legal-references/procedure-article-candidates/{candidate_id}/unconfirm", response_model=ProcedureArticleCandidateActionResponse)
+def unconfirm_procedure_article_candidate_endpoint(
+    candidate_id: int,
+    request: ProcedureArticleCandidateUnconfirmRequest | None = None,
+    db: Session = Depends(get_db),
+) -> ProcedureArticleCandidateActionResponse:
+    return unconfirm_procedure_article_candidate(db=db, candidate_id=candidate_id, request=request or ProcedureArticleCandidateUnconfirmRequest())
+
+
+@router.post("/legal-references/procedure-article-candidates/{candidate_id}/unconfirm", response_model=ProcedureArticleCandidateActionResponse)
+def unconfirm_procedure_article_candidate_endpoint_post(
+    candidate_id: int,
+    request: ProcedureArticleCandidateUnconfirmRequest | None = None,
+    db: Session = Depends(get_db),
+) -> ProcedureArticleCandidateActionResponse:
+    return unconfirm_procedure_article_candidate(db=db, candidate_id=candidate_id, request=request or ProcedureArticleCandidateUnconfirmRequest())
 
 
 @router.get("/legal-references/official-law-snapshot", response_model=OfficialLawSnapshotStatusResponse)

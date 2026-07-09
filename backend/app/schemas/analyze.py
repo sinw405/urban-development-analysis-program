@@ -58,6 +58,11 @@ class ProcedureArticleCandidate(BaseModel):
     source_mode: str
     source_mode_detail: str | None = None
     is_confirmed: bool = False
+    generated_at: datetime | None = None
+    confirmed_at: datetime | None = None
+    confirmed_by: str | None = None
+    confirmed_source: str | None = None
+    confirmation_note: str | None = None
 
 
 class ProcedureStep(BaseModel):

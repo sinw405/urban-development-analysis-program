@@ -1,4 +1,4 @@
-import type { LegalReference, ProcedureStep } from "../api/types";
+﻿import type { LegalReference, ProcedureArticleCandidate, ProcedureStep } from "../api/types";
 import type { NormalizedProcedureStep } from "../utils/analysisSummary";
 import { CANDIDATE_LEGAL_REFERENCE_NOTICE, legalReferenceQualityLabel } from "../utils/analysisSummary";
 import { formatDate, formatList, formatStatus } from "../utils/formatters";
@@ -61,6 +61,40 @@ function LegalReferenceCards({ references }: { references: LegalReference[] }) {
   );
 }
 
+
+function OfficialArticleCandidateCards({ candidates }: { candidates: ProcedureArticleCandidate[] }) {
+  if (candidates.length === 0) {
+    return <p className="emptyState">공식 조문 후보가 없습니다.</p>;
+  }
+
+  return (
+    <div className="referenceGrid">
+      {candidates.map((candidate, index) => (
+        <article className="legalReferenceCard" key={`${candidate.id ?? candidate.article_id ?? index}-${candidate.procedure_code}`}>
+          <div className="cardTitle compactTitle">
+            <h4>{candidate.article_title ?? `조문 후보 ${index + 1}`}</h4>
+            <span className={`referenceQualityBadge ${candidate.is_confirmed ? "verified" : "candidate"}`}>
+              {candidate.is_confirmed ? "확정" : "검토 필요"}
+            </span>
+          </div>
+          <dl className="definitionGrid">
+            <dt>법령</dt>
+            <dd>{candidate.law_title}</dd>
+            <dt>조문</dt>
+            <dd>{candidate.article_no ?? candidate.article_anchor ?? "확인 필요"}</dd>
+            <dt>출처 구분</dt>
+            <dd>{candidate.source_mode_detail ?? candidate.source_mode}</dd>
+            <dt>신뢰도</dt>
+            <dd>{candidate.confidence_level} / {candidate.match_score}</dd>
+            <dt>확정 메모</dt>
+            <dd>{candidate.confirmation_note ?? "-"}</dd>
+          </dl>
+        </article>
+      ))}
+    </div>
+  );
+}
+
 interface ProcedureStepDetailProps {
   step: ProcedureStep;
   normalizedStep: NormalizedProcedureStep;
@@ -113,6 +147,11 @@ export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onC
           <p>{formatList(normalizedStep.notes, "확인 필요")}</p>
         </section>
       </div>
+
+      <section className="legalReferenceSection">
+        <h4>공식 조문 후보</h4>
+        <OfficialArticleCandidateCards candidates={step.official_article_candidates ?? []} />
+      </section>
 
       <section className="legalReferenceSection">
         <h4>근거 법령</h4>

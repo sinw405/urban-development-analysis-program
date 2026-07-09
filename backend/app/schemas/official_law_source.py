@@ -307,7 +307,33 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     candidate_source_modes: list[str] = Field(default_factory=list)
     latest_candidate_generated_at: datetime | None = None
     has_candidates_for_analyze_steps: bool = False
+    latest_candidate_confirmed_at: datetime | None = None
+    confirmable_candidate_count: int = 0
+    raw_payload_storage_violation_count: int = 0
+    raw_payload_storage_policy_ok: bool = True
 
+
+
+class ProcedureArticleCandidateConfirmationRequest(BaseModel):
+    confirmed_by: str | None = "manual_admin"
+    confirmed_source: str | None = "manual_admin"
+    confirmation_note: str | None = None
+
+
+class ProcedureArticleCandidateUnconfirmRequest(BaseModel):
+    confirmation_note: str | None = None
+
+
+class ProcedureArticleCandidateActionResponse(BaseModel):
+    candidate_id: int
+    procedure_code: str
+    is_confirmed: bool
+    confirmed_at: datetime | None = None
+    confirmed_by: str | None = None
+    confirmed_source: str | None = None
+    confirmation_note: str | None = None
+    status: str
+    secret_exposed: bool = False
 
 class LegalReferenceVerifyPreviewRequest(BaseModel):
     procedure_reference_ids: list[int] | None = None

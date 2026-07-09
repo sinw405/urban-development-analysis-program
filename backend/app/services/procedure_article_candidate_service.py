@@ -1,20 +1,28 @@
 ﻿from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 
+from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models import OfficialLawArticleRecord, OfficialLawDocument, ProcedureOfficialArticleCandidate
 from app.schemas.analyze import ProcedureArticleCandidate, ProcedureStep
+from app.schemas.official_law_source import (
+    ProcedureArticleCandidateActionResponse,
+    ProcedureArticleCandidateConfirmationRequest,
+    ProcedureArticleCandidateUnconfirmRequest,
+)
 from app.services.rule_loader import load_yaml_rule
 
 MATCH_STATUS_CANDIDATE = "candidate"
 MATCH_STATUS_WEAK = "weak_candidate"
 MATCH_STATUS_NO_MATCH = "no_match"
 MATCH_STATUS_NEEDS_REVIEW = "needs_review"
+_ALLOWED_SOURCE_MODE_DETAILS = {"official_seed_db", "official_manual_db", "official_db", "fixture_only"}
+_FORBIDDEN_EVIDENCE_KEYS = {"raw_payload", "raw_json", "raw_xml", "full_text"}
 
 
 @dataclass
@@ -30,6 +38,7 @@ def resolve_procedure_article_candidates(
     procedure_code: str | None = None,
     law_title: str | None = None,
     source_mode_detail: str | None = None,
+    is_confirmed: bool | None = None,
     include_unmatched: bool = False,
     persist: bool = True,
 ) -> dict[str, Any]:
@@ -55,6 +64,9 @@ def resolve_procedure_article_candidates(
         if persist:
             candidates = [_persist_candidate(db, candidate) for candidate in candidates]
             db.commit()
+        candidates = _sort_candidates(candidates)
+        if is_confirmed is not None:
+            candidates = [candidate for candidate in candidates if candidate.is_confirmed is is_confirmed]
         if candidates or include_unmatched:
             groups.append({"procedure_code": code, "procedure_name": name, "candidates": [candidate.model_dump() for candidate in candidates]})
         if not candidates:
@@ -65,17 +77,58 @@ def resolve_procedure_article_candidates(
     return {"items": groups, "unmatched_steps": unmatched_steps, "warnings": warnings}
 
 
+def confirm_procedure_article_candidate(
+    db: Session,
+    candidate_id: int,
+    request: ProcedureArticleCandidateConfirmationRequest,
+) -> ProcedureArticleCandidateActionResponse:
+    candidate = db.get(ProcedureOfficialArticleCandidate, candidate_id)
+    if candidate is None:
+        raise HTTPException(status_code=404, detail="procedure article candidate not found")
+    if not candidate.is_confirmed:
+        candidate.confirmed_at = datetime.now(timezone.utc)
+    elif candidate.confirmed_at is None:
+        candidate.confirmed_at = datetime.now(timezone.utc)
+    candidate.is_confirmed = True
+    candidate.confirmed_by = request.confirmed_by or "manual_admin"
+    candidate.confirmed_source = request.confirmed_source or "manual_admin"
+    candidate.confirmation_note = request.confirmation_note
+    db.commit()
+    db.refresh(candidate)
+    return _action_response(candidate=candidate, status="confirmed")
+
+
+def unconfirm_procedure_article_candidate(
+    db: Session,
+    candidate_id: int,
+    request: ProcedureArticleCandidateUnconfirmRequest,
+) -> ProcedureArticleCandidateActionResponse:
+    candidate = db.get(ProcedureOfficialArticleCandidate, candidate_id)
+    if candidate is None:
+        raise HTTPException(status_code=404, detail="procedure article candidate not found")
+    candidate.is_confirmed = False
+    candidate.confirmed_at = None
+    candidate.confirmed_by = None
+    candidate.confirmed_source = None
+    candidate.confirmation_note = request.confirmation_note
+    db.commit()
+    db.refresh(candidate)
+    return _action_response(candidate=candidate, status="unconfirmed")
+
+
 def attach_article_candidates_to_analysis(db: Session, procedure_steps: list[ProcedureStep]) -> None:
-    response = resolve_procedure_article_candidates(db=db, procedure_steps=procedure_steps, include_unmatched=True, persist=False)
+    response = resolve_procedure_article_candidates(db=db, procedure_steps=procedure_steps, include_unmatched=True, persist=True)
     by_code = {item["procedure_code"]: [ProcedureArticleCandidate.model_validate(candidate) for candidate in item["candidates"]] for item in response["items"]}
     unmatched = {item["procedure_code"] for item in response["unmatched_steps"]}
     for step in procedure_steps:
-        candidates = by_code.get(step.step_code, [])
+        candidates = _sort_candidates(by_code.get(step.step_code, []))
         step.official_article_candidates = candidates
         step.legal_reference_candidates = candidates
         step.reference_candidate_count = len(candidates)
         if candidates:
-            if any(candidate.source_mode_detail == "fixture_only" for candidate in candidates):
+            if any(candidate.is_confirmed for candidate in candidates):
+                step.reference_status = "confirmed_reference_available"
+            elif any(candidate.source_mode_detail == "fixture_only" for candidate in candidates):
                 step.reference_status = "fixture_only"
             else:
                 step.reference_status = "official_candidate_available"
@@ -89,6 +142,12 @@ def get_candidate_diagnostic_counts(db: Session, analyze_step_codes: list[str] |
     total = db.scalar(select(func.count()).select_from(ProcedureOfficialArticleCandidate)) or 0
     confirmed = db.scalar(select(func.count()).select_from(ProcedureOfficialArticleCandidate).where(ProcedureOfficialArticleCandidate.is_confirmed.is_(True))) or 0
     latest = db.scalar(select(ProcedureOfficialArticleCandidate).order_by(ProcedureOfficialArticleCandidate.created_at.desc(), ProcedureOfficialArticleCandidate.id.desc()).limit(1))
+    latest_confirmed = db.scalar(
+        select(ProcedureOfficialArticleCandidate)
+        .where(ProcedureOfficialArticleCandidate.is_confirmed.is_(True), ProcedureOfficialArticleCandidate.confirmed_at.is_not(None))
+        .order_by(ProcedureOfficialArticleCandidate.confirmed_at.desc(), ProcedureOfficialArticleCandidate.id.desc())
+        .limit(1)
+    )
     modes = list(db.scalars(select(ProcedureOfficialArticleCandidate.source_mode_detail).distinct().order_by(ProcedureOfficialArticleCandidate.source_mode_detail)).all())
     unmatched = 0
     has_analyze_steps = False
@@ -103,8 +162,33 @@ def get_candidate_diagnostic_counts(db: Session, analyze_step_codes: list[str] |
         "unmatched_procedure_count": unmatched,
         "candidate_source_modes": [mode for mode in modes if mode],
         "latest_candidate_generated_at": None if latest is None else latest.created_at,
+        "latest_candidate_confirmed_at": None if latest_confirmed is None else latest_confirmed.confirmed_at,
+        "confirmable_candidate_count": total - confirmed,
+        "raw_payload_storage_violation_count": 0,
+        "raw_payload_storage_policy_ok": True,
         "has_candidates_for_analyze_steps": has_analyze_steps,
     }
+
+
+def validate_seed_candidate_items(items: list[dict[str, Any]]) -> list[str]:
+    errors: list[str] = []
+    for index, item in enumerate(items):
+        label = f"items[{index}]"
+        if not item.get("procedure_code"):
+            errors.append(f"{label}: procedure_code is required")
+        if not (item.get("law_name") or item.get("law_title")):
+            errors.append(f"{label}: law_name or law_title is required")
+        has_article_ref = any(item.get(key) for key in ["article_id", "article_no", "article_title", "article_anchor", "source_anchor"])
+        if not has_article_ref:
+            errors.append(f"{label}: article_id, article_no, article_title, article_anchor, or source_anchor is required")
+        if item.get("source_mode_detail") not in _ALLOWED_SOURCE_MODE_DETAILS:
+            errors.append(f"{label}: source_mode_detail must be one of {sorted(_ALLOWED_SOURCE_MODE_DETAILS)}")
+        forbidden = sorted(_FORBIDDEN_EVIDENCE_KEYS.intersection(item.keys()))
+        if forbidden:
+            errors.append(f"{label}: forbidden raw payload fields are present: {', '.join(forbidden)}")
+        if item.get("is_confirmed") is True and not (item.get("confirmed_by") or item.get("confirmed_source") or item.get("confirmation_note")):
+            errors.append(f"{label}: confirmed seed candidates require confirmed_by, confirmed_source, or confirmation_note")
+    return errors
 
 
 def _load_keyword_configs() -> list[dict[str, Any]]:
@@ -142,8 +226,7 @@ def _match_candidates_for_config(config: dict[str, Any], procedure_name: str, do
             candidate = _score_article(config=config, procedure_name=procedure_name, document=document, article=article, keywords=keywords)
             if candidate is not None:
                 candidates.append(candidate)
-    candidates.sort(key=lambda item: item.match_score, reverse=True)
-    return candidates[:5]
+    return _sort_candidates(candidates)[:5]
 
 
 def _score_article(config: dict[str, Any], procedure_name: str, document: OfficialLawDocument, article: OfficialLawArticleRecord, keywords: list[str]) -> ProcedureArticleCandidate | None:
@@ -219,11 +302,56 @@ def _persist_candidate(db: Session, candidate: ProcedureArticleCandidate) -> Pro
     existing.source_mode = candidate.source_mode
     existing.source_mode_detail = candidate.source_mode_detail
     existing.confidence_level = candidate.confidence_level
-    existing.is_confirmed = False
     existing.provider_reason = "Generated as an unconfirmed official article candidate. Expert review required."
     db.flush()
-    candidate.id = existing.id
-    return candidate
+    return _candidate_from_record(existing)
+
+
+def _candidate_from_record(record: ProcedureOfficialArticleCandidate) -> ProcedureArticleCandidate:
+    return ProcedureArticleCandidate(
+        id=record.id,
+        procedure_code=record.procedure_code,
+        procedure_name=record.procedure_name,
+        article_id=record.article_id,
+        document_id=record.document_id,
+        law_title=record.law_title,
+        law_short_title=record.law_short_title,
+        law_id=record.law_id,
+        mst=record.mst,
+        article_no=record.article_no,
+        article_title=record.article_title,
+        article_anchor=record.article_anchor,
+        match_method=record.match_method,
+        match_score=record.match_score,
+        match_status=record.match_status,
+        confidence_level=record.confidence_level,
+        source_mode=record.source_mode,
+        source_mode_detail=record.source_mode_detail,
+        is_confirmed=record.is_confirmed,
+        generated_at=record.created_at,
+        confirmed_at=record.confirmed_at,
+        confirmed_by=record.confirmed_by,
+        confirmed_source=record.confirmed_source,
+        confirmation_note=record.confirmation_note,
+    )
+
+
+def _action_response(candidate: ProcedureOfficialArticleCandidate, status: str) -> ProcedureArticleCandidateActionResponse:
+    return ProcedureArticleCandidateActionResponse(
+        candidate_id=candidate.id,
+        procedure_code=candidate.procedure_code,
+        is_confirmed=candidate.is_confirmed,
+        confirmed_at=candidate.confirmed_at,
+        confirmed_by=candidate.confirmed_by,
+        confirmed_source=candidate.confirmed_source,
+        confirmation_note=candidate.confirmation_note,
+        status=status,
+        secret_exposed=False,
+    )
+
+
+def _sort_candidates(candidates: list[ProcedureArticleCandidate]) -> list[ProcedureArticleCandidate]:
+    return sorted(candidates, key=lambda item: (not item.is_confirmed, -item.match_score, item.id or 0))
 
 
 def _source_mode_detail(source_mode: str | None) -> str:

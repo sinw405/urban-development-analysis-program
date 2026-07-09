@@ -22,6 +22,8 @@ class ProcedureOfficialArticleCandidate(Base):
         Index("ix_proc_article_candidates_article_id", "article_id"),
         Index("ix_proc_article_candidates_match_status", "match_status"),
         Index("ix_proc_article_candidates_source_mode_detail", "source_mode_detail"),
+        Index("ix_proc_article_candidates_is_confirmed", "is_confirmed"),
+        Index("ix_proc_article_candidates_confirmed_at", "confirmed_at"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
@@ -44,9 +46,12 @@ class ProcedureOfficialArticleCandidate(Base):
     confidence_level: Mapped[str] = mapped_column(String(50), nullable=False, default="unknown")
     is_confirmed: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     provider_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    confirmed_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    confirmed_source: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    confirmation_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     document = relationship("OfficialLawDocument")
     article = relationship("OfficialLawArticleRecord")
-

@@ -52,6 +52,11 @@ export interface ProcedureArticleCandidate {
   source_mode: string;
   source_mode_detail: string | null;
   is_confirmed: boolean;
+  generated_at?: string | null;
+  confirmed_at?: string | null;
+  confirmed_by?: string | null;
+  confirmed_source?: string | null;
+  confirmation_note?: string | null;
 }
 
 export interface ProcedureStep {
@@ -395,6 +400,28 @@ export interface ProcedureArticleCandidateResponse {
   }>;
   warnings: string[];
 }
+export interface ProcedureArticleCandidateConfirmationRequest {
+  confirmed_by?: string | null;
+  confirmed_source?: string | null;
+  confirmation_note?: string | null;
+}
+
+export interface ProcedureArticleCandidateUnconfirmRequest {
+  confirmation_note?: string | null;
+}
+
+export interface ProcedureArticleCandidateActionResponse {
+  candidate_id: number;
+  procedure_code: string;
+  is_confirmed: boolean;
+  confirmed_at: string | null;
+  confirmed_by: string | null;
+  confirmed_source: string | null;
+  confirmation_note: string | null;
+  status: string;
+  secret_exposed: boolean;
+}
+
 export interface OfficialLawIngestPreviewRequest {
   query: string;
   source_mode?: "mock" | "live" | "official_db" | "fallback" | "official_manual" | "official_manual_db" | "official_seed" | "official_seed_db";
@@ -439,4 +466,8 @@ export interface OfficialLawSnapshotStatusResponse {
   candidate_source_modes?: string[];
   latest_candidate_generated_at?: string | null;
   has_candidates_for_analyze_steps?: boolean;
+  latest_candidate_confirmed_at?: string | null;
+  confirmable_candidate_count?: number;
+  raw_payload_storage_violation_count?: number;
+  raw_payload_storage_policy_ok?: boolean;
 }
