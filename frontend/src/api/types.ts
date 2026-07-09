@@ -168,7 +168,7 @@ export interface OfficialLawDocument {
 }
 
 export interface OfficialLawSearchResult {
-  source_mode: "mock" | "live" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | string;
   status: string;
   query: string;
   candidates: OfficialLawCandidate[];
@@ -209,13 +209,23 @@ export interface LegalReferenceVerificationResult {
   reason: string;
   candidate_reference: CandidateLegalReferenceSnapshot;
   official_source_snapshot: OfficialLawArticleSnapshot | null;
-  source_mode: "mock" | "live" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | string;
   provider_reason: string | null;
+  source_error: boolean;
+  reason_type: string | null;
+  selected_candidate: OfficialLawCandidate | null;
+  document_id: number | null;
+  official_document_id: number | null;
+  article_count: number | null;
+  evidence_type: string | null;
+  sanitized_url: string | null;
+  source_hint: string | null;
+  as_of: string | null;
 }
 
 export interface LegalReferenceVerifyPreviewRequest {
   procedure_reference_ids?: number[] | null;
-  source_mode?: "mock" | "live";
+  source_mode?: "mock" | "live" | "official_db" | "fallback";
 }
 
 export interface LegalReferenceVerifyPreviewResponse {
@@ -235,16 +245,27 @@ export interface MolegDiagnosticResult {
 
 export interface OfficialLawIngestPreviewRequest {
   query: string;
-  source_mode?: "mock" | "live";
+  source_mode?: "mock" | "live" | "official_db" | "fallback";
 }
 
 export interface OfficialLawIngestPreviewResponse {
   status: string;
-  source_mode: "mock" | "live" | string;
+  source_mode: "mock" | "live" | "official_db" | "fallback" | string;
   selected_candidate: OfficialLawCandidate | null;
   document_id: number | null;
   ingest_run_id: number;
   article_count: number;
   provider_reason: string | null;
   secret_exposed: boolean;
+}
+
+
+export interface OfficialLawSnapshotStatusResponse {
+  document_count: number;
+  article_count: number;
+  ingest_run_count: number;
+  latest_ingest_status: string | null;
+  source_provider: string | null;
+  last_normalized_at: string | null;
+  has_current_documents: boolean;
 }

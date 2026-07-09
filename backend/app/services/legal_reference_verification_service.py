@@ -14,6 +14,7 @@ from app.schemas.official_law_source import (
     MATCH_STATUS_UNMATCHED,
 )
 from app.services.legal_reference_service import LEGAL_REFERENCE_QUALITY_CANDIDATE
+from app.services.official_law_db_source_service import OfficialLawDbSnapshotProvider
 from app.services.official_law_source import (
     LawSourceProvider,
     LawSourceProviderError,
@@ -46,6 +47,8 @@ def verify_candidate_reference(
     reference: ProcedureLegalReference,
     provider: LawSourceProvider | None = None,
     source_mode: str = "mock",
+    source_error: bool = False,
+    reason_type: str | None = None,
 ) -> LegalReferenceVerificationResult:
     provider = provider or MockOfficialLawSourceProvider()
     candidate = build_candidate_snapshot(reference)
@@ -57,6 +60,8 @@ def verify_candidate_reference(
             can_promote_to_verified=False,
             reason="Candidate reference does not contain both law name and article number.",
             source_mode=source_mode,
+            source_error=source_error,
+            reason_type=reason_type,
         )
 
     try:
@@ -68,6 +73,8 @@ def verify_candidate_reference(
             can_promote_to_verified=False,
             reason="Official law source is unavailable because live API configuration is missing or disabled.",
             source_mode=source_mode,
+            source_error=source_error,
+            reason_type=reason_type,
         )
     except LawSourceProviderError:
         return _result(
@@ -76,6 +83,8 @@ def verify_candidate_reference(
             can_promote_to_verified=False,
             reason="Official law source lookup failed. No secret values are included in this response.",
             source_mode=source_mode,
+            source_error=source_error,
+            reason_type=reason_type,
         )
 
     if official is None:
@@ -85,6 +94,8 @@ def verify_candidate_reference(
             can_promote_to_verified=False,
             reason="No official source article matched the candidate law name and article number.",
             source_mode=source_mode,
+            source_error=source_error,
+            reason_type=reason_type,
         )
 
     title_matches = _has_title_or_keyword_match(candidate.article_title, official.article_title, official.article_text)
@@ -97,6 +108,8 @@ def verify_candidate_reference(
             reason="Law name, article number, title or keyword, and official source URL matched.",
             official=official,
             source_mode=source_mode,
+            source_error=source_error,
+            reason_type=reason_type,
         )
 
     missing = []
@@ -120,7 +133,6 @@ def list_verification_previews(
     provider: LawSourceProvider | None = None,
     source_mode: str = "mock",
 ) -> list[LegalReferenceVerificationResult]:
-    provider = provider or make_law_source_provider(source_mode)
     statement = (
         select(ProcedureLegalReference)
         .options(
@@ -132,10 +144,35 @@ def list_verification_previews(
     if procedure_reference_ids is not None:
         statement = statement.where(ProcedureLegalReference.id.in_(procedure_reference_ids))
 
-    return [
-        verify_candidate_reference(reference=reference, provider=provider, source_mode=source_mode)
-        for reference in db.scalars(statement).all()
-    ]
+    references = db.scalars(statement).all()
+    if provider is not None:
+        return [verify_candidate_reference(reference=reference, provider=provider, source_mode=source_mode) for reference in references]
+
+    results: list[LegalReferenceVerificationResult] = []
+    db_provider = OfficialLawDbSnapshotProvider(db=db)
+    for reference in references:
+        db_result = verify_candidate_reference(reference=reference, provider=db_provider, source_mode="official_db")
+        if db_result.match_status != MATCH_STATUS_UNMATCHED:
+            results.append(db_result)
+            continue
+
+        live_error_type: str | None = None
+        if source_mode == "live":
+            live_result = verify_candidate_reference(reference=reference, provider=make_law_source_provider("live"), source_mode="live")
+            if live_result.match_status not in {MATCH_STATUS_SOURCE_ERROR, MATCH_STATUS_SOURCE_UNAVAILABLE, MATCH_STATUS_UNMATCHED}:
+                results.append(live_result)
+                continue
+            live_error_type = live_result.match_status
+
+        fallback_result = verify_candidate_reference(
+            reference=reference,
+            provider=make_law_source_provider("mock"),
+            source_mode="fallback" if live_error_type else "mock",
+            source_error=live_error_type is not None,
+            reason_type=live_error_type,
+        )
+        results.append(fallback_result)
+    return results
 
 
 def _result(
@@ -145,6 +182,8 @@ def _result(
     reason: str,
     source_mode: str,
     official=None,
+    source_error: bool = False,
+    reason_type: str | None = None,
 ) -> LegalReferenceVerificationResult:
     return LegalReferenceVerificationResult(
         procedure_reference_id=candidate.procedure_reference_id,
@@ -154,8 +193,16 @@ def _result(
         reason=reason,
         candidate_reference=candidate,
         official_source_snapshot=official,
-        source_mode="live" if source_mode == "live" else "mock",
+        source_mode=source_mode if source_mode in {"official_db", "live", "mock", "fallback"} else "mock",
         provider_reason=reason,
+        source_error=source_error or match_status in {MATCH_STATUS_SOURCE_ERROR, MATCH_STATUS_SOURCE_UNAVAILABLE},
+        reason_type=reason_type or (match_status if match_status in {MATCH_STATUS_SOURCE_ERROR, MATCH_STATUS_SOURCE_UNAVAILABLE} else None),
+        document_id=None if official is None else official.official_document_id,
+        official_document_id=None if official is None else official.official_document_id,
+        article_count=None if official is None else official.article_count,
+        evidence_type=None if official is None else official.evidence_type,
+        sanitized_url=None if official is None else official.source_url,
+        source_hint=None if official is None else official.source_hint,
     )
 
 

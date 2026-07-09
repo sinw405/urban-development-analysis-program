@@ -10,7 +10,7 @@ MATCH_STATUS_UNMATCHED = "unmatched"
 MATCH_STATUS_SOURCE_UNAVAILABLE = "source_unavailable"
 MATCH_STATUS_SOURCE_ERROR = "source_error"
 
-LawSourceMode = Literal["mock", "live"]
+LawSourceMode = Literal["mock", "live", "official_db", "fallback"]
 
 
 class OfficialLawMetadata(BaseModel):
@@ -32,6 +32,10 @@ class OfficialLawArticleSnapshot(BaseModel):
     source_type: str = "mock_official"
     official_law_id: str | None = None
     raw_payload_redacted: dict[str, Any] | None = Field(default=None, exclude=True)
+    official_document_id: int | None = None
+    article_count: int | None = None
+    evidence_type: str | None = None
+    source_hint: str | None = None
 
 
 class OfficialLawPagination(BaseModel):
@@ -110,6 +114,16 @@ class LegalReferenceVerificationResult(BaseModel):
     official_source_snapshot: OfficialLawArticleSnapshot | None = None
     source_mode: LawSourceMode = "mock"
     provider_reason: str | None = None
+    source_error: bool = False
+    reason_type: str | None = None
+    selected_candidate: OfficialLawCandidate | None = None
+    document_id: int | None = None
+    official_document_id: int | None = None
+    article_count: int | None = None
+    evidence_type: str | None = None
+    sanitized_url: str | None = None
+    source_hint: str | None = None
+    as_of: date | None = None
 
 
 class MolegDiagnosticResult(BaseModel):
@@ -136,6 +150,16 @@ class OfficialLawIngestPreviewResponse(BaseModel):
     article_count: int = 0
     provider_reason: str | None = None
     secret_exposed: bool = False
+
+
+class OfficialLawSnapshotStatusResponse(BaseModel):
+    document_count: int
+    article_count: int
+    ingest_run_count: int
+    latest_ingest_status: str | None = None
+    source_provider: str | None = None
+    last_normalized_at: datetime | None = None
+    has_current_documents: bool = False
 
 
 class LegalReferenceVerifyPreviewRequest(BaseModel):
