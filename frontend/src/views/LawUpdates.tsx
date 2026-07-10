@@ -70,9 +70,14 @@ export function LawUpdates() {
           <MolegStatusBadge diagnostic={diagnostic} />
         </div>
         {diagnostic ? (
-          <p>
-            사유: {diagnostic.reason_message} ({diagnostic.reason_type}) · fallback {diagnostic.fallback_available ? "사용 가능" : "확인 필요"} · secret 노출 없음 · raw payload 저장 없음
-          </p>
+          <>
+            <p>
+              사유: {diagnostic.reason_message_ko ?? diagnostic.reason_message} ({diagnostic.final_reason_type ?? diagnostic.reason_type}) · fallback {diagnostic.fallback_available ? "사용 가능" : "확인 필요"} · secret 노출 없음 · raw payload 저장 없음
+            </p>
+            <p>
+              조치: {diagnostic.suggested_fix ?? diagnostic.next_action} · 검색 {diagnostic.search_probe?.status ?? "대기"} · 상세조회 {diagnostic.detail_probe?.status ?? "대기"} · 파싱 {diagnostic.parse_probe?.status ?? "대기"}
+            </p>
+          </>
         ) : (
           <p>{diagnosticError ?? "법제처 API 진단 상태를 확인 중입니다."}</p>
         )}

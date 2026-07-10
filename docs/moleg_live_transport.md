@@ -101,3 +101,77 @@ MOLEG live failure must not fail `/api/analyze`. Official article candidate reso
 4. no candidate / `검토 필요`
 
 If no reviewed candidate exists, the system must leave the procedure as review-needed. It must not invent article numbers, legal thresholds, or review requirements.
+
+## Phase35 Probe Workflow
+
+Phase35 separates MOLEG live diagnostics into explicit probes:
+
+- `config_probe`: checks `.env` loading, enable flags, base URL presence, key presence, key length, SHA-256 fingerprint prefix, timeout, retry count, and allowed env names. It never prints the raw key.
+- `network_probe`: checks host DNS, socket connection, and TLS handshake for the configured base URL.
+- `search_probe`: sends a live law search request such as query `도시개발법` when live diagnostics are enabled and configured.
+- `detail_probe`: if search returns a law identifier, attempts a detail request for that identifier.
+- `parse_probe`: confirms whether the response can be parsed as JSON or XML.
+- `storage_policy_probe`: confirms that raw payload storage is disabled and secrets are not exposed.
+
+Smoke commands:
+
+```powershell
+python -m scripts.smoke_moleg_transport --probe config
+python -m scripts.smoke_moleg_transport --probe network
+python -m scripts.smoke_moleg_transport --probe search --query "도시개발법"
+python -m scripts.smoke_moleg_transport --probe all
+```
+
+The smoke output includes `final_reason_type`, `reason_message_ko`, `suggested_fix`, probe result summaries, and `secret_exposed=false`. It does not print raw request URLs with live keys, raw JSON/XML payloads, or full response bodies.
+
+## Redacted Config Check
+
+Diagnostics may show:
+
+- `live_enabled`
+- `configured`
+- `key_present`
+- `key_length`
+- `key_fingerprint_sha256_prefix`
+- `configured_env_names`
+- `detected_env_names_without_values`
+- sanitized base URL and endpoint path
+- timeout and retry settings
+
+Diagnostics must not show the raw `MOLEG_API_KEY`, raw `MOLEG_OC`, request headers, or query strings containing live secrets. Query parameters such as `OC`, `serviceKey`, `key`, and `token` must be redacted.
+
+## Phase35 Reason Types
+
+- `ok`: live response was reachable and parseable.
+- `not_configured`: required env/config values are missing.
+- `live_disabled`: live probes are disabled by `MOLEG_LIVE_TEST_ENABLED=false`.
+- `invalid_base_url`: base URL is missing a valid HTTP/HTTPS scheme or host.
+- `dns_error`: DNS resolution failed.
+- `connection_timeout`: network or HTTP request timed out.
+- `connection_refused`: socket connection was refused.
+- `tls_error`: TLS handshake or certificate validation failed.
+- `proxy_error`: proxy configuration or proxy connection failed.
+- `http_error_status`: HTTP status was an error not mapped to a more specific reason.
+- `unauthorized_or_invalid_key`: HTTP/API response indicates invalid key or unauthorized access.
+- `invalid_request_parameter`: endpoint or required request parameter is invalid.
+- `invalid_response_format`: response is not recognizable as JSON/XML.
+- `empty_response`: response body is empty.
+- `html_error_response`: endpoint returned HTML, often a proxy/block/error page.
+- `api_error_response`: MOLEG returned an API-level error payload.
+- `parsing_error`: JSON/XML parsing failed.
+- `unknown_connection_error`: fallback when the error cannot be classified safely.
+
+## Official API Contract Note
+
+If official MOLEG API documentation is not available in the project workspace, do not invent endpoint rules or parameter meanings. Use sanitized live response diagnostics to identify whether the current request path, authentication parameter `OC`, `type=JSON/XML`, `target=law`, search query, and detail identifier are accepted. Any change to endpoint or parameter contracts should be backed by official documentation or a sanitized successful live smoke.
+
+## Phase36 Path
+
+When `--probe all` reaches `final_reason_type=ok`, Phase36 can add controlled live ingest/import. That phase should still avoid storing raw JSON/XML payloads and should persist only normalized metadata, article identifiers, titles, anchors, dates, source metadata, and reviewed summaries needed by the application.
+
+If live probes fail, fallback remains active in this order:
+
+1. `official_seed_db`
+2. `official_manual_db`
+3. `procedure_keyword_candidate`
+4. `needs_review`

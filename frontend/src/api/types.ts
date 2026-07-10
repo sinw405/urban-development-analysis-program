@@ -470,6 +470,11 @@ export interface OfficialLawSnapshotStatusResponse {
   confirmable_candidate_count?: number;
   raw_payload_storage_violation_count?: number;
   raw_payload_storage_policy_ok?: boolean;
+  moleg_final_reason_type?: string | null;
+  moleg_reason_message_ko?: string | null;
+  moleg_search_ok?: boolean;
+  moleg_detail_ok?: boolean;
+  moleg_parse_ok?: boolean;
   official_seed_files_count?: number;
   official_seed_articles_count?: number;
   official_seed_confirmed_count?: number;
@@ -482,12 +487,36 @@ export interface OfficialLawSnapshotStatusResponse {
   secret_exposed?: boolean;
 }
 
+export interface MolegProbeResult {
+  name: string;
+  status: string;
+  reason_type: string;
+  reason_message_ko: string;
+  sanitized_detail: Record<string, unknown>;
+  suggested_fix: string;
+  retryable: boolean;
+  fallback_available: boolean;
+}
+
 export interface MolegSafeDiagnosticResponse {
   live_enabled: boolean;
   configured: boolean;
   transport_ok: boolean;
   reason_type: string;
+  final_reason_type?: string | null;
   reason_message: string;
+  reason_message_ko?: string | null;
+  suggested_fix?: string | null;
+  retryable?: boolean;
+  config_probe?: MolegProbeResult | null;
+  network_probe?: MolegProbeResult | null;
+  search_probe?: MolegProbeResult | null;
+  detail_probe?: MolegProbeResult | null;
+  parse_probe?: MolegProbeResult | null;
+  probe_results?: MolegProbeResult[];
+  search_ok?: boolean;
+  detail_ok?: boolean;
+  parse_ok?: boolean;
   diagnostic_detail: Record<string, unknown>;
   next_action: string;
   secret_exposed: boolean;

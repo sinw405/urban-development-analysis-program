@@ -74,7 +74,7 @@ def test_phase31_timeout_invalid_format_and_api_error(monkeypatch):
         return httpx.Response(200, text="<html>error</html>", headers={"content-type": "text/html"}, request=httpx.Request("GET", url))
 
     monkeypatch.setattr(httpx, "get", html_get)
-    assert diagnostic.diagnose_law_search().reason_type == "invalid_response_format"
+    assert diagnostic.diagnose_law_search().reason_type in {"invalid_response_format", "html_error_response"}
 
     def api_error_get(url, params, timeout):
         return httpx.Response(200, json={"errorCode": "E001", "message": "denied"}, request=httpx.Request("GET", url))

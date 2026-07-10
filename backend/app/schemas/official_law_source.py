@@ -232,12 +232,36 @@ class MolegTransportDiagnosticResponse(BaseModel):
 
 
 
+class MolegProbeResult(BaseModel):
+    name: str
+    status: str
+    reason_type: str
+    reason_message_ko: str
+    sanitized_detail: dict[str, Any] = Field(default_factory=dict)
+    suggested_fix: str
+    retryable: bool = False
+    fallback_available: bool = True
+
+
 class MolegSafeDiagnosticResponse(BaseModel):
     live_enabled: bool
     configured: bool
     transport_ok: bool
     reason_type: str
+    final_reason_type: str | None = None
     reason_message: str
+    reason_message_ko: str | None = None
+    suggested_fix: str | None = None
+    retryable: bool = False
+    config_probe: MolegProbeResult | None = None
+    network_probe: MolegProbeResult | None = None
+    search_probe: MolegProbeResult | None = None
+    detail_probe: MolegProbeResult | None = None
+    parse_probe: MolegProbeResult | None = None
+    probe_results: list[MolegProbeResult] = Field(default_factory=list)
+    search_ok: bool = False
+    detail_ok: bool = False
+    parse_ok: bool = False
     diagnostic_detail: dict[str, Any] = Field(default_factory=dict)
     next_action: str
     secret_exposed: bool = False
@@ -365,6 +389,11 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     moleg_configured: bool = False
     moleg_transport_ok: bool = False
     moleg_reason_type: str | None = None
+    moleg_final_reason_type: str | None = None
+    moleg_reason_message_ko: str | None = None
+    moleg_search_ok: bool = False
+    moleg_detail_ok: bool = False
+    moleg_parse_ok: bool = False
     moleg_last_checked_at: datetime | None = None
     moleg_secret_exposed: bool = False
     moleg_raw_payload_stored: bool = False
