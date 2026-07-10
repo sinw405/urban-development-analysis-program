@@ -1,0 +1,46 @@
+seed_version: 1
+law_key: dummy_official_law_seed_fixture
+law_name: Dummy Official Law
+law_type: other
+source:
+  source_type: official_manual
+  source_name: Dummy Official Source For Tests
+  source_url_optional: https://example.test/dummy-official-law
+  retrieved_at_optional: 2099-01-01
+  verified_by_optional: Dummy Reviewer
+  verification_note_optional: Dummy fixture review note only; not legal evidence.
+articles:
+  - article_key: dummy_confirmed_article
+    article_no: DUMMY-001
+    article_title: Dummy confirmed procedure basis
+    article_anchor: dummy-official-law#DUMMY-001
+    sanitized_summary: Dummy fixture sanitized summary for Project basic review only; not article body.
+    effective_date_optional: 2099-01-01
+    promulgation_date_optional: null
+    status: unknown
+    procedure_codes:
+      - PROJECT_BASIC_REVIEW
+    tags:
+      - dummy
+      - confirmed
+    source_mode_detail: official_seed_db
+    confidence: 0.95
+    is_confirmed: true
+    confirmation_note: Dummy fixture confirmation only.
+  - article_key: dummy_unconfirmed_article
+    article_no: DUMMY-UNCONFIRMED
+    article_title: Dummy unconfirmed procedure basis
+    article_anchor: dummy-official-law#DUMMY-UNCONFIRMED
+    sanitized_summary: Dummy fixture sanitized summary for zone designation review only; not article body.
+    effective_date_optional: 2099-01-01
+    promulgation_date_optional: null
+    status: unknown
+    procedure_codes:
+      - ZONE_DESIGNATION_REVIEW
+    tags:
+      - dummy
+      - unconfirmed
+    source_mode_detail: official_seed_db
+    confidence: 0.7
+    is_confirmed: false
+    confirmation_note: null

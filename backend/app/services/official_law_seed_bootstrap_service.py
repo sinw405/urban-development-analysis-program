@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import UTC, date, datetime
@@ -20,6 +20,10 @@ from app.services.official_law_persistence_service import (
 from app.services.rule_loader import load_yaml_rule
 
 DEFAULT_SEED_DIR = Path(__file__).resolve().parents[3] / "data" / "official_law_seeds"
+DOCS_DIR = Path(__file__).resolve().parents[3] / "docs"
+AUTHORING_CHECKLIST_PATH = DOCS_DIR / "official_law_seed_authoring_checklist.md"
+SEED_AUTHORING_CHECKLIST_PATH = DEFAULT_SEED_DIR / "SEED_AUTHORING_CHECKLIST.md"
+REVIEW_MANIFEST_TEMPLATE_PATH = DEFAULT_SEED_DIR / "official_seed_review_manifest.example.yaml"
 ALLOWED_LAW_TYPES = {"act", "enforcement_decree", "enforcement_rule", "other"}
 ALLOWED_SOURCE_TYPES = {"official_manual"}
 ALLOWED_SOURCE_MODE_DETAILS = {"official_seed_db", "official_manual_db"}
@@ -41,6 +45,7 @@ class SeedFileValidation:
     status: str = "unknown"
     article_count: int = 0
     confirmed_count: int = 0
+    unconfirmed_count: int = 0
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     is_example: bool = False
@@ -57,6 +62,7 @@ class SeedValidationReport:
     skipped_files: int = 0
     total_articles: int = 0
     confirmed_articles: int = 0
+    unconfirmed_articles: int = 0
     rejected_count: int = 0
     raw_payload_policy_ok: bool = True
     secret_exposed: bool = False
@@ -75,6 +81,7 @@ class SeedValidationReport:
             "skipped_files": self.skipped_files,
             "total_articles": self.total_articles,
             "confirmed_articles": self.confirmed_articles,
+            "unconfirmed_articles": self.unconfirmed_articles,
             "rejected_count": self.rejected_count,
             "raw_payload_policy_ok": self.raw_payload_policy_ok,
             "secret_exposed": self.secret_exposed,
@@ -93,7 +100,7 @@ def validate_official_law_seed_directory(seed_dir: Path | str = DEFAULT_SEED_DIR
         report.rejected_count = 1
         return report
 
-    files = sorted(directory.glob("*.seed.yaml"))
+    files = sorted({*directory.glob("*.seed.yaml"), *directory.glob("*.valid.yaml")})
     if include_examples:
         files.extend(sorted((directory / "examples").glob("*.yaml")))
     report.total_files = len(files)
@@ -103,6 +110,7 @@ def validate_official_law_seed_directory(seed_dir: Path | str = DEFAULT_SEED_DIR
         report.files.append(result)
         report.total_articles += result.article_count
         report.confirmed_articles += result.confirmed_count
+        report.unconfirmed_articles += result.unconfirmed_count
         if result.status == "valid":
             report.valid_files += 1
         elif result.status == "empty_valid":
@@ -146,6 +154,7 @@ def validate_official_law_seed_file(path: Path, procedure_codes: set[str] | None
     if isinstance(articles, list):
         result.article_count = len(articles)
         result.confirmed_count = sum(1 for article in articles if isinstance(article, dict) and article.get("is_confirmed") is True)
+        result.unconfirmed_count = len(articles) - result.confirmed_count
     result.errors.extend(errors)
     if errors:
         result.status = "invalid"
@@ -167,6 +176,7 @@ def import_official_law_seed_directory(db: Session, seed_dir: Path | str = DEFAU
             "articles_imported": 0,
             "candidates_created": 0,
             "candidates_confirmed": 0,
+            "candidates_unconfirmed": 0,
             "raw_payload_policy_ok": validation.raw_payload_policy_ok,
             "secret_exposed": False,
             "errors": validation.errors,
@@ -177,6 +187,7 @@ def import_official_law_seed_directory(db: Session, seed_dir: Path | str = DEFAU
     articles_imported = 0
     candidates_created = 0
     candidates_confirmed = 0
+    candidates_unconfirmed = 0
     procedure_names = _procedure_names()
     for file_result in validation.files:
         if file_result.status != "valid":
@@ -189,6 +200,7 @@ def import_official_law_seed_directory(db: Session, seed_dir: Path | str = DEFAU
         articles_imported += imported["articles_imported"]
         candidates_created += imported["candidates_created"]
         candidates_confirmed += imported["candidates_confirmed"]
+        candidates_unconfirmed += imported["candidates_unconfirmed"]
     db.commit()
     return {
         "status": "ok",
@@ -198,12 +210,63 @@ def import_official_law_seed_directory(db: Session, seed_dir: Path | str = DEFAU
         "articles_imported": articles_imported,
         "candidates_created": candidates_created,
         "candidates_confirmed": candidates_confirmed,
+        "candidates_unconfirmed": candidates_unconfirmed,
         "raw_payload_policy_ok": True,
         "secret_exposed": False,
         "errors": [],
         "warnings": validation.warnings,
     }
 
+
+def plan_official_law_seed_import(seed_dir: Path | str = DEFAULT_SEED_DIR) -> dict[str, Any]:
+    validation = validate_official_law_seed_directory(seed_dir=seed_dir, include_examples=False)
+    if validation.rejected_count:
+        return {
+            "status": "validation_error",
+            "files_scanned": validation.total_files,
+            "files_imported_planned": 0,
+            "articles_import_planned": 0,
+            "candidates_create_planned": 0,
+            "candidates_confirm_planned": 0,
+            "candidates_unconfirmed_planned": 0,
+            "raw_payload_policy_ok": validation.raw_payload_policy_ok,
+            "secret_exposed": False,
+            "errors": validation.errors,
+            "warnings": validation.warnings,
+        }
+    files_imported_planned = 0
+    articles_import_planned = 0
+    candidates_create_planned = 0
+    candidates_confirm_planned = 0
+    candidates_unconfirmed_planned = 0
+    for file_result in validation.files:
+        if file_result.status != "valid":
+            continue
+        _, payload = validate_official_law_seed_file(Path(file_result.path), procedure_codes=_procedure_codes())
+        if payload is None:
+            continue
+        files_imported_planned += 1
+        for article in payload.get("articles") or []:
+            articles_import_planned += 1
+            procedure_count = len(article.get("procedure_codes") or [])
+            candidates_create_planned += procedure_count
+            if article.get("is_confirmed") is True:
+                candidates_confirm_planned += procedure_count
+            else:
+                candidates_unconfirmed_planned += procedure_count
+    return {
+        "status": "dry_run",
+        "files_scanned": validation.total_files,
+        "files_imported_planned": files_imported_planned,
+        "articles_import_planned": articles_import_planned,
+        "candidates_create_planned": candidates_create_planned,
+        "candidates_confirm_planned": candidates_confirm_planned,
+        "candidates_unconfirmed_planned": candidates_unconfirmed_planned,
+        "raw_payload_policy_ok": True,
+        "secret_exposed": False,
+        "errors": [],
+        "warnings": validation.warnings,
+    }
 
 def seed_status(seed_dir: Path | str = DEFAULT_SEED_DIR) -> dict[str, Any]:
     report = validate_official_law_seed_directory(seed_dir=seed_dir, include_examples=False)
@@ -227,7 +290,18 @@ def seed_status(seed_dir: Path | str = DEFAULT_SEED_DIR) -> dict[str, Any]:
         "empty_files": report.empty_files,
         "total_articles": report.total_articles,
         "confirmed_articles": report.confirmed_articles,
+        "unconfirmed_articles": report.unconfirmed_articles,
         "validation_status": report.status,
+        "ready_for_manual_authoring": report.seed_directory_exists and _authoring_checklist_exists() and REVIEW_MANIFEST_TEMPLATE_PATH.exists(),
+        "authoring_checklist_exists": _authoring_checklist_exists(),
+        "review_manifest_template_exists": REVIEW_MANIFEST_TEMPLATE_PATH.exists(),
+        "dry_run_supported": True,
+        "fixture_validation_supported": True,
+        "total_seed_files": report.total_files,
+        "total_seed_articles": report.total_articles,
+        "confirmed_seed_articles": report.confirmed_articles,
+        "unconfirmed_seed_articles": report.unconfirmed_articles,
+        "empty_seed_files": report.empty_files,
         "raw_payload_policy_ok": report.raw_payload_policy_ok,
         "secret_exposed": False,
     }
@@ -243,6 +317,7 @@ def _import_payload(db: Session, payload: dict[str, Any], procedure_names: dict[
     imported_articles = 0
     candidates_created = 0
     candidates_confirmed = 0
+    candidates_unconfirmed = 0
     for index, article_payload in enumerate(articles, start=1):
         article = _upsert_article(db=db, document=document, article_payload=article_payload, sort_order=index)
         imported_articles += 1
@@ -252,6 +327,8 @@ def _import_payload(db: Session, payload: dict[str, Any], procedure_names: dict[
                 candidates_created += 1
             if candidate.is_confirmed:
                 candidates_confirmed += 1
+            else:
+                candidates_unconfirmed += 1
     complete_ingest_run(db=db, run=run, status=INGEST_STATUS_SUCCESS, error_reason=None)
     add_source_evidence(
         db=db,
@@ -268,7 +345,7 @@ def _import_payload(db: Session, payload: dict[str, Any], procedure_names: dict[
         },
         raw_available=False,
     )
-    return {"articles_imported": imported_articles, "candidates_created": candidates_created, "candidates_confirmed": candidates_confirmed}
+    return {"articles_imported": imported_articles, "candidates_created": candidates_created, "candidates_confirmed": candidates_confirmed, "candidates_unconfirmed": candidates_unconfirmed}
 
 
 def _upsert_document(db: Session, payload: dict[str, Any], source: dict[str, Any], law_key: str, law_name: str) -> OfficialLawDocument:
@@ -467,3 +544,7 @@ def _mentions_forbidden(value: str) -> bool:
     lowered = value.lower()
     return any(field in lowered for field in FORBIDDEN_FIELDS)
 
+
+
+def _authoring_checklist_exists() -> bool:
+    return AUTHORING_CHECKLIST_PATH.exists() or SEED_AUTHORING_CHECKLIST_PATH.exists()

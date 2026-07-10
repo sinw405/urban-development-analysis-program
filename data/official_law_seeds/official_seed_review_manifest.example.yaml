@@ -1,0 +1,17 @@
+review_batch_id: dummy-review-batch-example
+reviewer: null
+review_date: 2099-01-01
+official_source_checked: false
+seed_files_checked:
+  - urban_development_act.seed.yaml
+  - urban_development_act_enforcement_decree.seed.yaml
+  - urban_development_act_enforcement_rule.seed.yaml
+target_laws:
+  - law_key: dummy_law_key_example
+    law_name: Dummy Law Name Example
+    review_status: not_started
+articles_total: 0
+articles_confirmed: 0
+articles_needing_review: 0
+notes: Dummy manifest template only. Do not store secrets or full article text.
+signoff_status: not_ready

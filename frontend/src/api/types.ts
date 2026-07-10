@@ -1,4 +1,4 @@
-﻿export interface AnalyzeRequest {
+export interface AnalyzeRequest {
   project_name: string;
   location: string;
   area_square_meters: number;
@@ -497,6 +497,7 @@ export interface OfficialLawSeedFileStatus {
   status: string;
   article_count: number;
   confirmed_count: number;
+  unconfirmed_count: number;
   errors: string[];
   warnings: string[];
 }
@@ -509,7 +510,18 @@ export interface OfficialLawSeedStatusResponse {
   empty_files: number;
   total_articles: number;
   confirmed_articles: number;
+  unconfirmed_articles: number;
   validation_status: string;
   raw_payload_policy_ok: boolean;
   secret_exposed: boolean;
+  ready_for_manual_authoring: boolean;
+  authoring_checklist_exists: boolean;
+  review_manifest_template_exists: boolean;
+  dry_run_supported: boolean;
+  fixture_validation_supported: boolean;
+  total_seed_files: number;
+  total_seed_articles: number;
+  confirmed_seed_articles: number;
+  unconfirmed_seed_articles: number;
+  empty_seed_files: number;
 }

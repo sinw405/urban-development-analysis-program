@@ -373,6 +373,12 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     official_seed_files_count: int = 0
     official_seed_articles_count: int = 0
     official_seed_confirmed_count: int = 0
+    official_seed_unconfirmed_count: int = 0
+    official_seed_ready_for_manual_authoring: bool = False
+    official_seed_authoring_checklist_exists: bool = False
+    official_seed_review_manifest_template_exists: bool = False
+    official_seed_dry_run_supported: bool = True
+    official_seed_fixture_validation_supported: bool = True
     official_seed_empty_files_count: int = 0
     official_seed_validation_status: str | None = None
 
@@ -386,6 +392,7 @@ class OfficialLawSeedFileStatus(BaseModel):
     status: str
     article_count: int = 0
     confirmed_count: int = 0
+    unconfirmed_count: int = 0
     errors: list[str] = Field(default_factory=list)
     warnings: list[str] = Field(default_factory=list)
 
@@ -398,9 +405,20 @@ class OfficialLawSeedStatusResponse(BaseModel):
     empty_files: int = 0
     total_articles: int = 0
     confirmed_articles: int = 0
+    unconfirmed_articles: int = 0
     validation_status: str
     raw_payload_policy_ok: bool = True
     secret_exposed: bool = False
+    ready_for_manual_authoring: bool = False
+    authoring_checklist_exists: bool = False
+    review_manifest_template_exists: bool = False
+    dry_run_supported: bool = True
+    fixture_validation_supported: bool = True
+    total_seed_files: int = 0
+    total_seed_articles: int = 0
+    confirmed_seed_articles: int = 0
+    unconfirmed_seed_articles: int = 0
+    empty_seed_files: int = 0
 
 class ProcedureArticleCandidateConfirmationRequest(BaseModel):
     confirmed_by: str | None = "manual_admin"

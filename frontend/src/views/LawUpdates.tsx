@@ -81,8 +81,9 @@ export function LawUpdates() {
           <span>{seedStatus ? `${seedStatus.total_files}개` : "확인 중"}</span>
           <span>적재된 공식 조문 {seedStatus?.total_articles ?? 0}개</span>
           <span>확정 조문 {seedStatus?.confirmed_articles ?? 0}개</span>
+          <span>미확정 조문 {seedStatus?.unconfirmed_articles ?? 0}개</span>
         </div>
-        <p>{seedStatus && seedStatus.total_articles === 0 ? "상태: seed 파일 준비됨 / 아직 공식 조문 미입력" : `상태: ${seedStatus?.validation_status ?? "확인 중"}`} · raw payload 저장 없음 · secret 노출 없음</p>
+        <p>{seedStatus && seedStatus.total_articles === 0 ? "상태: seed 파일 준비됨 / 아직 공식 조문 미입력" : `상태: ${seedStatus?.validation_status ?? "확인 중"}`} · 수동 작성 {seedStatus?.ready_for_manual_authoring ? "준비됨" : "확인 필요"} · dry-run {seedStatus?.dry_run_supported ? "지원" : "확인 필요"} · 체크리스트 {seedStatus?.authoring_checklist_exists ? "있음" : "없음"} · raw payload 저장 없음 · secret 노출 없음</p>
       </div>
 
       {error && (
