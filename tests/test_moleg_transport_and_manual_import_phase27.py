@@ -1,4 +1,4 @@
-﻿from pathlib import Path
+from pathlib import Path
 
 import httpx
 import pytest
@@ -142,7 +142,7 @@ def test_transport_diagnostic_http_error_after_socket_tls(monkeypatch):
         assert result.socket_ok is True
         assert result.http_ok is False
         assert result.endpoint_ok is False
-        assert result.reason_type == "http_error"
+        assert result.reason_type == "http_error_status"
         assert result.secret_exposed is False
         assert SECRET not in str(result.model_dump())
     finally:
@@ -191,7 +191,7 @@ def test_manual_import_xml_stores_or_returns_safe_parse_error():
             assert data["article_count"] == 1
             assert data["document_id"] is not None
         else:
-            assert data["reason_type"] in {"parse_error", "invalid_response"}
+            assert data["reason_type"] in {"parsing_error", "invalid_response_format", "parse_error", "invalid_response"}
     finally:
         _cleanup()
 

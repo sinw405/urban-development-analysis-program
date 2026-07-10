@@ -1067,3 +1067,27 @@ tr:hover td {
   background: #f2f4f7;
   color: #687386;
 }
+
+.inlineStatusRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
+.moleg-ok {
+  border-color: #15803d;
+  color: #166534;
+  background: #dcfce7;
+}
+.moleg-warn {
+  border-color: #b45309;
+  color: #92400e;
+  background: #fef3c7;
+}
+.moleg-muted {
+  border-color: #64748b;
+  color: #475569;
+  background: #f1f5f9;
+}

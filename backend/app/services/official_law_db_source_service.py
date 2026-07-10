@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from datetime import date
 
@@ -7,6 +7,8 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models import OfficialLawArticleRecord, OfficialLawDocument, OfficialLawIngestRun
 from app.schemas.official_law_source import OfficialLawArticleSnapshot, OfficialLawMetadata, OfficialLawSnapshotStatusResponse
+from app.services.moleg_diagnostic_service import diagnose_moleg_safe
+from app.services.moleg_live_client import FALLBACK_SOURCE_MODES
 from app.services.procedure_article_candidate_service import get_candidate_diagnostic_counts
 
 
@@ -107,6 +109,7 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
     seed_run_count = db.scalar(select(func.count()).select_from(OfficialLawIngestRun).where(OfficialLawIngestRun.source_mode == "official_seed")) or 0
     documents = db.scalars(select(OfficialLawDocument)).all()
     candidate_counts = get_candidate_diagnostic_counts(db)
+    moleg_diagnostic = _safe_moleg_snapshot_diagnostic()
     return OfficialLawSnapshotStatusResponse(
         document_count=document_count,
         article_count=article_count,
@@ -131,6 +134,7 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
         has_urban_development_enforcement_decree=_has_document_title(documents, "도시개발법 시행령"),
         has_urban_development_enforcement_rule=_has_document_title(documents, "도시개발법 시행규칙"),
         **candidate_counts,
+        **moleg_diagnostic,
     )
 
 
@@ -171,3 +175,31 @@ def _normalize(value: str) -> str:
 
 def _normalize_article_number(value: str) -> str:
     return _normalize(value).replace(" ", "")
+
+
+def _safe_moleg_snapshot_diagnostic() -> dict[str, object]:
+    try:
+        diagnostic = diagnose_moleg_safe()
+        return {
+            "moleg_live_enabled": diagnostic.live_enabled,
+            "moleg_configured": diagnostic.configured,
+            "moleg_transport_ok": diagnostic.transport_ok,
+            "moleg_reason_type": diagnostic.reason_type,
+            "moleg_last_checked_at": diagnostic.checked_at,
+            "moleg_secret_exposed": diagnostic.secret_exposed,
+            "moleg_raw_payload_stored": diagnostic.raw_payload_stored,
+            "fallback_available": diagnostic.fallback_available,
+            "fallback_source_modes": diagnostic.fallback_source_modes,
+        }
+    except Exception:
+        return {
+            "moleg_live_enabled": False,
+            "moleg_configured": False,
+            "moleg_transport_ok": False,
+            "moleg_reason_type": "unknown_connection_error",
+            "moleg_last_checked_at": None,
+            "moleg_secret_exposed": False,
+            "moleg_raw_payload_stored": False,
+            "fallback_available": True,
+            "fallback_source_modes": FALLBACK_SOURCE_MODES,
+        }

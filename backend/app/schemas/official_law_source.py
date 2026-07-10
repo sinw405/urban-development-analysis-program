@@ -1,4 +1,4 @@
-﻿from datetime import date, datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field
@@ -154,7 +154,17 @@ class MolegDiagnosticResult(BaseModel):
 
 class MolegLiveDiagnosticResult(BaseModel):
     live_configured: bool
+    configured: bool = False
+    live_enabled: bool = False
     has_secret: bool
+    key_present: bool = False
+    key_length: int = 0
+    key_fingerprint: str | None = None
+    configured_env_names: list[str] = Field(default_factory=list)
+    allowed_env_names: list[str] = Field(default_factory=list)
+    base_url_configured: bool = False
+    retry_count: int = 0
+    backoff_seconds: float = 0.0
     secret_exposed: bool = False
     sanitized_base_url: str | None = None
     sanitized_endpoint: str
@@ -170,12 +180,30 @@ class MolegLiveDiagnosticResult(BaseModel):
     response_content_type: str | None = None
     response_preview_sanitized: str | None = None
     suggested_next_action: str
+    reason_message: str | None = None
     result: str
+    request_sanitized: bool = True
+    raw_payload_stored: bool = False
+    fallback_available: bool = True
+    fallback_source_modes: list[str] = Field(default_factory=list)
+    response_format: str | None = None
+    sample_law_count: int | None = None
 
 
 class MolegTransportDiagnosticResponse(BaseModel):
     live_configured: bool
+    configured: bool = False
+    live_enabled: bool = False
     has_secret: bool
+    key_present: bool = False
+    key_length: int = 0
+    key_fingerprint: str | None = None
+    configured_env_names: list[str] = Field(default_factory=list)
+    allowed_env_names: list[str] = Field(default_factory=list)
+    base_url_configured: bool = False
+    timeout_seconds: float | None = None
+    retry_count: int = 0
+    backoff_seconds: float = 0.0
     secret_exposed: bool = False
     sanitized_base_url: str | None = None
     sanitized_endpoint: str
@@ -194,10 +222,32 @@ class MolegTransportDiagnosticResponse(BaseModel):
     error_message_sanitized: str | None = None
     elapsed_ms: int
     suggested_next_action: str
+    reason_message: str | None = None
     final_url_sanitized: str | None = None
     response_preview_sanitized: str | None = None
+    request_sanitized: bool = True
+    raw_payload_stored: bool = False
+    fallback_available: bool = True
+    fallback_source_modes: list[str] = Field(default_factory=list)
 
 
+
+class MolegSafeDiagnosticResponse(BaseModel):
+    live_enabled: bool
+    configured: bool
+    transport_ok: bool
+    reason_type: str
+    reason_message: str
+    diagnostic_detail: dict[str, Any] = Field(default_factory=dict)
+    next_action: str
+    secret_exposed: bool = False
+    raw_payload_stored: bool = False
+    request_sanitized: bool = True
+    fallback_available: bool = True
+    fallback_source_modes: list[str] = Field(default_factory=list)
+    checked_at: datetime
+    response_format: str | None = None
+    sample_law_count: int | None = None
 class OfficialLawManualImportRequest(BaseModel):
     file_path: str
     query: str | None = None
@@ -311,6 +361,15 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     confirmable_candidate_count: int = 0
     raw_payload_storage_violation_count: int = 0
     raw_payload_storage_policy_ok: bool = True
+    moleg_live_enabled: bool = False
+    moleg_configured: bool = False
+    moleg_transport_ok: bool = False
+    moleg_reason_type: str | None = None
+    moleg_last_checked_at: datetime | None = None
+    moleg_secret_exposed: bool = False
+    moleg_raw_payload_stored: bool = False
+    fallback_available: bool = True
+    fallback_source_modes: list[str] = Field(default_factory=list)
 
 
 

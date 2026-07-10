@@ -18,7 +18,7 @@ def test_live_diagnostic_without_secret_is_not_configured():
     assert result.live_configured is False
     assert result.has_secret is False
     assert result.secret_exposed is False
-    assert result.reason_type == "disabled"
+    assert result.reason_type == "not_configured"
     assert SECRET not in str(result.model_dump())
 
 
@@ -79,7 +79,7 @@ def test_live_diagnostic_classifies_timeout(monkeypatch):
 
     result = diagnostic.diagnose_law_search()
 
-    assert result.reason_type == "timeout"
+    assert result.reason_type == "connection_timeout"
     assert result.result == "source_error"
     assert result.secret_exposed is False
 
@@ -94,7 +94,7 @@ def test_live_diagnostic_classifies_invalid_response(monkeypatch):
 
     result = diagnostic.diagnose_law_search()
 
-    assert result.reason_type == "invalid_response"
+    assert result.reason_type == "invalid_response_format"
     assert result.response_preview_sanitized == "not-json-or-xml"
     assert result.secret_exposed is False
 

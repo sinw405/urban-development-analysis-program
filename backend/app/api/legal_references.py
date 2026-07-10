@@ -1,4 +1,4 @@
-﻿from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -7,6 +7,7 @@ from app.schemas.official_law_source import (
     LegalReferenceVerifyPreviewResponse,
     MolegDiagnosticResult,
     MolegLiveDiagnosticResult,
+    MolegSafeDiagnosticResponse,
     MolegTransportDiagnosticResponse,
     OfficialLawIngestPreviewRequest,
     OfficialLawIngestPreviewResponse,
@@ -20,7 +21,7 @@ from app.schemas.official_law_source import (
     ProcedureArticleCandidateUnconfirmRequest,
 )
 from app.services.legal_reference_verification_service import list_verification_previews
-from app.services.moleg_diagnostic_service import diagnose_moleg_connectivity, diagnose_moleg_live_only
+from app.services.moleg_diagnostic_service import diagnose_moleg_connectivity, diagnose_moleg_live_only, diagnose_moleg_safe
 from app.services.moleg_transport_probe_service import diagnose_moleg_transport
 from app.services.official_law_db_source_service import get_official_law_snapshot_status
 from app.services.official_law_manual_import_service import import_official_law_file
@@ -58,6 +59,11 @@ def diagnose_official_law_source() -> MolegDiagnosticResult:
 @router.get("/legal-references/moleg-live-diagnostic", response_model=MolegLiveDiagnosticResult)
 def diagnose_moleg_live_source() -> MolegLiveDiagnosticResult:
     return diagnose_moleg_live_only()
+
+
+@router.get("/legal-references/moleg/diagnostic", response_model=MolegSafeDiagnosticResponse)
+def diagnose_moleg_safe_source() -> MolegSafeDiagnosticResponse:
+    return diagnose_moleg_safe()
 
 
 @router.get("/legal-references/moleg-transport-diagnostic", response_model=MolegTransportDiagnosticResponse)

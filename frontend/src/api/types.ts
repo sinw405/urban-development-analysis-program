@@ -471,3 +471,21 @@ export interface OfficialLawSnapshotStatusResponse {
   raw_payload_storage_violation_count?: number;
   raw_payload_storage_policy_ok?: boolean;
 }
+
+export interface MolegSafeDiagnosticResponse {
+  live_enabled: boolean;
+  configured: boolean;
+  transport_ok: boolean;
+  reason_type: string;
+  reason_message: string;
+  diagnostic_detail: Record<string, unknown>;
+  next_action: string;
+  secret_exposed: boolean;
+  raw_payload_stored: boolean;
+  request_sanitized: boolean;
+  fallback_available: boolean;
+  fallback_source_modes: string[];
+  checked_at: string;
+  response_format: string | null;
+  sample_law_count: number | null;
+}
