@@ -223,6 +223,12 @@ def _safe_seed_snapshot_diagnostic() -> dict[str, object]:
             "official_seed_fixture_validation_supported": status["fixture_validation_supported"],
             "official_seed_empty_files_count": status["empty_files"],
             "official_seed_validation_status": status["validation_status"],
+            "official_seed_source_material_directory_exists": status["source_material_directory_exists"],
+            "official_seed_source_intake_status": status["source_intake_status"],
+            "official_seed_source_intake_rows": status["source_intake_rows"],
+            "official_seed_ready_for_seed_generation": status["ready_for_seed_generation"],
+            "official_seed_batch1_policy_exists": status["batch1_policy_exists"],
+            "secret_exposed": status["secret_exposed"],
         }
     except Exception:
         return {
@@ -237,4 +243,10 @@ def _safe_seed_snapshot_diagnostic() -> dict[str, object]:
             "official_seed_fixture_validation_supported": True,
             "official_seed_empty_files_count": 0,
             "official_seed_validation_status": "unknown",
+            "official_seed_source_material_directory_exists": False,
+            "official_seed_source_intake_status": "unknown",
+            "official_seed_source_intake_rows": 0,
+            "official_seed_ready_for_seed_generation": False,
+            "official_seed_batch1_policy_exists": False,
+            "secret_exposed": False,
         }

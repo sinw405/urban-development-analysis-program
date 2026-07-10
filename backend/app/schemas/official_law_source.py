@@ -381,6 +381,12 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     official_seed_fixture_validation_supported: bool = True
     official_seed_empty_files_count: int = 0
     official_seed_validation_status: str | None = None
+    official_seed_source_material_directory_exists: bool = False
+    official_seed_source_intake_status: str | None = None
+    official_seed_source_intake_rows: int = 0
+    official_seed_ready_for_seed_generation: bool = False
+    official_seed_batch1_policy_exists: bool = False
+    secret_exposed: bool = False
 
 
 
@@ -419,6 +425,16 @@ class OfficialLawSeedStatusResponse(BaseModel):
     confirmed_seed_articles: int = 0
     unconfirmed_seed_articles: int = 0
     empty_seed_files: int = 0
+    source_material_directory_exists: bool = False
+    source_intake_template_exists: bool = False
+    source_intake_status: str | None = None
+    source_intake_rows: int = 0
+    source_intake_valid_rows: int = 0
+    source_intake_rejected_rows: int = 0
+    ready_for_seed_generation: bool = False
+    batch1_policy_exists: bool = False
+    batch1_apply_supported: bool = True
+    last_seed_generation_status_optional: str | None = None
 
 class ProcedureArticleCandidateConfirmationRequest(BaseModel):
     confirmed_by: str | None = "manual_admin"

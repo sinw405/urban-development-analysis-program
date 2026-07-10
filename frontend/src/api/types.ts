@@ -470,6 +470,16 @@ export interface OfficialLawSnapshotStatusResponse {
   confirmable_candidate_count?: number;
   raw_payload_storage_violation_count?: number;
   raw_payload_storage_policy_ok?: boolean;
+  official_seed_files_count?: number;
+  official_seed_articles_count?: number;
+  official_seed_confirmed_count?: number;
+  official_seed_unconfirmed_count?: number;
+  official_seed_source_material_directory_exists?: boolean;
+  official_seed_source_intake_status?: string | null;
+  official_seed_source_intake_rows?: number;
+  official_seed_ready_for_seed_generation?: boolean;
+  official_seed_batch1_policy_exists?: boolean;
+  secret_exposed?: boolean;
 }
 
 export interface MolegSafeDiagnosticResponse {
@@ -524,4 +534,14 @@ export interface OfficialLawSeedStatusResponse {
   confirmed_seed_articles: number;
   unconfirmed_seed_articles: number;
   empty_seed_files: number;
+  source_material_directory_exists: boolean;
+  source_intake_template_exists: boolean;
+  source_intake_status: string | null;
+  source_intake_rows: number;
+  source_intake_valid_rows: number;
+  source_intake_rejected_rows: number;
+  ready_for_seed_generation: boolean;
+  batch1_policy_exists: boolean;
+  batch1_apply_supported: boolean;
+  last_seed_generation_status_optional: string | null;
 }

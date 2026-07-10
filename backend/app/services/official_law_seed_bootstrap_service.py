@@ -270,6 +270,25 @@ def plan_official_law_seed_import(seed_dir: Path | str = DEFAULT_SEED_DIR) -> di
 
 def seed_status(seed_dir: Path | str = DEFAULT_SEED_DIR) -> dict[str, Any]:
     report = validate_official_law_seed_directory(seed_dir=seed_dir, include_examples=False)
+    try:
+        from app.services.official_seed_intake_service import source_intake_status
+
+        intake_status = source_intake_status()
+    except Exception:
+        intake_status = {
+            "source_material_directory_exists": False,
+            "source_intake_template_exists": False,
+            "source_intake_status": "unknown",
+            "source_intake_rows": 0,
+            "source_intake_valid_rows": 0,
+            "source_intake_rejected_rows": 0,
+            "ready_for_seed_generation": False,
+            "batch1_policy_exists": False,
+            "batch1_apply_supported": True,
+            "last_seed_generation_status_optional": None,
+            "raw_payload_policy_ok": True,
+            "secret_exposed": False,
+        }
     return {
         "seed_directory_exists": report.seed_directory_exists,
         "seed_files": [
@@ -280,6 +299,7 @@ def seed_status(seed_dir: Path | str = DEFAULT_SEED_DIR) -> dict[str, Any]:
                 "status": item.status,
                 "article_count": item.article_count,
                 "confirmed_count": item.confirmed_count,
+                "unconfirmed_count": item.unconfirmed_count,
                 "errors": item.errors,
                 "warnings": item.warnings,
             }
@@ -304,6 +324,7 @@ def seed_status(seed_dir: Path | str = DEFAULT_SEED_DIR) -> dict[str, Any]:
         "empty_seed_files": report.empty_files,
         "raw_payload_policy_ok": report.raw_payload_policy_ok,
         "secret_exposed": False,
+        **intake_status,
     }
 
 
