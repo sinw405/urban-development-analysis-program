@@ -370,8 +370,37 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     moleg_raw_payload_stored: bool = False
     fallback_available: bool = True
     fallback_source_modes: list[str] = Field(default_factory=list)
+    official_seed_files_count: int = 0
+    official_seed_articles_count: int = 0
+    official_seed_confirmed_count: int = 0
+    official_seed_empty_files_count: int = 0
+    official_seed_validation_status: str | None = None
 
 
+
+
+class OfficialLawSeedFileStatus(BaseModel):
+    law_key: str | None = None
+    law_name: str | None = None
+    law_type: str | None = None
+    status: str
+    article_count: int = 0
+    confirmed_count: int = 0
+    errors: list[str] = Field(default_factory=list)
+    warnings: list[str] = Field(default_factory=list)
+
+
+class OfficialLawSeedStatusResponse(BaseModel):
+    seed_directory_exists: bool
+    seed_files: list[OfficialLawSeedFileStatus] = Field(default_factory=list)
+    total_files: int = 0
+    valid_files: int = 0
+    empty_files: int = 0
+    total_articles: int = 0
+    confirmed_articles: int = 0
+    validation_status: str
+    raw_payload_policy_ok: bool = True
+    secret_exposed: bool = False
 
 class ProcedureArticleCandidateConfirmationRequest(BaseModel):
     confirmed_by: str | None = "manual_admin"

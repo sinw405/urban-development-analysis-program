@@ -9,6 +9,7 @@ from app.models import OfficialLawArticleRecord, OfficialLawDocument, OfficialLa
 from app.schemas.official_law_source import OfficialLawArticleSnapshot, OfficialLawMetadata, OfficialLawSnapshotStatusResponse
 from app.services.moleg_diagnostic_service import diagnose_moleg_safe
 from app.services.moleg_live_client import FALLBACK_SOURCE_MODES
+from app.services.official_law_seed_bootstrap_service import seed_status
 from app.services.procedure_article_candidate_service import get_candidate_diagnostic_counts
 
 
@@ -110,6 +111,7 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
     documents = db.scalars(select(OfficialLawDocument)).all()
     candidate_counts = get_candidate_diagnostic_counts(db)
     moleg_diagnostic = _safe_moleg_snapshot_diagnostic()
+    seed_diagnostic = _safe_seed_snapshot_diagnostic()
     return OfficialLawSnapshotStatusResponse(
         document_count=document_count,
         article_count=article_count,
@@ -130,11 +132,12 @@ def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusRe
         latest_seed_law_id=None if latest_seed_document is None else latest_seed_document.law_id,
         latest_seed_mst=None if latest_seed_document is None else latest_seed_document.mst,
         latest_seed_enforcement_date=None if latest_seed_document is None else latest_seed_document.enforcement_date,
-        has_urban_development_law=_has_document_title(documents, "도시개발법"),
-        has_urban_development_enforcement_decree=_has_document_title(documents, "도시개발법 시행령"),
-        has_urban_development_enforcement_rule=_has_document_title(documents, "도시개발법 시행규칙"),
+        has_urban_development_law=_has_document_title(documents, "\ub3c4\uc2dc\uac1c\ubc1c\ubc95"),
+        has_urban_development_enforcement_decree=_has_document_title(documents, "\ub3c4\uc2dc\uac1c\ubc1c\ubc95 \uc2dc\ud589\ub839"),
+        has_urban_development_enforcement_rule=_has_document_title(documents, "\ub3c4\uc2dc\uac1c\ubc1c\ubc95 \uc2dc\ud589\uaddc\uce59"),
         **candidate_counts,
         **moleg_diagnostic,
+        **seed_diagnostic,
     )
 
 
@@ -202,4 +205,24 @@ def _safe_moleg_snapshot_diagnostic() -> dict[str, object]:
             "moleg_raw_payload_stored": False,
             "fallback_available": True,
             "fallback_source_modes": FALLBACK_SOURCE_MODES,
+        }
+
+
+def _safe_seed_snapshot_diagnostic() -> dict[str, object]:
+    try:
+        status = seed_status()
+        return {
+            "official_seed_files_count": status["total_files"],
+            "official_seed_articles_count": status["total_articles"],
+            "official_seed_confirmed_count": status["confirmed_articles"],
+            "official_seed_empty_files_count": status["empty_files"],
+            "official_seed_validation_status": status["validation_status"],
+        }
+    except Exception:
+        return {
+            "official_seed_files_count": 0,
+            "official_seed_articles_count": 0,
+            "official_seed_confirmed_count": 0,
+            "official_seed_empty_files_count": 0,
+            "official_seed_validation_status": "unknown",
         }

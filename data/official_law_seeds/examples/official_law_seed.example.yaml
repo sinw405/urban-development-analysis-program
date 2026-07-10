@@ -1,0 +1,28 @@
+﻿seed_version: 1
+law_key: dummy_official_seed_law_do_not_use
+law_name: DUMMY_OFFICIAL_SEED_LAW_DO_NOT_USE
+law_type: other
+source:
+  source_type: official_manual
+  source_name: DUMMY_OFFICIAL_SOURCE_DO_NOT_USE
+  source_url_optional: https://example.test/dummy-official-source
+  retrieved_at_optional: 2099-01-01
+  verified_by_optional: DUMMY_REVIEWER_DO_NOT_USE
+  verification_note_optional: DUMMY example only; not legal evidence.
+articles:
+  - article_key: dummy_article_key_do_not_use
+    article_no: DUMMY_ARTICLE_NO_DO_NOT_USE
+    article_title: DUMMY_ARTICLE_TITLE_DO_NOT_USE
+    article_anchor: dummy-anchor-do-not-use
+    sanitized_summary: DUMMY sanitized summary only. Not a law article body.
+    effective_date_optional: 2099-01-01
+    promulgation_date_optional: null
+    status: unknown
+    procedure_codes:
+      - PROJECT_BASIC_REVIEW
+    tags:
+      - dummy
+    source_mode_detail: official_seed_db
+    confidence: 0.8
+    is_confirmed: true
+    confirmation_note: DUMMY confirmation for pipeline testing only.

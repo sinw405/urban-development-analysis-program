@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getMolegDiagnostic, listLawUpdates } from "../api/lawUpdates";
-import type { LawUpdateEvent, MolegSafeDiagnosticResponse } from "../api/types";
+import { getMolegDiagnostic, getOfficialLawSeedStatus, listLawUpdates } from "../api/lawUpdates";
+import type { LawUpdateEvent, MolegSafeDiagnosticResponse, OfficialLawSeedStatusResponse } from "../api/types";
 import { formatDate, formatList, formatStatus } from "../utils/formatters";
 import { labelFor } from "../utils/labels";
 
@@ -17,6 +17,7 @@ function MolegStatusBadge({ diagnostic }: { diagnostic: MolegSafeDiagnosticRespo
 export function LawUpdates() {
   const [items, setItems] = useState<LawUpdateEvent[]>([]);
   const [diagnostic, setDiagnostic] = useState<MolegSafeDiagnosticResponse | null>(null);
+  const [seedStatus, setSeedStatus] = useState<OfficialLawSeedStatusResponse | null>(null);
   const [diagnosticError, setDiagnosticError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +27,7 @@ export function LawUpdates() {
     setError(null);
     setDiagnosticError(null);
     try {
-      const [updates, moleg] = await Promise.allSettled([listLawUpdates(), getMolegDiagnostic()]);
+      const [updates, moleg, seeds] = await Promise.allSettled([listLawUpdates(), getMolegDiagnostic(), getOfficialLawSeedStatus()]);
       if (updates.status === "fulfilled") {
         setItems(updates.value.items);
       } else {
@@ -38,6 +39,7 @@ export function LawUpdates() {
         setDiagnostic(null);
         setDiagnosticError(moleg.reason instanceof Error ? moleg.reason.message : "법제처 API 진단 상태를 불러오지 못했습니다.");
       }
+      setSeedStatus(seeds.status === "fulfilled" ? seeds.value : null);
     } finally {
       setIsLoading(false);
     }
@@ -74,6 +76,13 @@ export function LawUpdates() {
         ) : (
           <p>{diagnosticError ?? "법제처 API 진단 상태를 확인 중입니다."}</p>
         )}
+        <div className="inlineStatusRow seedStatusLine">
+          <strong>공식 seed 파일</strong>
+          <span>{seedStatus ? `${seedStatus.total_files}개` : "확인 중"}</span>
+          <span>적재된 공식 조문 {seedStatus?.total_articles ?? 0}개</span>
+          <span>확정 조문 {seedStatus?.confirmed_articles ?? 0}개</span>
+        </div>
+        <p>{seedStatus && seedStatus.total_articles === 0 ? "상태: seed 파일 준비됨 / 아직 공식 조문 미입력" : `상태: ${seedStatus?.validation_status ?? "확인 중"}`} · raw payload 저장 없음 · secret 노출 없음</p>
       </div>
 
       {error && (

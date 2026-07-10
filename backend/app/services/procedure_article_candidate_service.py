@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -64,6 +64,13 @@ def resolve_procedure_article_candidates(
         if persist:
             candidates = [_persist_candidate(db, candidate) for candidate in candidates]
             db.commit()
+        candidates = _merge_persisted_candidates(
+            db=db,
+            procedure_code=code,
+            candidates=candidates,
+            law_title=law_title,
+            source_mode_detail=source_mode_detail,
+        )
         candidates = _sort_candidates(candidates)
         if is_confirmed is not None:
             candidates = [candidate for candidate in candidates if candidate.is_confirmed is is_confirmed]
@@ -190,6 +197,25 @@ def validate_seed_candidate_items(items: list[dict[str, Any]]) -> list[str]:
             errors.append(f"{label}: confirmed seed candidates require confirmed_by, confirmed_source, or confirmation_note")
     return errors
 
+def _merge_persisted_candidates(
+    db: Session,
+    procedure_code: str,
+    candidates: list[ProcedureArticleCandidate],
+    law_title: str | None,
+    source_mode_detail: str | None,
+) -> list[ProcedureArticleCandidate]:
+    statement = select(ProcedureOfficialArticleCandidate).where(ProcedureOfficialArticleCandidate.procedure_code == procedure_code)
+    if source_mode_detail:
+        statement = statement.where(ProcedureOfficialArticleCandidate.source_mode_detail == source_mode_detail)
+    if law_title:
+        statement = statement.where(func.lower(ProcedureOfficialArticleCandidate.law_title).contains(_normalize(law_title)))
+    merged = list(candidates)
+    seen_ids = {candidate.id for candidate in merged if candidate.id is not None}
+    for record in db.scalars(statement).all():
+        if record.id not in seen_ids:
+            merged.append(_candidate_from_record(record))
+            seen_ids.add(record.id)
+    return merged
 
 def _load_keyword_configs() -> list[dict[str, Any]]:
     data = load_yaml_rule("procedure_article_keywords.yaml")
@@ -282,6 +308,15 @@ def _persist_candidate(db: Session, candidate: ProcedureArticleCandidate) -> Pro
             ProcedureOfficialArticleCandidate.source_mode_detail == candidate.source_mode_detail,
         )
     )
+    if existing is None:
+        existing = db.scalar(
+            select(ProcedureOfficialArticleCandidate).where(
+                ProcedureOfficialArticleCandidate.procedure_code == candidate.procedure_code,
+                ProcedureOfficialArticleCandidate.article_id == candidate.article_id,
+                ProcedureOfficialArticleCandidate.source_mode_detail == candidate.source_mode_detail,
+                ProcedureOfficialArticleCandidate.is_confirmed.is_(True),
+            )
+        )
     if existing is None:
         existing = ProcedureOfficialArticleCandidate()
         db.add(existing)

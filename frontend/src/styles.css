@@ -1091,3 +1091,10 @@ tr:hover td {
   color: #475569;
   background: #f1f5f9;
 }
+
+.seedStatusLine {
+  margin-top: 8px;
+}
+.seedStatusLine span {
+  color: #475569;
+}

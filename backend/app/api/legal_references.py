@@ -15,6 +15,7 @@ from app.schemas.official_law_source import (
     OfficialLawManualImportResponse,
     OfficialLawSeedImportRequest,
     OfficialLawSeedImportResponse,
+    OfficialLawSeedStatusResponse,
     OfficialLawSnapshotStatusResponse,
     ProcedureArticleCandidateActionResponse,
     ProcedureArticleCandidateConfirmationRequest,
@@ -26,6 +27,7 @@ from app.services.moleg_transport_probe_service import diagnose_moleg_transport
 from app.services.official_law_db_source_service import get_official_law_snapshot_status
 from app.services.official_law_manual_import_service import import_official_law_file
 from app.services.official_law_persistence_service import ingest_live_document_preview
+from app.services.official_law_seed_bootstrap_service import seed_status
 from app.services.official_law_seed_import_service import import_official_law_seed
 from app.services.procedure_article_candidate_service import (
     confirm_procedure_article_candidate,
@@ -132,6 +134,10 @@ def get_official_law_snapshot(db: Session = Depends(get_db)) -> OfficialLawSnaps
     return get_official_law_snapshot_status(db=db)
 
 
+
+@router.get("/legal-references/official-law-seeds/status", response_model=OfficialLawSeedStatusResponse)
+def get_official_law_seed_status() -> OfficialLawSeedStatusResponse:
+    return OfficialLawSeedStatusResponse.model_validate(seed_status())
 @router.post("/legal-references/official-law-manual-import", response_model=OfficialLawManualImportResponse)
 def import_official_law_manual_file(
     request: OfficialLawManualImportRequest,

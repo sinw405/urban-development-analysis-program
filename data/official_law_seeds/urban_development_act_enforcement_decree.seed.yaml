@@ -1,0 +1,12 @@
+﻿seed_version: 1
+law_key: urban_development_act_enforcement_decree
+law_name: 도시개발법 시행령
+law_type: enforcement_decree
+source:
+  source_type: official_manual
+  source_name: TODO_OFFICIAL_SOURCE_AFTER_REVIEW
+  source_url_optional: null
+  retrieved_at_optional: null
+  verified_by_optional: null
+  verification_note_optional: null
+articles: []

@@ -489,3 +489,27 @@ export interface MolegSafeDiagnosticResponse {
   response_format: string | null;
   sample_law_count: number | null;
 }
+
+export interface OfficialLawSeedFileStatus {
+  law_key: string | null;
+  law_name: string | null;
+  law_type: string | null;
+  status: string;
+  article_count: number;
+  confirmed_count: number;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface OfficialLawSeedStatusResponse {
+  seed_directory_exists: boolean;
+  seed_files: OfficialLawSeedFileStatus[];
+  total_files: number;
+  valid_files: number;
+  empty_files: number;
+  total_articles: number;
+  confirmed_articles: number;
+  validation_status: string;
+  raw_payload_policy_ok: boolean;
+  secret_exposed: boolean;
+}
