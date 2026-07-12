@@ -175,3 +175,82 @@ If live probes fail, fallback remains active in this order:
 2. `official_manual_db`
 3. `procedure_keyword_candidate`
 4. `needs_review`
+
+## Phase36.1 Browser-Success Alignment
+
+A user-verified browser request to `lawSearch.do` succeeded for the query `도시개발법`. Phase36.1 treats that as sanitized expected metadata for transport diagnostics only. It does not confirm article numbers, thresholds, review requirements, or article body text.
+
+Verified search metadata from the browser result:
+
+- query: `도시개발법`
+- target: `law`
+- resultCode: `00`
+- totalCnt: `3`
+- expected laws: `도시개발법`, `도시개발법 시행령`, `도시개발법 시행규칙`
+- expected MST values: `284059`, `287279`, `268933`
+- expected law IDs: `002024`, `003421`, `007096`
+- expected effective dates for detail probe: `20260701`, `20260701`, `20250131`
+
+These values are used only to compare browser-success request metadata with Python/httpx probe behavior. Raw XML/HTML and full article text are not stored or printed.
+
+### Endpoint Matrix
+
+The smoke script can compare HTTP/HTTPS and `trust_env` combinations:
+
+```powershell
+python -m scripts.smoke_moleg_transport --probe matrix
+```
+
+The matrix reports only sanitized fields: scheme, host, path, redacted query, HTTP status, content type, body length, resultCode, totalCnt, parsed law candidate count, reason type, and selected candidate. `OC` and other sensitive query values are always redacted.
+
+### Request Difference Check
+
+Diagnostics include `sanitized_request_diff` with:
+
+- browser success pattern with `OC=[REDACTED]`
+- Python request pattern with `OC=[REDACTED]`
+- scheme differences such as `browser=http, python=https`
+- query parameter names, excluding secret values
+- User-Agent and Accept header status
+- timeout, `trust_env`, and proxy environment detection without proxy values
+
+### Headers And Proxy
+
+Phase36.1 applies a browser-compatible User-Agent and XML-friendly Accept header:
+
+- `User-Agent: Mozilla/5.0 compatible; UrbanDevelopmentAnalysis/0.1; MOLEG-live-probe`
+- `Accept: application/xml,text/xml,application/json,*/*`
+
+Proxy diagnostics show only whether proxy environment variables exist and which variable names are present. Proxy URLs, credentials, and secret values are never printed.
+
+### Search, Detail, Parse Probes
+
+Search probe uses:
+
+```text
+/DRF/lawSearch.do?OC=[REDACTED]&target=law&type=XML&query=도시개발법&display=5&page=1
+```
+
+Detail probe uses `lawService.do` with user-verified MST and effective date metadata:
+
+```powershell
+python -m scripts.smoke_moleg_transport --probe detail --mst 284059 --ef-yd 20260701
+python -m scripts.smoke_moleg_transport --probe detail --mst 287279 --ef-yd 20260701
+python -m scripts.smoke_moleg_transport --probe detail --mst 268933 --ef-yd 20250131
+```
+
+The detail probe tries `type=XML` first. If XML fails, HTML availability may be checked only as sanitized availability metadata. Full HTML/XML response bodies and full article text are not stored or printed.
+
+### Ready For Live Ingest
+
+`ready_for_live_ingest=true` only when all of these hold:
+
+- search probe is ok
+- detail probe is ok
+- parse probe is ok
+- `secret_exposed=false`
+- `raw_payload_stored=false`
+- `/api/analyze` remains healthy
+- fallback policy remains available
+
+When true, Phase37 may implement controlled live ingest/import. Phase36.1 still does not run bulk collection or DB import.

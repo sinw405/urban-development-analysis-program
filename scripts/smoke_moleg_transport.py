@@ -19,14 +19,16 @@ from app.services.moleg_probe_service import run_moleg_live_probes
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Run sanitized MOLEG Open API live probes.")
-    parser.add_argument("--probe", choices=["config", "network", "search", "detail", "parse", "storage_policy", "all"], default="all")
+    parser.add_argument("--probe", choices=["config", "network", "matrix", "search", "detail", "parse", "storage_policy", "all"], default="all")
     parser.add_argument("--query", default=DEFAULT_LIVE_QUERY)
+    parser.add_argument("--mst", default=None)
+    parser.add_argument("--ef-yd", dest="ef_yd", default=None)
     args = parser.parse_args(argv)
 
     load_dotenv(PROJECT_ROOT / ".env", override=False)
     get_settings.cache_clear()
     try:
-        diagnostic = run_moleg_live_probes(probe=args.probe, query=args.query)
+        diagnostic = run_moleg_live_probes(probe=args.probe, query=args.query, mst=args.mst, ef_yd=args.ef_yd)
     except Exception as exc:
         print(json.dumps({"status": "error", "final_reason_type": "code_error", "error_class": exc.__class__.__name__, "secret_exposed": False, "raw_payload_stored": False}, ensure_ascii=False))
         return 1
@@ -53,6 +55,13 @@ def main(argv: list[str] | None = None) -> int:
         "fallback_source_modes": diagnostic.fallback_source_modes,
         "response_format": diagnostic.response_format,
         "sample_law_count": diagnostic.sample_law_count,
+        "browser_success_metadata_present": diagnostic.browser_success_metadata_present,
+        "selected_endpoint": diagnostic.selected_endpoint,
+        "endpoint_matrix": diagnostic.endpoint_matrix,
+        "sanitized_request_diff": diagnostic.sanitized_request_diff,
+        "trust_env_probe": diagnostic.trust_env_probe,
+        "proxy_probe": diagnostic.proxy_probe,
+        "ready_for_live_ingest": diagnostic.ready_for_live_ingest,
     }
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0

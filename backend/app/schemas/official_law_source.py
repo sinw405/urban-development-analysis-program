@@ -262,6 +262,15 @@ class MolegSafeDiagnosticResponse(BaseModel):
     search_ok: bool = False
     detail_ok: bool = False
     parse_ok: bool = False
+    browser_success_metadata_present: bool = False
+    browser_success_expected_laws: list[dict[str, Any]] = Field(default_factory=list)
+    endpoint_matrix: list[dict[str, Any]] = Field(default_factory=list)
+    selected_endpoint: str | None = None
+    sanitized_request_diff: dict[str, Any] = Field(default_factory=dict)
+    user_agent_applied: bool = False
+    trust_env_probe: list[dict[str, Any]] = Field(default_factory=list)
+    proxy_probe: dict[str, Any] = Field(default_factory=dict)
+    ready_for_live_ingest: bool = False
     diagnostic_detail: dict[str, Any] = Field(default_factory=dict)
     next_action: str
     secret_exposed: bool = False
@@ -394,6 +403,10 @@ class OfficialLawSnapshotStatusResponse(BaseModel):
     moleg_search_ok: bool = False
     moleg_detail_ok: bool = False
     moleg_parse_ok: bool = False
+    moleg_browser_success_metadata_present: bool = False
+    moleg_selected_endpoint: str | None = None
+    moleg_ready_for_live_ingest: bool = False
+    moleg_suggested_fix: str | None = None
     moleg_last_checked_at: datetime | None = None
     moleg_secret_exposed: bool = False
     moleg_raw_payload_stored: bool = False

@@ -517,6 +517,15 @@ export interface MolegSafeDiagnosticResponse {
   search_ok?: boolean;
   detail_ok?: boolean;
   parse_ok?: boolean;
+  browser_success_metadata_present?: boolean;
+  browser_success_expected_laws?: Record<string, unknown>[];
+  endpoint_matrix?: Record<string, unknown>[];
+  selected_endpoint?: string | null;
+  sanitized_request_diff?: Record<string, unknown>;
+  user_agent_applied?: boolean;
+  trust_env_probe?: Record<string, unknown>[];
+  proxy_probe?: Record<string, unknown>;
+  ready_for_live_ingest?: boolean;
   diagnostic_detail: Record<string, unknown>;
   next_action: string;
   secret_exposed: boolean;

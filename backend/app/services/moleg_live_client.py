@@ -18,7 +18,15 @@ MOLEG_LAW_SERVICE_PATH = "/DRF/lawService.do"
 MOLEG_LAW_TARGET = "law"
 MOLEG_JSON_TYPE = "JSON"
 MOLEG_XML_TYPE = "XML"
-DEFAULT_LIVE_QUERY = "도시개발법"
+DEFAULT_LIVE_QUERY = "\ub3c4\uc2dc\uac1c\ubc1c\ubc95"
+MOLEG_HTML_TYPE = "HTML"
+DEFAULT_USER_AGENT = "Mozilla/5.0 compatible; UrbanDevelopmentAnalysis/0.1; MOLEG-live-probe"
+DEFAULT_ACCEPT = "application/xml,text/xml,application/json,*/*"
+BROWSER_SUCCESS_EXPECTED_LAWS = [
+    {"law_name": "\ub3c4\uc2dc\uac1c\ubc1c\ubc95", "mst": "284059", "law_id": "002024", "ef_yd": "20260701"},
+    {"law_name": "\ub3c4\uc2dc\uac1c\ubc1c\ubc95 \uc2dc\ud589\ub839", "mst": "287279", "law_id": "003421", "ef_yd": "20260701"},
+    {"law_name": "\ub3c4\uc2dc\uac1c\ubc1c\ubc95 \uc2dc\ud589\uaddc\uce59", "mst": "268933", "law_id": "007096", "ef_yd": "20250131"},
+]
 SECRET_REDACTION = "[REDACTED]"
 SECRET_KEYS = {"OC", "oc", "api_key", "apikey", "MOLEG_API_KEY", "MOLEG_OC", "serviceKey", "ServiceKey", "key", "token", "access_token"}
 ALLOWED_ENV_NAMES = ["MOLEG_API_ENABLED", "MOLEG_LIVE_TEST_ENABLED", "MOLEG_API_BASE_URL", "MOLEG_API_KEY", "MOLEG_OC", "MOLEG_API_TIMEOUT_SECONDS", "MOLEG_API_RETRY_COUNT", "MOLEG_API_RETRY_BACKOFF_SECONDS"]
@@ -62,6 +70,9 @@ class ParsedMolegResponse:
     sample_law_count: int | None
     first_law_identifier: str | None = None
     article_count: int | None = None
+    law_search: dict[str, Any] | None = None
+    article_title_sample_count: int = 0
+    article_number_sample_count: int = 0
 
 
 class MolegLiveClient:
@@ -72,6 +83,9 @@ class MolegLiveClient:
         timeout_seconds: float | None = None,
         retry_count: int | None = None,
         retry_backoff_seconds: float | None = None,
+        trust_env: bool | None = None,
+        user_agent: str | None = None,
+        accept: str | None = None,
     ) -> None:
         settings = get_settings()
         self.base_url = (base_url if base_url is not None else settings.moleg_api_base_url).strip().rstrip("/")
@@ -81,6 +95,9 @@ class MolegLiveClient:
         self.retry_backoff_seconds = retry_backoff_seconds if retry_backoff_seconds is not None else _env_float("MOLEG_API_RETRY_BACKOFF_SECONDS", 0.25)
         self.api_enabled = settings.moleg_api_enabled if api_key is None and base_url is None else True
         self.live_test_enabled = settings.moleg_live_test_enabled
+        self.trust_env = True if trust_env is None else trust_env
+        self.user_agent = user_agent or DEFAULT_USER_AGENT
+        self.accept = accept or DEFAULT_ACCEPT
 
     @property
     def sanitized_base_url(self) -> str | None:
@@ -94,7 +111,11 @@ class MolegLiveClient:
     def has_secret(self) -> bool:
         return bool(self.api_key)
 
-    def search_params(self, query: str, result_type: str = MOLEG_JSON_TYPE, page: int = 1, display: int = 20) -> dict[str, str]:
+    @property
+    def headers(self) -> dict[str, str]:
+        return {"User-Agent": self.user_agent, "Accept": self.accept}
+
+    def search_params(self, query: str, result_type: str = MOLEG_XML_TYPE, page: int = 1, display: int = 5) -> dict[str, str]:
         return {
             "OC": self.api_key,
             "type": result_type,
@@ -104,8 +125,11 @@ class MolegLiveClient:
             "display": str(display),
         }
 
-    def document_params(self, mst: str, result_type: str = MOLEG_JSON_TYPE) -> dict[str, str]:
-        return {"OC": self.api_key, "type": result_type, "target": MOLEG_LAW_TARGET, "MST": mst}
+    def document_params(self, mst: str, result_type: str = MOLEG_XML_TYPE, ef_yd: str | None = None) -> dict[str, str]:
+        params = {"OC": self.api_key, "type": result_type, "target": MOLEG_LAW_TARGET, "MST": mst}
+        if ef_yd:
+            params["efYd"] = ef_yd
+        return params
 
     def request_payload(self, path: str, params: dict[str, str]) -> dict[str, Any] | list[Any]:
         if not self.api_enabled:
@@ -130,8 +154,8 @@ class MolegLiveClient:
     def diagnose_law_search(self, query: str = DEFAULT_LIVE_QUERY) -> MolegLiveDiagnosticResult:
         return self.diagnose_request(endpoint=MOLEG_LAW_SEARCH_PATH, params=self.search_params(query=query), require_live=True)
 
-    def diagnose_law_detail(self, mst: str) -> MolegLiveDiagnosticResult:
-        return self.diagnose_request(endpoint=MOLEG_LAW_SERVICE_PATH, params=self.document_params(mst=mst), require_live=True)
+    def diagnose_law_detail(self, mst: str, ef_yd: str | None = None, result_type: str = MOLEG_XML_TYPE) -> MolegLiveDiagnosticResult:
+        return self.diagnose_request(endpoint=MOLEG_LAW_SERVICE_PATH, params=self.document_params(mst=mst, ef_yd=ef_yd, result_type=result_type), require_live=True)
 
     def diagnose_request(self, endpoint: str, params: dict[str, str], require_live: bool = True) -> MolegLiveDiagnosticResult:
         validation_error = _validate_request(path=endpoint, params=params, base_url=self.base_url)
@@ -210,7 +234,13 @@ class MolegLiveClient:
         last_exc: Exception | None = None
         for attempt in range(attempts):
             try:
-                return httpx.get(url, params=params, timeout=httpx.Timeout(self.timeout_seconds))
+                return _http_get(
+                    url,
+                    params=params,
+                    timeout=httpx.Timeout(self.timeout_seconds),
+                    headers=self.headers,
+                    trust_env=self.trust_env,
+                )
             except (httpx.TimeoutException, httpx.ConnectError, httpx.ProxyError) as exc:
                 last_exc = exc
                 if attempt >= attempts - 1:
@@ -297,7 +327,20 @@ def parse_response(response: httpx.Response) -> ParsedMolegResponse:
         sample_law_count=_sample_law_count(payload),
         first_law_identifier=_first_law_identifier(payload),
         article_count=_article_count(payload),
+        law_search=parse_law_search_payload(payload),
+        article_title_sample_count=_article_title_count(payload),
+        article_number_sample_count=_article_number_count(payload),
     )
+
+
+def _http_get(url: str, params: dict[str, str], timeout: httpx.Timeout, headers: dict[str, str], trust_env: bool) -> httpx.Response:
+    try:
+        return httpx.get(url, params=params, headers=headers, timeout=timeout, trust_env=trust_env, follow_redirects=True)
+    except TypeError as exc:
+        # Older tests monkeypatch httpx.get with the pre-Phase36 signature.
+        if "unexpected keyword" not in str(exc):
+            raise
+        return httpx.get(url, params=params, timeout=timeout)
 
 
 def redact_secret_values(value: Any, secret: str | None = None) -> Any:
@@ -312,47 +355,45 @@ def redact_secret_values(value: Any, secret: str | None = None) -> Any:
 
 def reason_message(reason_type: str) -> str:
     return {
-        REASON_OK: "법제처 API 응답이 정상적으로 확인되었습니다.",
-        REASON_NOT_CONFIGURED: "법제처 API 설정이 완료되지 않았습니다.",
-        REASON_LIVE_DISABLED: "법제처 API live 진단이 비활성화되어 있습니다.",
-        REASON_INVALID_BASE_URL: "법제처 API base URL 형식이 올바르지 않습니다.",
-        REASON_DNS_ERROR: "법제처 API 호스트 DNS 조회에 실패했습니다.",
-        REASON_CONNECTION_TIMEOUT: "법제처 API 연결 시간이 초과되었습니다.",
-        REASON_CONNECTION_REFUSED: "법제처 API 연결이 거부되었습니다.",
-        REASON_TLS_ERROR: "법제처 API TLS 또는 인증서 연결 오류가 발생했습니다.",
-        REASON_PROXY_ERROR: "프록시 설정 또는 프록시 연결 오류가 발생했습니다.",
-        REASON_HTTP_ERROR_STATUS: "법제처 API가 오류 HTTP 상태 코드를 반환했습니다.",
-        REASON_UNAUTHORIZED_OR_INVALID_KEY: "법제처 API 인증키가 유효하지 않거나 권한이 없습니다.",
-        REASON_INVALID_REQUEST_PARAMETER: "법제처 API 요청 파라미터가 올바르지 않습니다.",
-        REASON_INVALID_RESPONSE_FORMAT: "법제처 API 응답 형식을 JSON/XML로 확인할 수 없습니다.",
-        REASON_EMPTY_RESPONSE: "법제처 API 응답 본문이 비어 있습니다.",
-        REASON_HTML_ERROR_RESPONSE: "법제처 API가 HTML 오류 페이지를 반환했습니다.",
-        REASON_API_ERROR_RESPONSE: "법제처 API가 업무 오류 응답을 반환했습니다.",
-        REASON_PARSING_ERROR: "법제처 API 응답 파싱 중 오류가 발생했습니다.",
-    }.get(reason_type, "법제처 API 연결 오류 원인을 추가 확인해야 합니다.")
-
+        REASON_OK: "\ubc95\uc81c\ucc98 API \uc751\ub2f5\uc774 \uc815\uc0c1\uc801\uc73c\ub85c \ud655\uc778\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+        REASON_NOT_CONFIGURED: "\ubc95\uc81c\ucc98 API \uc124\uc815\uc774 \uc644\ub8cc\ub418\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.",
+        REASON_LIVE_DISABLED: "\ubc95\uc81c\ucc98 API live \uc9c4\ub2e8\uc774 \ube44\ud65c\uc131\ud654\ub418\uc5b4 \uc788\uc2b5\ub2c8\ub2e4.",
+        REASON_INVALID_BASE_URL: "\ubc95\uc81c\ucc98 API base URL \ud615\uc2dd\uc774 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+        REASON_DNS_ERROR: "\ubc95\uc81c\ucc98 API \ud638\uc2a4\ud2b8 DNS \uc870\ud68c\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4.",
+        REASON_CONNECTION_TIMEOUT: "\ubc95\uc81c\ucc98 API \uc5f0\uacb0 \uc2dc\uac04\uc774 \ucd08\uacfc\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+        REASON_CONNECTION_REFUSED: "\ubc95\uc81c\ucc98 API \uc5f0\uacb0\uc774 \uac70\ubd80\ub418\uc5c8\uc2b5\ub2c8\ub2e4.",
+        REASON_TLS_ERROR: "\ubc95\uc81c\ucc98 API TLS \ub610\ub294 \uc778\uc99d\uc11c \uc5f0\uacb0 \uc624\ub958\uac00 \ubc1c\uc0dd\ud588\uc2b5\ub2c8\ub2e4.",
+        REASON_PROXY_ERROR: "\ud504\ub85d\uc2dc \uc124\uc815 \ub610\ub294 \ud504\ub85d\uc2dc \uc5f0\uacb0 \uc624\ub958\uac00 \ubc1c\uc0dd\ud588\uc2b5\ub2c8\ub2e4.",
+        REASON_HTTP_ERROR_STATUS: "\ubc95\uc81c\ucc98 API\uac00 \uc624\ub958 HTTP \uc0c1\ud0dc \ucf54\ub4dc\ub97c \ubc18\ud658\ud588\uc2b5\ub2c8\ub2e4.",
+        REASON_UNAUTHORIZED_OR_INVALID_KEY: "\ubc95\uc81c\ucc98 API \uc778\uc99d\ud0a4\uac00 \uc720\ud6a8\ud558\uc9c0 \uc54a\uac70\ub098 \uad8c\ud55c\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.",
+        REASON_INVALID_REQUEST_PARAMETER: "\ubc95\uc81c\ucc98 API \uc694\uccad \ud30c\ub77c\ubbf8\ud130\uac00 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.",
+        REASON_INVALID_RESPONSE_FORMAT: "\ubc95\uc81c\ucc98 API \uc751\ub2f5 \ud615\uc2dd\uc744 JSON/XML\ub85c \ud655\uc778\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.",
+        REASON_EMPTY_RESPONSE: "\ubc95\uc81c\ucc98 API \uc751\ub2f5 \ubcf8\ubb38\uc774 \ube44\uc5b4 \uc788\uc2b5\ub2c8\ub2e4.",
+        REASON_HTML_ERROR_RESPONSE: "\ubc95\uc81c\ucc98 API\uac00 HTML \uc624\ub958 \ud398\uc774\uc9c0\ub97c \ubc18\ud658\ud588\uc2b5\ub2c8\ub2e4.",
+        REASON_API_ERROR_RESPONSE: "\ubc95\uc81c\ucc98 API\uac00 \uc5c5\ubb34 \uc624\ub958 \uc751\ub2f5\uc744 \ubc18\ud658\ud588\uc2b5\ub2c8\ub2e4.",
+        REASON_PARSING_ERROR: "\ubc95\uc81c\ucc98 API \uc751\ub2f5 \ud30c\uc2f1 \uc911 \uc624\ub958\uac00 \ubc1c\uc0dd\ud588\uc2b5\ub2c8\ub2e4.",
+    }.get(reason_type, "\ubc95\uc81c\ucc98 API \uc5f0\uacb0 \uc624\ub958 \uc6d0\uc778\uc744 \ucd94\uac00 \ud655\uc778\ud574\uc57c \ud569\ub2c8\ub2e4.")
 
 def suggested_fix(reason_type: str) -> str:
     return {
-        REASON_OK: "Live search/detail smoke가 가능하므로 Phase36 live ingest 설계를 진행할 수 있습니다.",
-        REASON_NOT_CONFIGURED: "MOLEG_API_ENABLED, MOLEG_LIVE_TEST_ENABLED, MOLEG_API_BASE_URL, MOLEG_API_KEY 또는 MOLEG_OC 설정을 확인하세요.",
-        REASON_LIVE_DISABLED: "안전한 로컬 환경에서만 MOLEG_LIVE_TEST_ENABLED=true로 설정한 뒤 smoke를 실행하세요.",
-        REASON_INVALID_BASE_URL: "MOLEG_API_BASE_URL을 https://www.law.go.kr 형식의 scheme 포함 URL로 설정하세요.",
-        REASON_DNS_ERROR: "DNS, VPN, 보안 프로그램, 사내망 DNS 정책을 확인하세요.",
-        REASON_CONNECTION_TIMEOUT: "네트워크 지연/방화벽을 확인하고 필요 시 MOLEG_API_TIMEOUT_SECONDS를 늘리세요.",
-        REASON_CONNECTION_REFUSED: "방화벽 또는 원격 endpoint 차단 여부를 확인하세요.",
-        REASON_TLS_ERROR: "인증서 신뢰 저장소, SSL inspection, 보안 프록시 설정을 확인하세요.",
-        REASON_PROXY_ERROR: "HTTP_PROXY/HTTPS_PROXY 설정과 프록시 인증 상태를 확인하세요.",
-        REASON_HTTP_ERROR_STATUS: "HTTP status와 endpoint path를 확인하고, 인증키 권한을 점검하세요.",
-        REASON_UNAUTHORIZED_OR_INVALID_KEY: "OC/MOLEG_API_KEY 값과 API 승인 상태를 확인하세요. 키 원문은 공유하지 마세요.",
-        REASON_INVALID_REQUEST_PARAMETER: "target/type/query/MST/OC 파라미터와 endpoint가 공식 규격과 맞는지 확인하세요.",
-        REASON_INVALID_RESPONSE_FORMAT: "응답 content-type과 format 요청(type=JSON/XML)을 확인하세요.",
-        REASON_EMPTY_RESPONSE: "endpoint, query, 인증키, 네트워크 장비의 빈 응답 차단 여부를 확인하세요.",
-        REASON_HTML_ERROR_RESPONSE: "프록시/차단 페이지 또는 잘못된 endpoint 여부를 확인하세요.",
-        REASON_API_ERROR_RESPONSE: "법제처 오류 코드/메시지를 sanitized 진단으로 확인하고 요청 파라미터와 키 권한을 점검하세요.",
-        REASON_PARSING_ERROR: "응답 format이 변경되었는지 확인하고 parser fixture를 갱신하세요.",
-    }.get(reason_type, "sanitized error_class/message와 네트워크 정책을 확인하세요.")
-
+        REASON_OK: "search/detail/parse\uac00 \ubaa8\ub450 ok\uc774\uba74 Phase37 live ingest\ub85c \uc9c4\ud589\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4.",
+        REASON_NOT_CONFIGURED: "MOLEG_API_ENABLED, MOLEG_LIVE_TEST_ENABLED, MOLEG_API_BASE_URL, MOLEG_API_KEY \ub610\ub294 MOLEG_OC \uc124\uc815\uc744 \ud655\uc778\ud558\uc138\uc694.",
+        REASON_LIVE_DISABLED: "\uc548\uc804\ud55c \ub85c\uceec \ud658\uacbd\uc5d0\uc11c\ub9cc MOLEG_LIVE_TEST_ENABLED=true\ub85c \uc124\uc815\ud558\uace0 smoke\ub97c \uc2e4\ud589\ud558\uc138\uc694.",
+        REASON_INVALID_BASE_URL: "MOLEG_API_BASE_URL\uc744 http://www.law.go.kr \ub610\ub294 https://www.law.go.kr \ud615\uc2dd\uc73c\ub85c \uc124\uc815\ud558\uc138\uc694.",
+        REASON_DNS_ERROR: "DNS, VPN, \ubcf4\uc548 \ud504\ub85c\uadf8\ub7a8, \uc0ac\ub0b4\ub9dd DNS \uc815\ucc45\uc744 \ud655\uc778\ud558\uc138\uc694.",
+        REASON_CONNECTION_TIMEOUT: "\ub124\ud2b8\uc6cc\ud06c \uc9c0\uc5f0 \ub610\ub294 \ubc29\ud654\ubcbd\uc744 \ud655\uc778\ud558\uace0 \ud544\uc694 \uc2dc MOLEG_API_TIMEOUT_SECONDS\ub97c \ub298\ub9ac\uc138\uc694.",
+        REASON_CONNECTION_REFUSED: "\ube0c\ub77c\uc6b0\uc800 \uc131\uacf5 \uc694\uccad\uacfc Python \uc694\uccad\uc758 http/https, User-Agent, trust_env, proxy \ucc28\uc774\ub97c \ud655\uc778\ud558\uc138\uc694.",
+        REASON_TLS_ERROR: "\uc778\uc99d\uc11c \uc800\uc7a5\uc18c, SSL inspection, \ubcf4\uc548 \ud504\ub85d\uc2dc \uc124\uc815\uc744 \ud655\uc778\ud558\uc138\uc694.",
+        REASON_PROXY_ERROR: "HTTP_PROXY/HTTPS_PROXY \uac12\uacfc \ube0c\ub77c\uc6b0\uc800 \ud504\ub85d\uc2dc \uc124\uc815 \ucc28\uc774\ub97c \ud655\uc778\ud558\uc138\uc694.",
+        REASON_HTTP_ERROR_STATUS: "HTTP status\uc640 endpoint path\ub97c \ud655\uc778\ud558\uace0, \uc778\uc99d\ud0a4 \uad8c\ud55c\uc744 \uc810\uac80\ud558\uc138\uc694.",
+        REASON_UNAUTHORIZED_OR_INVALID_KEY: "OC/MOLEG_API_KEY \uac12\uacfc API \uc2b9\uc778 \uc0c1\ud0dc\ub97c \ud655\uc778\ud558\uc138\uc694. \ud0a4 \uc6d0\ubb38\uc740 \uacf5\uc720\ud558\uc9c0 \ub9c8\uc138\uc694.",
+        REASON_INVALID_REQUEST_PARAMETER: "target/type/query/MST/OC \ud30c\ub77c\ubbf8\ud130\uc640 endpoint\uac00 \uacf5\uc2dd \uaddc\uaca9\uacfc \ub9de\ub294\uc9c0 \ud655\uc778\ud558\uc138\uc694.",
+        REASON_INVALID_RESPONSE_FORMAT: "\uc751\ub2f5 content-type\uacfc format \uc694\uccad(type=XML/HTML)\uc744 \ud655\uc778\ud558\uc138\uc694.",
+        REASON_EMPTY_RESPONSE: "endpoint, query, \uc778\uc99d\ud0a4, \ub124\ud2b8\uc6cc\ud06c \uc7a5\ube44\uc758 \ube48 \uc751\ub2f5 \ucc28\ub2e8 \uc5ec\ubd80\ub97c \ud655\uc778\ud558\uc138\uc694.",
+        REASON_HTML_ERROR_RESPONSE: "\ud504\ub85d\uc2dc \ucc28\ub2e8 \ud398\uc774\uc9c0 \ub610\ub294 \uc798\ubabb\ub41c endpoint \uc5ec\ubd80\ub97c \ud655\uc778\ud558\uc138\uc694.",
+        REASON_API_ERROR_RESPONSE: "\ubc95\uc81c\ucc98 \uc624\ub958 \ucf54\ub4dc/\uba54\uc2dc\uc9c0\ub97c sanitized \uc9c4\ub2e8\uc73c\ub85c \ud655\uc778\ud558\uace0 \uc694\uccad \ud30c\ub77c\ubbf8\ud130\uc640 \ud0a4 \uad8c\ud55c\uc744 \uc810\uac80\ud558\uc138\uc694.",
+        REASON_PARSING_ERROR: "\uc751\ub2f5 format\uc774 \ubcc0\uacbd\ub418\uc5c8\ub294\uc9c0 \ud655\uc778\ud558\uace0 parser fixture\ub97c \uac31\uc2e0\ud558\uc138\uc694.",
+    }.get(reason_type, "sanitized error_class/message\uc640 \ub124\ud2b8\uc6cc\ud06c \uc815\ucc45\uc744 \ud655\uc778\ud558\uc138\uc694.")
 
 def retryable(reason_type: str) -> bool:
     return reason_type in {REASON_DNS_ERROR, REASON_CONNECTION_TIMEOUT, REASON_CONNECTION_REFUSED, REASON_TLS_ERROR, REASON_PROXY_ERROR, REASON_HTTP_ERROR_STATUS, REASON_UNKNOWN_CONNECTION_ERROR}
@@ -462,6 +503,9 @@ def _api_error_reason(payload: Any) -> str:
 
 
 def _sample_law_count(payload: Any) -> int | None:
+    law_search = parse_law_search_payload(payload)
+    if law_search is not None:
+        return len(law_search["laws"])
     if isinstance(payload, dict):
         for key in ("law", "Law", "laws", "items"):
             value = payload.get(key)
@@ -478,6 +522,9 @@ def _sample_law_count(payload: Any) -> int | None:
 
 
 def _first_law_identifier(payload: Any) -> str | None:
+    law_search = parse_law_search_payload(payload)
+    if law_search and law_search["laws"]:
+        return law_search["laws"][0].get("mst")
     for item in _walk_dicts(payload):
         for key in ("MST", "mst", "lawId", "law_id", "법령일련번호"):
             value = item.get(key)
@@ -489,7 +536,7 @@ def _first_law_identifier(payload: Any) -> str | None:
 def _article_count(payload: Any) -> int | None:
     count = 0
     for item in _walk_dicts(payload):
-        if any(key in item for key in ("article", "Article", "조문", "조문번호", "articleNo")):
+        if any(key in item for key in ("\uc870\ubb38\ubc88\ud638", "\uc870\ubb38\uc81c\ubaa9", "articleNo", "article_no", "articleTitle")):
             count += 1
     return count or None
 
@@ -527,11 +574,28 @@ def _valid_base_url(base_url: str) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.hostname)
 
 
+def sanitized_url(base_url: str | None, endpoint: str, params: dict[str, str]) -> str | None:
+    return _sanitized_url(base_url, endpoint, params)
+
+
 def _sanitized_url(base_url: str | None, endpoint: str, params: dict[str, str]) -> str | None:
     if not base_url:
         return None
     safe_params = {key: SECRET_REDACTION if key in SECRET_KEYS else value for key, value in params.items()}
     return f"{urljoin(f'{base_url}/', endpoint.lstrip('/'))}?{urlencode(safe_params)}"
+
+
+def _sanitize_url_text(value: str | None) -> str | None:
+    if value is None:
+        return None
+    parsed = urlparse(value)
+    if not parsed.query:
+        return _sanitize_text(value)
+    safe_params: list[str] = []
+    for part in parsed.query.split("&"):
+        key = part.split("=", 1)[0]
+        safe_params.append(f"{key}={SECRET_REDACTION}" if key in SECRET_KEYS else part)
+    return parsed._replace(query="&".join(safe_params)).geturl()
 
 
 def _safe_response_preview(value: str, secret: str | None = None) -> str:
@@ -596,3 +660,62 @@ def _config_detail(api_enabled: bool, live_enabled: bool, base_url: str, api_key
         "retry_count": retry_count,
         "backoff_seconds": backoff_seconds,
     }
+
+def parse_law_search_payload(payload: Any) -> dict[str, Any] | None:
+    root = payload.get("LawSearch") if isinstance(payload, dict) else None
+    if not isinstance(root, dict):
+        return None
+    result_code = _text(root.get("resultCode"))
+    if result_code and result_code != "00":
+        raise MolegLiveClientError(REASON_API_ERROR_RESPONSE)
+    laws = root.get("law") or []
+    if isinstance(laws, dict):
+        laws = [laws]
+    if not isinstance(laws, list):
+        laws = []
+    parsed_laws: list[dict[str, Any]] = []
+    for item in laws:
+        if not isinstance(item, dict):
+            continue
+        parsed_laws.append({
+            "law_name": _text(item.get("\ubc95\ub839\uba85\ud55c\uae00")),
+            "mst": _text(item.get("\ubc95\ub839\uc77c\ub828\ubc88\ud638")) or _text(item.get("MST")),
+            "law_id": _text(item.get("\ubc95\ub839ID")),
+            "promulgation_date": _text(item.get("\uacf5\ud3ec\uc77c\uc790")),
+            "promulgation_no": _text(item.get("\uacf5\ud3ec\ubc88\ud638")),
+            "revision_type": _text(item.get("\uc81c\uac1c\uc815\uad6c\ubd84\uba85")),
+            "ministry_name": _text(item.get("\uc18c\uad00\ubd80\ucc98\uba85")),
+            "law_type": _text(item.get("\ubc95\ub839\uad6c\ubd84\uba85")),
+            "effective_date": _text(item.get("\uc2dc\ud589\uc77c\uc790")),
+            "detail_link_sanitized": _sanitize_url_text(_text(item.get("\ubc95\ub839\uc0c1\uc138\ub9c1\ud06c"))),
+        })
+    return {
+        "result_code": result_code,
+        "result_msg": _text(root.get("resultMsg")),
+        "total_cnt": _int(root.get("totalCnt")),
+        "page": _int(root.get("page")),
+        "num_of_rows": _int(root.get("numOfRows")),
+        "laws": parsed_laws,
+    }
+
+
+def _article_title_count(payload: Any) -> int:
+    return sum(1 for item in _walk_dicts(payload) if any(key in item for key in ("\uc870\ubb38\uc81c\ubaa9", "articleTitle", "title")))
+
+
+def _article_number_count(payload: Any) -> int:
+    return sum(1 for item in _walk_dicts(payload) if any(key in item for key in ("\uc870\ubb38\ubc88\ud638", "articleNo", "article_no")))
+
+
+def _text(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _int(value: Any) -> int | None:
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return None

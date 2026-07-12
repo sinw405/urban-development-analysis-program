@@ -77,6 +77,9 @@ export function LawUpdates() {
             <p>
               조치: {diagnostic.suggested_fix ?? diagnostic.next_action} · 검색 {diagnostic.search_probe?.status ?? "대기"} · 상세조회 {diagnostic.detail_probe?.status ?? "대기"} · 파싱 {diagnostic.parse_probe?.status ?? "대기"}
             </p>
+            <p>
+              브라우저 성공 기준 {diagnostic.browser_success_metadata_present ? "반영" : "미반영"} · 선택 endpoint {diagnostic.selected_endpoint ?? "미선택"} · live ingest {diagnostic.ready_for_live_ingest ? "가능" : "대기"}
+            </p>
           </>
         ) : (
           <p>{diagnosticError ?? "법제처 API 진단 상태를 확인 중입니다."}</p>
