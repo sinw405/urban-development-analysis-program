@@ -138,19 +138,35 @@ export interface AnalysisHistoryRow extends AnalysisSummary {
 
 export interface LawUpdateEvent {
   event_id: number;
-  law_id: number;
-  article_id: number;
+  event_kind: "legacy_law_update" | "law_change_impact" | string;
+  law_id: number | string | null;
+  law_name: string | null;
+  article_id: number | null;
   previous_version_id: number | null;
   new_version_id: number | null;
+  from_mst: string | null;
+  to_mst: string | null;
+  from_effective_date: string | null;
+  to_effective_date: string | null;
+  article_no: string | null;
+  article_title: string | null;
   change_type: string;
   detected_at: string;
   effective_date: string | null;
   impacted_step_codes: string[];
+  affected_procedure_code: string | null;
+  affected_procedure_name: string | null;
+  impact_level: string | null;
+  review_status: string | null;
+  mapping_status: string | null;
+  impact_reason: string | null;
+  official_url: string | null;
+  official_url_status: string;
+  applicable: boolean | null;
   status: string;
   source: string;
   metadata_json: Record<string, unknown> | null;
 }
-
 export interface LawUpdateListResponse {
   items: LawUpdateEvent[];
   since: string | null;

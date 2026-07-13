@@ -8,7 +8,7 @@ from fastapi import HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
-from app.models import OfficialLawArticleRecord, OfficialLawDocument, ProcedureOfficialArticleCandidate
+from app.models import LawChangeImpactEvent, OfficialLawArticleRecord, OfficialLawDocument, ProcedureOfficialArticleCandidate
 from app.schemas.analyze import LegalReference, ProcedureArticleCandidate, ProcedureStep
 from app.schemas.official_law_source import (
     ProcedureArticleCandidateActionResponse,
@@ -162,6 +162,9 @@ def _candidate_review_status(db: Session, candidate: ProcedureArticleCandidate) 
         return "rejected"
     if not candidate.is_confirmed:
         return "unconfirmed"
+    impact_status = _latest_impact_review_status(db, candidate.id)
+    if impact_status in {"needs_revalidation", "stale"}:
+        return impact_status
     current_document = db.scalar(
         select(OfficialLawDocument)
         .where(OfficialLawDocument.law_id == candidate.law_id, OfficialLawDocument.source_mode == "live")
@@ -172,6 +175,17 @@ def _candidate_review_status(db: Session, candidate: ProcedureArticleCandidate) 
         return STATUS_NEEDS_REVALIDATION
     return STATUS_CONFIRMED
 
+
+def _latest_impact_review_status(db: Session, candidate_id: int | None) -> str | None:
+    if candidate_id is None:
+        return None
+    event = db.scalar(
+        select(LawChangeImpactEvent)
+        .where(LawChangeImpactEvent.candidate_id == candidate_id)
+        .order_by(LawChangeImpactEvent.detected_at.desc(), LawChangeImpactEvent.id.desc())
+        .limit(1)
+    )
+    return None if event is None else event.derived_review_status
 
 def _legal_reference_from_confirmed_candidate(candidate: ProcedureArticleCandidate) -> LegalReference:
     return LegalReference(

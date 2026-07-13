@@ -97,3 +97,6 @@ It must not invent a URL from guessed law or article identifiers.
 ## Recovery
 
 If a candidate was confirmed or rejected in error, run `reopen` with a reviewer and reason. The candidate returns to unconfirmed review state and can be reviewed again.
+## Phase 40 law change impact
+
+법령 버전 diff와 절차 후보 영향 이벤트 정책은 [law_change_impact.md](law_change_impact.md)를 참고한다. Phase 40부터 confirm/reject/reopen 작업은 기존 candidate 행의 최신 상태 필드와 별도로 append-only procedure_article_review_events에도 기록된다.

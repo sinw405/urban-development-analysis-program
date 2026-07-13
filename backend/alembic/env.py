@@ -1,4 +1,4 @@
-﻿from logging.config import fileConfig
+from logging.config import fileConfig
 from pathlib import Path
 import sys
 
@@ -18,11 +18,14 @@ from app.models import (  # noqa: F401
     LawArticle,
     LawArticleVersion,
     LawUpdateEvent,
+    LawChangeImpactEvent,
     OfficialLawSourceEvidence,
     OfficialLawIngestRun,
     OfficialLawDocument,
     OfficialLawArticleRecord,
     ProcedureLegalReference,
+    ProcedureArticleReviewEvent,
+    ProcedureOfficialArticleCandidate,
     Project,
 )
 

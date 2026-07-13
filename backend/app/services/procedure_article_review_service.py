@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
-from app.models import OfficialLawArticleRecord, OfficialLawDocument, ProcedureOfficialArticleCandidate
+from app.models import LawChangeImpactEvent, OfficialLawArticleRecord, OfficialLawDocument, ProcedureArticleReviewEvent, ProcedureOfficialArticleCandidate
 from app.services.rule_loader import load_yaml_rule
 
 REVIEW_SOURCE_CONFIRMED = "manual_review_confirmed"
@@ -52,7 +52,7 @@ def candidate_detail(db: Session, candidate_id: int, include_article_text: bool 
     document = candidate.document
     article = candidate.article
     current_document = _current_document(db, candidate.law_id)
-    status = candidate_review_status(candidate, current_document)
+    status = _candidate_detail_status(db, candidate, current_document)
     official_url = None
     official_url_status = "unavailable"
     if document is not None and document.sanitized_source_url:
@@ -123,6 +123,19 @@ def candidate_review_status(candidate: ProcedureOfficialArticleCandidate, curren
     return STATUS_UNCONFIRMED
 
 
+def _candidate_detail_status(db: Session, candidate: ProcedureOfficialArticleCandidate, current_document: OfficialLawDocument | None) -> str:
+    base_status = candidate_review_status(candidate, current_document)
+    if base_status == STATUS_REJECTED:
+        return base_status
+    impact = db.scalar(
+        select(LawChangeImpactEvent)
+        .where(LawChangeImpactEvent.candidate_id == candidate.id)
+        .order_by(LawChangeImpactEvent.detected_at.desc(), LawChangeImpactEvent.id.desc())
+        .limit(1)
+    )
+    if impact is not None and impact.derived_review_status in {STATUS_NEEDS_REVALIDATION, STATUS_STALE}:
+        return impact.derived_review_status
+    return base_status
 def _review_action(db: Session, candidate_id: int, reviewer: str | None, note: str | None, source: str, is_confirmed: bool, new_status: str, force_rollback: bool) -> ReviewActionResult:
     if not reviewer or not reviewer.strip():
         return ReviewActionResult(status="validation_error", candidate_id=candidate_id, errors=["reviewer_required"])
@@ -131,14 +144,31 @@ def _review_action(db: Session, candidate_id: int, reviewer: str | None, note: s
     candidate = db.scalar(_candidate_statement().where(ProcedureOfficialArticleCandidate.id == candidate_id))
     if candidate is None:
         return ReviewActionResult(status="not_found", candidate_id=candidate_id, errors=["candidate_not_found"])
-    previous = candidate_review_status(candidate, _current_document(db, candidate.law_id))
+    current_document = _current_document(db, candidate.law_id)
+    previous = candidate_review_status(candidate, current_document)
     reviewed_at = datetime.now(UTC)
+    clean_reviewer = reviewer.strip()
+    clean_note = note.strip()
     try:
         candidate.is_confirmed = is_confirmed
         candidate.confirmed_at = reviewed_at
-        candidate.confirmed_by = reviewer.strip()
+        candidate.confirmed_by = clean_reviewer
         candidate.confirmed_source = source
-        candidate.confirmation_note = _append_review_note(candidate.confirmation_note, previous, new_status, reviewer.strip(), note.strip(), reviewed_at)
+        candidate.confirmation_note = _append_review_note(candidate.confirmation_note, previous, new_status, clean_reviewer, clean_note, reviewed_at)
+        db.add(
+            ProcedureArticleReviewEvent(
+                candidate_id=candidate.id,
+                previous_status=previous,
+                new_status=new_status,
+                reviewer=clean_reviewer,
+                review_note=clean_note,
+                reviewed_at=reviewed_at,
+                reviewed_mst=candidate.mst,
+                reviewed_effective_date=None if candidate.document is None else candidate.document.enforcement_date,
+                source=source,
+                metadata_json={"raw_payload_stored": False, "secret_exposed": False},
+            )
+        )
         if force_rollback:
             raise RuntimeError("PHASE39_TEST_ROLLBACK")
         db.commit()
@@ -147,7 +177,6 @@ def _review_action(db: Session, candidate_id: int, reviewer: str | None, note: s
     except Exception as exc:
         db.rollback()
         return ReviewActionResult(status="rolled_back", candidate_id=candidate_id, previous_status=previous, new_status=new_status, reviewer=reviewer, rollback=True, errors=[exc.__class__.__name__])
-
 
 def _append_review_note(existing: str | None, previous: str, new_status: str, reviewer: str, note: str, reviewed_at: datetime) -> str:
     entry = f"[{reviewed_at.isoformat()}] {previous} -> {new_status}; reviewer={reviewer}; note={note}"
