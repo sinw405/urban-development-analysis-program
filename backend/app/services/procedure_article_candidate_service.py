@@ -9,12 +9,13 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.models import OfficialLawArticleRecord, OfficialLawDocument, ProcedureOfficialArticleCandidate
-from app.schemas.analyze import ProcedureArticleCandidate, ProcedureStep
+from app.schemas.analyze import LegalReference, ProcedureArticleCandidate, ProcedureStep
 from app.schemas.official_law_source import (
     ProcedureArticleCandidateActionResponse,
     ProcedureArticleCandidateConfirmationRequest,
     ProcedureArticleCandidateUnconfirmRequest,
 )
+from app.services.procedure_article_review_service import REVIEW_SOURCE_REJECTED, STATUS_CONFIRMED, STATUS_NEEDS_REVALIDATION
 from app.services.rule_loader import load_yaml_rule
 
 MATCH_STATUS_CANDIDATE = "candidate"
@@ -128,14 +129,21 @@ def attach_article_candidates_to_analysis(db: Session, procedure_steps: list[Pro
     by_code = {item["procedure_code"]: [ProcedureArticleCandidate.model_validate(candidate) for candidate in item["candidates"]] for item in response["items"]}
     unmatched = {item["procedure_code"] for item in response["unmatched_steps"]}
     for step in procedure_steps:
-        candidates = _sort_candidates(by_code.get(step.step_code, []))
+        candidates = [candidate for candidate in _sort_candidates(by_code.get(step.step_code, [])) if not _is_rejected_candidate(candidate)]
+        statuses = [_candidate_review_status(db, candidate) for candidate in candidates]
+        valid_confirmed = [candidate for candidate, status in zip(candidates, statuses) if status == STATUS_CONFIRMED]
         step.official_article_candidates = candidates
         step.legal_reference_candidates = candidates
         step.reference_candidate_count = len(candidates)
-        if candidates:
-            if any(candidate.is_confirmed for candidate in candidates):
-                step.reference_status = "confirmed_reference_available"
-            elif any(candidate.source_mode_detail == "fixture_only" for candidate in candidates):
+        for candidate in valid_confirmed:
+            step.legal_references.append(_legal_reference_from_confirmed_candidate(candidate))
+        if valid_confirmed:
+            step.legal_reference_status = "verified"
+            step.reference_status = "confirmed_reference_available"
+        elif any(status == STATUS_NEEDS_REVALIDATION for status in statuses):
+            step.reference_status = "needs_revalidation"
+        elif candidates:
+            if any(candidate.source_mode_detail == "fixture_only" for candidate in candidates):
                 step.reference_status = "fixture_only"
             else:
                 step.reference_status = "official_candidate_available"
@@ -144,6 +152,52 @@ def attach_article_candidates_to_analysis(db: Session, procedure_steps: list[Pro
         else:
             step.reference_status = "needs_seed_data"
 
+
+def _is_rejected_candidate(candidate: ProcedureArticleCandidate) -> bool:
+    return candidate.confirmed_source == REVIEW_SOURCE_REJECTED
+
+
+def _candidate_review_status(db: Session, candidate: ProcedureArticleCandidate) -> str:
+    if candidate.confirmed_source == REVIEW_SOURCE_REJECTED:
+        return "rejected"
+    if not candidate.is_confirmed:
+        return "unconfirmed"
+    current_document = db.scalar(
+        select(OfficialLawDocument)
+        .where(OfficialLawDocument.law_id == candidate.law_id, OfficialLawDocument.source_mode == "live")
+        .order_by(OfficialLawDocument.enforcement_date.desc().nullslast(), OfficialLawDocument.id.desc())
+        .limit(1)
+    )
+    if current_document is not None and candidate.mst and current_document.mst and candidate.mst != current_document.mst:
+        return STATUS_NEEDS_REVALIDATION
+    return STATUS_CONFIRMED
+
+
+def _legal_reference_from_confirmed_candidate(candidate: ProcedureArticleCandidate) -> LegalReference:
+    return LegalReference(
+        step_code=candidate.procedure_code,
+        reference_status="confirmed",
+        reference_quality="verified",
+        placeholder="CONFIRMED_OFFICIAL_ARTICLE",
+        notes={
+            "source": "procedure_official_article_candidate",
+            "candidate_id": candidate.id,
+            "law_title": candidate.law_title,
+            "official_law_id": candidate.law_id,
+            "mst": candidate.mst,
+            "article_no": candidate.article_no,
+            "article_title": candidate.article_title,
+            "article_anchor": candidate.article_anchor,
+            "confirmation_status": "confirmed",
+            "confirmed_at": None if candidate.confirmed_at is None else candidate.confirmed_at.isoformat(),
+            "confirmed_by": candidate.confirmed_by,
+            "confirmed_source": candidate.confirmed_source,
+            "confirmation_note": candidate.confirmation_note,
+            "applicable": True,
+            "official_url": None,
+            "official_url_status": "unavailable",
+        },
+    )
 
 def get_candidate_diagnostic_counts(db: Session, analyze_step_codes: list[str] | None = None) -> dict[str, Any]:
     total = db.scalar(select(func.count()).select_from(ProcedureOfficialArticleCandidate)) or 0
