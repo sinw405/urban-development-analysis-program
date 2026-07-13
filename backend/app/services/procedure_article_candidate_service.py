@@ -76,8 +76,8 @@ def resolve_procedure_article_candidates(
             candidates = [candidate for candidate in candidates if candidate.is_confirmed is is_confirmed]
         if candidates or include_unmatched:
             groups.append({"procedure_code": code, "procedure_name": name, "candidates": [candidate.model_dump() for candidate in candidates]})
-        if not candidates:
-            unmatched_steps.append({"procedure_code": code, "procedure_name": name, "match_status": MATCH_STATUS_NO_MATCH})
+        if not candidates or (include_unmatched and _requires_manual_review(candidates)):
+            unmatched_steps.append({"procedure_code": code, "procedure_name": name, "match_status": MATCH_STATUS_NO_MATCH if not candidates else MATCH_STATUS_NEEDS_REVIEW})
     if unmatched_steps:
         warnings.append("Some procedure steps have no official article candidates. This is not a legal determination.")
 
@@ -384,6 +384,10 @@ def _action_response(candidate: ProcedureOfficialArticleCandidate, status: str) 
         secret_exposed=False,
     )
 
+
+
+def _requires_manual_review(candidates: list[ProcedureArticleCandidate]) -> bool:
+    return bool(candidates) and not any(candidate.is_confirmed or candidate.source_mode_detail in {"official_seed_db", "official_manual_db"} for candidate in candidates)
 
 def _filter_highest_source_priority(candidates: list[ProcedureArticleCandidate]) -> list[ProcedureArticleCandidate]:
     if not candidates:

@@ -1,4 +1,4 @@
-﻿from datetime import date
+from datetime import date
 from typing import Any
 
 from pydantic import BaseModel
@@ -40,6 +40,17 @@ class LawArticleSummary(BaseModel):
 class LawArticleListResponse(BaseModel):
     items: list[LawArticleSummary]
     as_of: date | None = None
+    requested_as_of: date | None = None
+    coverage_status: str | None = None
+    available_from: date | None = None
+    available_to: date | None = None
+    total_articles: int = 0
+    applicable_articles: int = 0
+    current_version_count: int = 0
+    selected_mst: str | None = None
+    selected_effective_date: date | None = None
+    version_status: str | None = None
+    history_complete: bool = False
 
 
 class LawArticleVersionListResponse(BaseModel):
