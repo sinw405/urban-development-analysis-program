@@ -71,7 +71,7 @@ def resolve_procedure_article_candidates(
             law_title=law_title,
             source_mode_detail=source_mode_detail,
         )
-        candidates = _sort_candidates(candidates)
+        candidates = _filter_highest_source_priority(_sort_candidates(candidates))
         if is_confirmed is not None:
             candidates = [candidate for candidate in candidates if candidate.is_confirmed is is_confirmed]
         if candidates or include_unmatched:
@@ -385,8 +385,24 @@ def _action_response(candidate: ProcedureOfficialArticleCandidate, status: str) 
     )
 
 
+def _filter_highest_source_priority(candidates: list[ProcedureArticleCandidate]) -> list[ProcedureArticleCandidate]:
+    if not candidates:
+        return candidates
+    best = min(_source_priority(candidate.source_mode_detail) for candidate in candidates)
+    return [candidate for candidate in candidates if _source_priority(candidate.source_mode_detail) == best]
+
+
 def _sort_candidates(candidates: list[ProcedureArticleCandidate]) -> list[ProcedureArticleCandidate]:
-    return sorted(candidates, key=lambda item: (not item.is_confirmed, -item.match_score, item.id or 0))
+    return sorted(candidates, key=lambda item: (not item.is_confirmed, _source_priority(item.source_mode_detail), -item.match_score, item.id or 0))
+
+
+def _source_priority(source_mode_detail: str | None) -> int:
+    return {
+        "official_seed_db": 0,
+        "official_manual_db": 1,
+        "official_db": 2,
+        "fixture_only": 3,
+    }.get(source_mode_detail or "", 9)
 
 
 def _source_mode_detail(source_mode: str | None) -> str:

@@ -91,9 +91,9 @@ class OfficialLawDbSnapshotProvider:
         candidates = self.db.scalars(statement).unique().all()
         exact = [document for document in candidates if _normalize(document.law_title) == normalized_law_name]
         if exact:
-            return exact[0]
+            return sorted(exact, key=_document_priority)[0]
         contains = [document for document in candidates if normalized_law_name in _normalize(document.law_title)]
-        return contains[0] if contains else None
+        return sorted(contains, key=_document_priority)[0] if contains else None
 
 
 def get_official_law_snapshot_status(db: Session) -> OfficialLawSnapshotStatusResponse:
@@ -156,6 +156,14 @@ def _article_snapshot(document: OfficialLawDocument, article: OfficialLawArticle
         evidence_type="official_law_documents_snapshot",
         source_hint="Loaded from official_law_documents DB snapshot.",
         source_mode_detail=_snapshot_source_mode_detail(document.source_mode),
+    )
+
+
+def _document_priority(document: OfficialLawDocument) -> tuple[int, object, int]:
+    return (
+        {"official_seed": 0, "official_manual": 1, "fixture": 2, "mock": 2, "live": 3}.get(document.source_mode or "", 9),
+        document.enforcement_date or date.min,
+        document.id,
     )
 
 
