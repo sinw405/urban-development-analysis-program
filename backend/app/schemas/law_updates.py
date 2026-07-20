@@ -39,3 +39,35 @@ class LawUpdateEventSummary(BaseModel):
 class LawUpdateEventListResponse(BaseModel):
     items: list[LawUpdateEventSummary]
     since: date | None = None
+
+
+class LiveLawImpactRequest(BaseModel):
+    law_name: str
+    from_mst: str | None = None
+    to_mst: str | None = None
+    dry_run: bool = True
+
+
+class LiveLawVersionSummary(BaseModel):
+    mst: str | None = None
+    promulgation_date: date | None = None
+    effective_date: date | None = None
+    status: str | None = None
+
+
+class LiveLawImpactResponse(BaseModel):
+    law_name: str
+    source: str = "MOLEG"
+    status: str
+    selection_mode: str
+    selection_reason: str | None = None
+    from_version: LiveLawVersionSummary | None = None
+    to_version: LiveLawVersionSummary | None = None
+    changed: bool
+    changed_articles: list[dict[str, Any]]
+    impacted_rules: list[str]
+    warnings: list[str]
+    errors: list[str]
+    checked_at: datetime
+    discovery: dict[str, Any] | None = None
+    secret_exposed: bool = False
