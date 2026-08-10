@@ -4,6 +4,8 @@ from app.models.law_article import LawArticle
 from app.models.law_article_version import LawArticleVersion
 from app.models.law_update_event import LawUpdateEvent
 from app.models.law_change_impact_event import LawChangeImpactEvent
+from app.models.live_law_change_event import LiveLawChangeEvent
+from app.models.live_law_change_event_audit import LiveLawChangeEventAudit
 from app.models.official_law_article import OfficialLawArticleRecord
 from app.models.official_law_document import OfficialLawDocument
 from app.models.official_law_ingest_run import OfficialLawIngestRun
@@ -20,6 +22,8 @@ __all__ = [
     "LawArticleVersion",
     "LawUpdateEvent",
     "LawChangeImpactEvent",
+    "LiveLawChangeEvent",
+    "LiveLawChangeEventAudit",
     "OfficialLawArticleRecord",
     "OfficialLawDocument",
     "OfficialLawIngestRun",

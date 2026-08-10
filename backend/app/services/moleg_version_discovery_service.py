@@ -177,6 +177,7 @@ class LiveLawChangeImpactResult:
     checked_at: datetime = field(default_factory=lambda: datetime.now(UTC))
     secret_exposed: bool = False
     raw_payload_stored: bool = False
+    phase43: Any | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -426,6 +427,9 @@ def analyze_live_law_change(
     dry_run: bool = True,
     force_rollback: bool = False,
     max_versions: int = 50,
+    ensure_versions: bool = False,
+    persist_event: bool = False,
+    force_reanalyze: bool = False,
 ) -> LiveLawChangeImpactResult:
     mode = "manual" if from_mst or to_mst else "auto"
     result = LiveLawChangeImpactResult(status="started", law_name=law_name, mode=mode)
@@ -461,6 +465,15 @@ def analyze_live_law_change(
         result.errors.append("different_mst_pair_not_found")
         return result
     result.selection = selection
+    if ensure_versions or persist_event:
+        from app.services.live_law_change_persistence_service import execute_phase43
+        phase43 = execute_phase43(db, client, selection, ensure_versions=ensure_versions, persist_event=persist_event, force_reanalyze=force_reanalyze)
+        result.phase43 = phase43
+        result.impact = phase43.impact
+        result.status = phase43.status
+        result.warnings.extend(phase43.warnings)
+        result.errors.extend(phase43.errors)
+        return result
     impact = LawVersionImpactService(db).analyze(law_name, selection.from_mst, selection.to_mst, dry_run=dry_run, force_rollback=force_rollback)
     result.impact = impact
     result.status = "ok" if impact.status == "ok" else impact.status

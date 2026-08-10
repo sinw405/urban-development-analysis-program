@@ -46,6 +46,9 @@ class LiveLawImpactRequest(BaseModel):
     from_mst: str | None = None
     to_mst: str | None = None
     dry_run: bool = True
+    ensure_versions: bool = True
+    persist_event: bool = True
+    force_reanalyze: bool = False
 
 
 class LiveLawVersionSummary(BaseModel):
@@ -53,6 +56,12 @@ class LiveLawVersionSummary(BaseModel):
     promulgation_date: date | None = None
     effective_date: date | None = None
     status: str | None = None
+
+
+class LiveLawChangeEventSummary(BaseModel):
+    id: int
+    idempotency_key: str
+    created: bool
 
 
 class LiveLawImpactResponse(BaseModel):
@@ -64,10 +73,15 @@ class LiveLawImpactResponse(BaseModel):
     from_version: LiveLawVersionSummary | None = None
     to_version: LiveLawVersionSummary | None = None
     changed: bool
+    version_changed: bool = False
+    content_changed: bool | None = None
+    analysis_status: str = "missing_version"
     changed_articles: list[dict[str, Any]]
-    impacted_rules: list[str]
+    impacted_rules: list[dict[str, Any]]
     warnings: list[str]
     errors: list[str]
     checked_at: datetime
     discovery: dict[str, Any] | None = None
+    event: LiveLawChangeEventSummary | None = None
+    version_documents: list[dict[str, Any]] = []
     secret_exposed: bool = False

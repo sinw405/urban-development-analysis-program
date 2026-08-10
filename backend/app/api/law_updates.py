@@ -104,6 +104,9 @@ def analyze_live_law_update_impact(request: LiveLawImpactRequest, db: Session = 
         from_mst=request.from_mst,
         to_mst=request.to_mst,
         dry_run=request.dry_run,
+        ensure_versions=request.ensure_versions,
+        persist_event=request.persist_event,
+        force_reanalyze=request.force_reanalyze,
     )
     if result.status in {"invalid_request", "invalid_version_pair"}:
         raise HTTPException(status_code=400, detail={"status": result.status, "errors": result.errors})
@@ -126,37 +129,32 @@ def get_law_update_event(event_id: int, kind: str | None = Query(default=None), 
 def _live_impact_response(result) -> LiveLawImpactResponse:
     selection = result.selection
     impact = result.impact
+    phase43 = result.phase43
     changed_articles = []
-    impacted_rules: list[str] = []
+    impacted_rules = []
     changed = False
-    if impact is not None:
+    if phase43 is not None:
+        changed_articles = phase43.changed_articles
+        impacted_rules = phase43.impacted_rules
+        changed = bool(phase43.content_changed)
+    elif impact is not None:
         changed_articles = [item for item in impact.affected_articles if item.get("change_type") != "unchanged"]
-        impacted_rules = sorted({item.get("affected_procedure_code") for item in changed_articles if item.get("affected_procedure_code")})
+        impacted_rules = [{"rule_type": "procedure", "rule_id": str(code), "rule_name": None, "related_article": None, "impact_reason": None, "review_required": True} for code in sorted({item.get("affected_procedure_code") for item in changed_articles if item.get("affected_procedure_code")})]
         summary = impact.diff_summary
         changed = any(summary.get(key, 0) > 0 for key in ("added", "removed", "changed"))
     return LiveLawImpactResponse(
-        law_name=result.law_name,
-        source=result.source,
-        status=result.status,
-        selection_mode=result.mode,
+        law_name=result.law_name, source=result.source, status=result.status, selection_mode=result.mode,
         selection_reason=None if selection is None else selection.selection_reason,
         from_version=None if selection is None else _version(selection.from_version),
         to_version=None if selection is None else _version(selection.to_version),
-        changed=changed,
-        changed_articles=changed_articles,
-        impacted_rules=impacted_rules,
-        warnings=result.warnings,
-        errors=result.errors,
+        changed=changed, version_changed=False if selection is None else selection.from_mst != selection.to_mst,
+        content_changed=changed if phase43 is None and impact is not None else (None if phase43 is None else phase43.content_changed),
+        analysis_status=result.status if phase43 is None else phase43.analysis_status,
+        changed_articles=changed_articles, impacted_rules=impacted_rules, warnings=result.warnings, errors=result.errors,
         checked_at=result.checked_at,
-        discovery=None if result.discovery is None else {
-            "status": result.discovery.status,
-            "total_count": result.discovery.total_count,
-            "page_count": result.discovery.page_count,
-            "requested_pages": result.discovery.requested_pages,
-            "collected_item_count": result.discovery.collected_item_count,
-            "exact_match_count": result.discovery.exact_match_count,
-            "distinct_mst_count": result.discovery.distinct_mst_count,
-        },
+        discovery=None if result.discovery is None else {"status": result.discovery.status, "total_count": result.discovery.total_count, "page_count": result.discovery.page_count, "requested_pages": result.discovery.requested_pages, "collected_item_count": result.discovery.collected_item_count, "exact_match_count": result.discovery.exact_match_count, "distinct_mst_count": result.discovery.distinct_mst_count},
+        event=None if phase43 is None or phase43.event is None else {"id": phase43.event.id, "idempotency_key": phase43.event.idempotency_key, "created": phase43.event_created},
+        version_documents=[] if phase43 is None else [item.to_dict() for item in phase43.version_states],
         secret_exposed=result.secret_exposed,
     )
 
