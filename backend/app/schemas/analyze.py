@@ -69,6 +69,9 @@ class ProcedureStep(BaseModel):
     step_code: str
     step_name: str
     sequence: int
+    standard_stage_code: str | None = None
+    standard_stage_name: str | None = None
+    depends_on: list[str] = Field(default_factory=list)
     description: str
     required_documents: list[str]
     related_agencies: list[str]
@@ -81,6 +84,15 @@ class ProcedureStep(BaseModel):
     reference_candidate_count: int = 0
     reference_status: str = "needs_seed_data"
     notes: list[str] = Field(default_factory=list)
+
+
+class StandardProcedureStage(BaseModel):
+    stage_code: str
+    stage_name: str
+    sequence: int
+    depends_on: list[str] = Field(default_factory=list)
+    detail_step_codes: list[str] = Field(default_factory=list)
+    legal_basis_status: str = "unresolved"
 
 
 class AssessmentItem(BaseModel):
@@ -102,6 +114,7 @@ class AnalyzeResponse(BaseModel):
     local_government: str
     as_of: date | None = None
     procedures: list[ProcedureStep]
+    standard_procedure_graph: list[StandardProcedureStage] = Field(default_factory=list)
     assessments: list[AssessmentItem]
     warnings: list[str]
     project_id: int | None = None

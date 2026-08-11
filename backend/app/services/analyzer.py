@@ -5,6 +5,7 @@ from app.schemas.analyze import (
     AnalyzeResponse,
     AssessmentItem,
     ProcedureStep,
+    StandardProcedureStage,
 )
 from app.services.rule_loader import load_yaml_rule
 
@@ -73,6 +74,78 @@ def _step_from_rule(step: dict[str, Any]) -> ProcedureStep:
         legal_references=[],
         notes=step.get("notes", []),
     )
+
+
+def _build_standard_graph(
+    procedure_rules: dict[str, Any], procedures: list[ProcedureStep]
+) -> list[StandardProcedureStage]:
+    raw_stages = procedure_rules.get("standard_procedure_graph", [])
+    if not isinstance(raw_stages, list) or not raw_stages:
+        raise ValueError("standard_procedure_graph must be a non-empty list")
+
+    stage_codes = [stage.get("stage_code") for stage in raw_stages]
+    if any(not code for code in stage_codes) or len(stage_codes) != len(set(stage_codes)):
+        raise ValueError("standard procedure stage codes must be present and unique")
+
+    detail_to_stage: dict[str, dict[str, Any]] = {}
+    seen_stage_codes: set[str] = set()
+    for stage in sorted(raw_stages, key=lambda item: (item["sequence"], item["stage_code"])):
+        dependencies = set(stage.get("depends_on", []))
+        unknown_dependencies = dependencies - set(stage_codes)
+        if unknown_dependencies:
+            raise ValueError(f"unknown standard stage dependencies: {sorted(unknown_dependencies)}")
+        if not dependencies.issubset(seen_stage_codes):
+            raise ValueError(f"standard stage dependencies must refer to earlier stages: {stage['stage_code']}")
+        seen_stage_codes.add(stage["stage_code"])
+        for step_code in stage.get("detail_step_codes", []):
+            if step_code in detail_to_stage:
+                raise ValueError(f"detail step is mapped to multiple standard stages: {step_code}")
+            detail_to_stage[step_code] = stage
+
+    configured_codes = {step["step_code"] for step in procedure_rules.get("common_steps", [])}
+    for section in ("implementation_method_rules", "implementer_type_rules"):
+        for branch in procedure_rules.get(section, {}).values():
+            configured_codes.update(step["step_code"] for step in branch.get("add_steps", []))
+    graph_codes = set(detail_to_stage)
+    if configured_codes != graph_codes:
+        raise ValueError(
+            "standard graph detail mappings must match configured procedure steps: "
+            f"missing={sorted(configured_codes - graph_codes)}, unknown={sorted(graph_codes - configured_codes)}"
+        )
+
+    selected_codes = {step.step_code for step in procedures}
+    unmapped = selected_codes - set(detail_to_stage)
+    if unmapped:
+        raise ValueError(f"procedure steps are missing standard stage mappings: {sorted(unmapped)}")
+
+    selected_by_stage: dict[str, list[ProcedureStep]] = {}
+    for step in procedures:
+        stage = detail_to_stage[step.step_code]
+        step.standard_stage_code = stage["stage_code"]
+        step.standard_stage_name = stage["stage_name"]
+        selected_by_stage.setdefault(stage["stage_code"], []).append(step)
+
+    graph: list[StandardProcedureStage] = []
+    previous_detail_code: str | None = None
+    for stage in sorted(raw_stages, key=lambda item: (item["sequence"], item["stage_code"])):
+        selected_steps = sorted(
+            selected_by_stage.get(stage["stage_code"], []),
+            key=lambda item: (item.sequence, item.step_code),
+        )
+        for step in selected_steps:
+            step.depends_on = [] if previous_detail_code is None else [previous_detail_code]
+            previous_detail_code = step.step_code
+        graph.append(
+            StandardProcedureStage(
+                stage_code=stage["stage_code"],
+                stage_name=stage["stage_name"],
+                sequence=stage["sequence"],
+                depends_on=stage.get("depends_on", []),
+                detail_step_codes=[step.step_code for step in selected_steps],
+                legal_basis_status=stage.get("legal_basis_status", "unresolved"),
+            )
+        )
+    return graph
 
 
 def _build_procedures(
@@ -147,6 +220,7 @@ def analyze_project(request: AnalyzeRequest) -> AnalyzeResponse:
         implementer_type=request.implementer_type,
         warnings=warnings,
     )
+    standard_graph = _build_standard_graph(procedure_rules, procedures)
     assessments = _build_assessments(assessment_rules)
 
     return AnalyzeResponse(
@@ -158,6 +232,7 @@ def analyze_project(request: AnalyzeRequest) -> AnalyzeResponse:
         local_government=request.local_government,
         as_of=request.as_of,
         procedures=procedures,
+        standard_procedure_graph=standard_graph,
         assessments=assessments,
         warnings=warnings,
     )

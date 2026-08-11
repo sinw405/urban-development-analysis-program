@@ -4,6 +4,58 @@ notes:
   - "Procedure rules are draft workflow candidates for general urban development projects."
   - "Legal basis values are placeholders only."
   - "Finalize legal article references later through MOLEG Open API and expert review."
+standard_procedure_graph:
+  - stage_code: "ZONE_DESIGNATION_PROPOSAL"
+    stage_name: "구역지정 제안"
+    sequence: 10
+    depends_on: []
+    detail_step_codes:
+      - "PROJECT_BASIC_REVIEW"
+      - "PUBLIC_IMPLEMENTER_COORDINATION"
+      - "PRIVATE_IMPLEMENTER_QUALIFICATION_REVIEW"
+      - "SPC_GOVERNANCE_REVIEW"
+      - "ZONE_DESIGNATION_REVIEW"
+    legal_basis_status: "unresolved"
+  - stage_code: "ZONE_DESIGNATION_NOTIFICATION"
+    stage_name: "구역 지정·고시"
+    sequence: 20
+    depends_on: ["ZONE_DESIGNATION_PROPOSAL"]
+    detail_step_codes:
+      - "RESIDENT_OPINION_HEARING"
+      - "RELATED_AGENCY_CONSULTATION"
+      - "URBAN_PLANNING_COMMITTEE_REVIEW"
+      - "ZONE_DESIGNATION_NOTIFICATION"
+    legal_basis_status: "unresolved"
+  - stage_code: "DEVELOPMENT_PLAN"
+    stage_name: "개발계획"
+    sequence: 30
+    depends_on: ["ZONE_DESIGNATION_NOTIFICATION"]
+    detail_step_codes:
+      - "DEVELOPMENT_PLAN_ESTABLISHMENT"
+      - "IMPLEMENTER_DESIGNATION_REVIEW"
+    legal_basis_status: "unresolved"
+  - stage_code: "IMPLEMENTATION_PLAN_AUTHORIZATION"
+    stage_name: "실시계획 인가"
+    sequence: 40
+    depends_on: ["DEVELOPMENT_PLAN"]
+    detail_step_codes:
+      - "LAND_ACQUISITION_REVIEW"
+      - "REPLOTTING_PLAN_REVIEW"
+      - "MIXED_METHOD_COORDINATION"
+      - "IMPLEMENTATION_PLAN_AUTHORIZATION"
+    legal_basis_status: "unresolved"
+  - stage_code: "PROJECT_IMPLEMENTATION"
+    stage_name: "사업시행"
+    sequence: 50
+    depends_on: ["IMPLEMENTATION_PLAN_AUTHORIZATION"]
+    detail_step_codes: ["PROJECT_IMPLEMENTATION"]
+    legal_basis_status: "unresolved"
+  - stage_code: "COMPLETION"
+    stage_name: "준공"
+    sequence: 60
+    depends_on: ["PROJECT_IMPLEMENTATION"]
+    detail_step_codes: ["COMPLETION_INSPECTION"]
+    legal_basis_status: "unresolved"
 common_steps:
   - step_code: "PROJECT_BASIC_REVIEW"
     step_name: "Project basic review"
