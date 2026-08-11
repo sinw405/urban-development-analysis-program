@@ -1,103 +1,127 @@
-version: "0.3.0"
-phase: "Phase 46 Verified Assessment Legal Basis"
+version: 0.3.0
+phase: Phase 46 Verified Assessment Legal Basis
 notes:
-  - "Assessment applicability is never inferred from unverified thresholds."
-  - "No production threshold or article number is defined in this file."
-  - "Stored verified references may enrich these results through ProcedureLegalReference."
+- Assessment applicability is never inferred from unverified thresholds.
+- No production threshold or article number is defined in this file.
+- Stored verified references may enrich these results through ProcedureLegalReference.
 assessment_items:
-  - assessment_code: "URBAN_PLANNING_COMMITTEE_REVIEW"
-    name: "도시계획위원회 심의"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "urban_planning_review_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "unresolved"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
-  - assessment_code: "ENVIRONMENTAL_IMPACT_ASSESSMENT"
-    name: "환경영향평가"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "environmental_assessment_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "placeholder"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
-  - assessment_code: "TRAFFIC_IMPACT_ASSESSMENT"
-    name: "교통영향평가"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "traffic_assessment_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "placeholder"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
-  - assessment_code: "DISASTER_IMPACT_REVIEW"
-    name: "재해 영향성 검토"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "disaster_review_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "unresolved"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
-  - assessment_code: "LANDSCAPE_REVIEW"
-    name: "경관 관련 심의"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "landscape_review_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "unresolved"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
-  - assessment_code: "EDUCATIONAL_ENVIRONMENT_REVIEW"
-    name: "교육환경 관련 평가·검토"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "educational_environment_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "unresolved"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
-  - assessment_code: "UNDERGROUND_SAFETY_ASSESSMENT"
-    name: "지하안전평가"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "underground_safety_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "placeholder"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
-  - assessment_code: "BURIED_CULTURAL_HERITAGE_REVIEW"
-    name: "매장유산 조사·검토"
-    status: "?? ?? ??"
-    condition: "Applicability condition is not verified in stored legal data."
-    required_inputs:
-      - "buried_heritage_context"
-    threshold: "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
-    legal_basis: "TODO_MOLEG_API_ARTICLE_CHECK"
-    legal_basis_status: "placeholder"
-    required_action: "Provide the missing assessment context and verify a stored legal reference before deciding applicability."
-    notes:
-      - "No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule."
+- assessment_code: URBAN_PLANNING_COMMITTEE_REVIEW
+  name: 도시계획위원회 심의
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - urban_planning_review_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: unresolved
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+- assessment_code: ENVIRONMENTAL_IMPACT_ASSESSMENT
+  name: 환경영향평가
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - environmental_assessment_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: placeholder
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+- assessment_code: TRAFFIC_IMPACT_ASSESSMENT
+  name: 교통영향평가
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - traffic_assessment_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: placeholder
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+- assessment_code: DISASTER_IMPACT_REVIEW
+  name: 재해 영향성 검토
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - disaster_review_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: unresolved
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+- assessment_code: LANDSCAPE_REVIEW
+  name: 경관 관련 심의
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - landscape_review_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: unresolved
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+- assessment_code: EDUCATIONAL_ENVIRONMENT_REVIEW
+  name: 교육환경 관련 평가·검토
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - educational_environment_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: unresolved
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+- assessment_code: UNDERGROUND_SAFETY_ASSESSMENT
+  name: 지하안전평가
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - underground_safety_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: placeholder
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+- assessment_code: BURIED_CULTURAL_HERITAGE_REVIEW
+  name: 매장유산 조사·검토
+  status: ?? ?? ??
+  condition: Applicability condition is not verified in stored legal data.
+  required_inputs:
+  - buried_heritage_context
+  threshold: TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA
+  legal_basis: TODO_MOLEG_API_ARTICLE_CHECK
+  legal_basis_status: placeholder
+  required_action: Provide the missing assessment context and verify a stored legal reference before deciding applicability.
+  notes:
+  - No REQUIRED or NOT_REQUIRED decision is made from this placeholder rule.
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true

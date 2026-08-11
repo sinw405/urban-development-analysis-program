@@ -191,6 +191,7 @@ def _validate_assessment_rules(assessment_rules: dict[str, Any]) -> None:
 
     codes: list[str] = []
     allowed_basis_statuses = {"verified", "candidate", "unresolved", "placeholder", "missing"}
+    allowed_threshold_statuses = {"verified", "unresolved", "placeholder", "not_applicable"}
     for item in items:
         code = item.get("assessment_code")
         if not code:
@@ -204,6 +205,18 @@ def _validate_assessment_rules(assessment_rules: dict[str, Any]) -> None:
             raise ValueError(f"invalid legal_basis_status for {code}: {basis_status}")
         if basis_status == "verified" and item.get("legal_basis") == "TODO_MOLEG_API_ARTICLE_CHECK":
             raise ValueError(f"placeholder legal basis cannot be marked verified: {code}")
+        applicability_status = item.get("applicability_status", "unresolved")
+        threshold_status = item.get("threshold_status", "placeholder")
+        outcome = item.get("verified_outcome")
+        if applicability_status not in allowed_basis_statuses:
+            raise ValueError(f"invalid applicability_status for {code}: {applicability_status}")
+        if threshold_status not in allowed_threshold_statuses:
+            raise ValueError(f"invalid threshold_status for {code}: {threshold_status}")
+        if applicability_status == "verified":
+            if outcome not in {"REQUIRED", "NOT_REQUIRED", "CONDITIONAL"}:
+                raise ValueError(f"verified applicability requires a verified_outcome: {code}")
+            if threshold_status not in {"verified", "not_applicable"}:
+                raise ValueError(f"verified applicability cannot use an unresolved threshold: {code}")
 
     if len(codes) != len(set(codes)):
         raise ValueError("assessment codes must be unique")
@@ -237,6 +250,10 @@ def _build_assessments(
                 threshold=item.get("threshold", "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"),
                 legal_basis=item.get("legal_basis", "TODO_MOLEG_API_ARTICLE_CHECK"),
                 legal_basis_status=item.get("legal_basis_status", "placeholder"),
+                applicability_status=item.get("applicability_status", "unresolved"),
+                threshold_status=item.get("threshold_status", "placeholder"),
+                verified_outcome=item.get("verified_outcome"),
+                requires_expert_review=item.get("requires_expert_review", True),
                 legal_references=[],
                 as_of=request.as_of,
                 required_action=item.get(

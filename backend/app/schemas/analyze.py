@@ -113,6 +113,10 @@ class AssessmentItem(BaseModel):
     required_inputs: list[str] = Field(default_factory=list)
     missing_inputs: list[str] = Field(default_factory=list)
     legal_basis_status: str = "placeholder"
+    applicability_status: str = "unresolved"
+    threshold_status: str = "placeholder"
+    verified_outcome: str | None = None
+    requires_expert_review: bool = True
     legal_references: list[LegalReference] = Field(default_factory=list)
     as_of: date | None = None
 

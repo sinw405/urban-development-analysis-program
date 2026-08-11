@@ -134,7 +134,10 @@ def attach_legal_references(
     )
 
     for step in result.procedures:
-        step.legal_references = references_by_step_code.get(step.step_code, [])
+        step.legal_references = [
+            reference for reference in references_by_step_code.get(step.step_code, [])
+            if reference.notes.get("reference_scope") != "assessment"
+        ]
         step.legal_reference_status = _step_reference_status(step.legal_references)
     return result
 
@@ -152,7 +155,29 @@ def attach_assessment_legal_references(
 
     for item in result.assessments:
         item.as_of = reference_as_of
-        item.legal_references = references_by_code.get(item.assessment_code or "", [])
+        item.legal_references = [
+            reference for reference in references_by_code.get(item.assessment_code or "", [])
+            if reference.notes.get("reference_scope") != "procedure"
+        ]
         if item.legal_references:
             item.legal_basis_status = _step_reference_status(item.legal_references)
+        finalize_assessment_determination(item)
     return result
+
+
+def finalize_assessment_determination(item) -> None:
+    if item.missing_inputs:
+        item.determination_status = "NEED_MORE_INFO"
+        item.determination_reason = "Required assessment inputs are missing; applicability was not determined."
+        return
+    if (
+        item.legal_basis_status == "verified"
+        and item.applicability_status == "verified"
+        and item.threshold_status in {"verified", "not_applicable"}
+        and item.verified_outcome in {"REQUIRED", "NOT_REQUIRED", "CONDITIONAL"}
+    ):
+        item.determination_status = item.verified_outcome
+        item.determination_reason = "Verified legal basis and applicability rule were satisfied."
+        return
+    item.determination_status = "UNRESOLVED"
+    item.determination_reason = "Legal basis and applicability are not both verified; no required/not-required decision was made."

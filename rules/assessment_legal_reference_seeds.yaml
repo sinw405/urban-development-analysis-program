@@ -1,0 +1,103 @@
+version: 0.1.0
+phase: Phase 46.5 Assessment Live Legal Grounding
+notes:
+- Only references verified from ingested MOLEG article content may appear here.
+- A verified legal basis does not verify applicability or thresholds.
+references:
+- assessment_code: URBAN_PLANNING_COMMITTEE_REVIEW
+  law_key: moleg:002024
+  article_number_text: '8'
+  article_title: 도시계획위원회의 심의 등
+  evidence_terms:
+  - 도시계획위원회
+  source: MOLEG_LIVE_LOCAL_ACCEPTANCE
+  verified_version_sources:
+  - MOLEG_LIVE:276975
+  - MOLEG_LIVE:284059
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder
+- assessment_code: ENVIRONMENTAL_IMPACT_ASSESSMENT
+  law_key: moleg:002016
+  article_number_text: '22'
+  article_title: 환경영향평가의 대상
+  evidence_terms:
+  - 환경영향평가
+  source: MOLEG_LIVE_PHASE46_5
+  verified_version_sources:
+  - MOLEG_LIVE:276833
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder
+- assessment_code: TRAFFIC_IMPACT_ASSESSMENT
+  law_key: moleg:001754
+  article_number_text: '15'
+  article_title: 교통영향평가의 실시대상 지역 및 사업
+  evidence_terms:
+  - 교통영향평가
+  source: MOLEG_LIVE_PHASE46_5
+  verified_version_sources:
+  - MOLEG_LIVE:284063
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder
+- assessment_code: DISASTER_IMPACT_REVIEW
+  law_key: moleg:000959
+  article_number_text: '4'
+  article_title: 재해영향평가등의 협의
+  evidence_terms:
+  - 재해영향평가
+  source: MOLEG_LIVE_PHASE46_5
+  verified_version_sources:
+  - MOLEG_LIVE:276321
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder
+- assessment_code: LANDSCAPE_REVIEW
+  law_key: moleg:010447
+  article_number_text: '27'
+  article_title: 개발사업의 경관 심의
+  evidence_terms:
+  - 경관 심의
+  source: MOLEG_LIVE_PHASE46_5
+  verified_version_sources:
+  - MOLEG_LIVE:276931
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder
+- assessment_code: EDUCATIONAL_ENVIRONMENT_REVIEW
+  law_key: moleg:012494
+  article_number_text: '6'
+  article_title: 교육환경평가서의 승인 등
+  evidence_terms:
+  - 교육환경평가
+  source: MOLEG_LIVE_PHASE46_5
+  verified_version_sources:
+  - MOLEG_LIVE:280023
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder
+- assessment_code: UNDERGROUND_SAFETY_ASSESSMENT
+  law_key: moleg:012468
+  article_number_text: '14'
+  article_title: 지하안전평가의 실시 등
+  evidence_terms:
+  - 지하안전평가
+  source: MOLEG_LIVE_PHASE46_5
+  verified_version_sources:
+  - MOLEG_LIVE:271251
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder
+- assessment_code: BURIED_CULTURAL_HERITAGE_REVIEW
+  law_key: moleg:011152
+  article_number_text: '7'
+  article_title: 지표조사 보고서 제출
+  evidence_terms:
+  - 지표조사
+  source: MOLEG_LIVE_PHASE46_5
+  verified_version_sources:
+  - MOLEG_LIVE:285661
+  verified_at: '2026-08-11'
+  applicability_status: unresolved
+  threshold_status: placeholder

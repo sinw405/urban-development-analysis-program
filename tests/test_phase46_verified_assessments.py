@@ -94,16 +94,15 @@ def _create_verified_fixture() -> None:
 
 
 def test_placeholder_assessments_need_more_info_without_fabricated_thresholds():
-    response = client.post("/api/analyze", json=_payload())
-    assert response.status_code == 200
-    assessments = response.json()["assessments"]
+    result = analyze_project(AnalyzeRequest(**_payload()))
+    assessments = result.assessments
 
     assert len(assessments) == 8
-    assert all(item["determination_status"] == "NEED_MORE_INFO" for item in assessments)
-    assert all(item["missing_inputs"] for item in assessments)
-    assert all(item["threshold"] == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA" for item in assessments)
-    assert all(item["legal_references"] == [] for item in assessments)
-    assert {item["legal_basis_status"] for item in assessments} == {"placeholder", "unresolved"}
+    assert all(item.determination_status == "NEED_MORE_INFO" for item in assessments)
+    assert all(item.missing_inputs for item in assessments)
+    assert all(item.threshold == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA" for item in assessments)
+    assert all(item.legal_references == [] for item in assessments)
+    assert {item.legal_basis_status for item in assessments} == {"placeholder", "unresolved"}
 
 
 def test_complete_context_does_not_promote_unverified_rule_to_required():
@@ -141,8 +140,9 @@ def test_verified_stored_assessment_reference_uses_as_of_article_version():
         assert item["legal_basis_status"] == "verified"
         assert item["determination_status"] == "UNRESOLVED"
         assert item["as_of"] == "2099-06-15"
-        assert len(item["legal_references"]) == 1
-        reference = item["legal_references"][0]
+        reference = next(
+            value for value in item["legal_references"] if value["law_key"] == TEST_LAW_KEY
+        )
         assert reference["reference_quality"] == "verified"
         assert reference["current_version"]["effective_date"] == "2099-01-01"
         assert {v["temporal_status"] for v in reference["versions"]} == {"current", "scheduled"}
