@@ -1,0 +1,141 @@
+﻿version: 0.1.0
+phase: Phase 47 Assessment Applicability Verification
+as_of: '2026-08-11'
+notes:
+- Evidence was observed in official MOLEG law detail responses; authentication material is not stored.
+- Attached-table evidence is provenance only because attached tables are not normalized by the current ingest pipeline.
+- No item in this file authorizes REQUIRED or NOT_REQUIRED without a separately verified executable rule.
+assessment_evidence:
+- assessment_code: URBAN_PLANNING_COMMITTEE_REVIEW
+  applicability_status: requires_expert_review
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: requires_expert_review
+    hierarchy: enforcement_decree_article
+    law_name: 도시개발법 시행령
+    mst: '287279'
+    effective_date: '2026-07-01'
+    article_number: '5'
+    article_title: 도시계획위원회 심의 관련 절차
+    source: MOLEG_LIVE_PHASE47
+    supports: committee-review provisions exist, but scenario and local-operation conditions need expert review
+    notes:
+    - Article 14 also contains exclusions; no nationwide automatic rule was derived.
+- assessment_code: ENVIRONMENTAL_IMPACT_ASSESSMENT
+  applicability_status: partial
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: partial
+    hierarchy: enforcement_decree_attached_table
+    law_name: 환경영향평가법 시행령
+    mst: '279237'
+    effective_date: '2025-10-23'
+    attached_table_number: '3'
+    attached_table_title: 환경영향평가 대상사업의 구체적인 종류, 범위 및 협의 요청시기
+    source: MOLEG_LIVE_PHASE47
+    supports: attached table contains 도시개발법 and 도시개발사업
+    notes:
+    - Scope and numeric criteria remain unnormalized and are not executable.
+- assessment_code: TRAFFIC_IMPACT_ASSESSMENT
+  applicability_status: partial
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: partial
+    hierarchy: enforcement_decree_attached_table
+    law_name: 도시교통정비 촉진법 시행령
+    mst: '287283'
+    effective_date: '2026-07-01'
+    attached_table_number: '1'
+    attached_table_title: 교통영향평가 대상사업의 범위 및 교통영향평가서의 제출·심의 시기
+    source: MOLEG_LIVE_PHASE47
+    supports: attached table contains 도시개발법 and 도시개발사업
+    notes:
+    - Scope and exceptions require normalized table rows before automation.
+- assessment_code: DISASTER_IMPACT_REVIEW
+  applicability_status: partial
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: partial
+    hierarchy: enforcement_decree_attached_table
+    law_name: 자연재해대책법 시행령
+    mst: '282993'
+    effective_date: '2026-02-01'
+    attached_table_number: '1'
+    attached_table_title: 재해영향평가등의 협의 대상 행정계획 및 개발사업의 범위 및 협의 시기
+    source: MOLEG_LIVE_PHASE47
+    supports: attached table contains 도시개발사업
+    notes:
+    - Administrative-plan and development-project branches are not normalized.
+- assessment_code: LANDSCAPE_REVIEW
+  applicability_status: requires_expert_review
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: requires_expert_review
+    hierarchy: enforcement_decree_article_and_attached_table
+    law_name: 경관법 시행령
+    mst: '277919'
+    effective_date: '2025-10-01'
+    article_number: '19'
+    article_title: 개발사업의 경관 심의 대상 등
+    attached_table_number: '1'
+    attached_table_title: 경관 심의 대상 개발사업의 종류 및 심의 시기
+    source: MOLEG_LIVE_PHASE47
+    supports: attached table contains 도시개발사업
+    notes:
+    - Local ordinance and committee-operation requirements are not available in this system.
+- assessment_code: EDUCATIONAL_ENVIRONMENT_REVIEW
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: unresolved
+    hierarchy: enforcement_decree_articles
+    law_name: 교육환경 보호에 관한 법률 시행령
+    mst: '286641'
+    effective_date: '2026-06-03'
+    article_number: 16-20
+    article_title: 교육환경평가 관련 조문군
+    source: MOLEG_LIVE_PHASE47
+    supports: assessment procedure exists, but urban-development applicability was not verified
+    notes:
+    - No matching attached-table applicability evidence was confirmed.
+- assessment_code: UNDERGROUND_SAFETY_ASSESSMENT
+  applicability_status: partial
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: partial
+    hierarchy: enforcement_decree_article_and_attached_table
+    law_name: 지하안전관리에 관한 특별법 시행령
+    mst: '283007'
+    effective_date: '2026-02-01'
+    article_number: '14'
+    article_title: 지하안전평가 대상사업의 종류 및 평가방법 등
+    attached_table_number: '1'
+    attached_table_title: 지하안전평가 및 소규모지하안전평가대상사업의 종류, 범위 및 협의 요청시기
+    source: MOLEG_LIVE_PHASE47
+    supports: attached table contains 도시개발 and defines project scope
+    notes:
+    - Article 23 confirms 10m 이상 20m 미만 only for 소규모 지하안전평가; it is not promoted as this assessment's production threshold.
+    - Table row normalization is required before the general assessment can be automated.
+- assessment_code: BURIED_CULTURAL_HERITAGE_REVIEW
+  applicability_status: unresolved
+  threshold_status: placeholder
+  requires_expert_review: true
+  evidence:
+  - evidence_status: unresolved
+    hierarchy: enforcement_decree_articles
+    law_name: 매장유산 보호 및 조사에 관한 법률 시행령
+    mst: '285999'
+    effective_date: '2026-05-17'
+    article_number: 5-2, 5-3, 5-4, 10
+    article_title: 지표조사 및 건설공사 범위 관련 조문군
+    source: MOLEG_LIVE_PHASE47
+    supports: survey provisions exist, but urban-development applicability was not verified
+    notes:
+    - Location, exclusions, and administrative interpretation require further evidence.

@@ -99,6 +99,21 @@ class StandardProcedureStage(BaseModel):
     legal_basis_status: str = "unresolved"
 
 
+class AssessmentApplicabilityEvidence(BaseModel):
+    evidence_status: str
+    hierarchy: str
+    law_name: str
+    mst: str
+    effective_date: date | None = None
+    article_number: str | None = None
+    article_title: str | None = None
+    attached_table_number: str | None = None
+    attached_table_title: str | None = None
+    source: str
+    supports: str
+    notes: list[str] = Field(default_factory=list)
+
+
 class AssessmentItem(BaseModel):
     name: str
     status: str
@@ -117,6 +132,7 @@ class AssessmentItem(BaseModel):
     threshold_status: str = "placeholder"
     verified_outcome: str | None = None
     requires_expert_review: bool = True
+    applicability_evidence: list[AssessmentApplicabilityEvidence] = Field(default_factory=list)
     legal_references: list[LegalReference] = Field(default_factory=list)
     as_of: date | None = None
 

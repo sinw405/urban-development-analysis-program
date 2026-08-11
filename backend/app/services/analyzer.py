@@ -3,6 +3,7 @@
 from app.schemas.analyze import (
     AnalyzeRequest,
     AnalyzeResponse,
+    AssessmentApplicabilityEvidence,
     AssessmentItem,
     ProcedureStep,
     StandardProcedureStage,
@@ -222,12 +223,46 @@ def _validate_assessment_rules(assessment_rules: dict[str, Any]) -> None:
         raise ValueError("assessment codes must be unique")
 
 
+def _validate_applicability_evidence(evidence_rules: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    items = evidence_rules.get("assessment_evidence", [])
+    if not isinstance(items, list):
+        raise ValueError("assessment_evidence must be a list")
+    allowed_statuses = {"verified", "partial", "unresolved", "requires_expert_review"}
+    by_code: dict[str, dict[str, Any]] = {}
+    for item in items:
+        code = item.get("assessment_code")
+        if not code or code in by_code:
+            raise ValueError("applicability evidence assessment codes must be present and unique")
+        status = item.get("applicability_status", "unresolved")
+        if status not in allowed_statuses:
+            raise ValueError(f"invalid evidence applicability_status for {code}: {status}")
+        sources = item.get("evidence", [])
+        if not isinstance(sources, list):
+            raise ValueError(f"evidence must be a list: {code}")
+        for source in sources:
+            required = {"evidence_status", "hierarchy", "law_name", "mst", "source", "supports"}
+            if required - set(source):
+                raise ValueError(f"applicability evidence is missing provenance fields: {code}")
+            if source["evidence_status"] not in allowed_statuses:
+                raise ValueError(f"invalid applicability evidence status: {code}")
+        if item.get("threshold_status", "placeholder") == "verified":
+            threshold = item.get("threshold_evidence")
+            required = {"value", "unit", "operator", "law_name", "source_locator", "effective_date"}
+            if not isinstance(threshold, dict) or required - set(threshold):
+                raise ValueError(f"verified threshold requires complete evidence: {code}")
+        by_code[code] = item
+    return by_code
+
+
 def _build_assessments(
-    assessment_rules: dict[str, Any], request: AnalyzeRequest
+    assessment_rules: dict[str, Any], request: AnalyzeRequest,
+    evidence_rules: dict[str, Any] | None = None,
 ) -> list[AssessmentItem]:
     _validate_assessment_rules(assessment_rules)
+    evidence_by_code = _validate_applicability_evidence(evidence_rules or {})
     assessments: list[AssessmentItem] = []
     for item in assessment_rules["assessment_items"]:
+        evidence = evidence_by_code.get(item["assessment_code"], {})
         required_inputs = item.get("required_inputs", [])
         missing_inputs = [key for key in required_inputs if request.assessment_inputs.get(key) is None]
         if missing_inputs:
@@ -250,10 +285,11 @@ def _build_assessments(
                 threshold=item.get("threshold", "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"),
                 legal_basis=item.get("legal_basis", "TODO_MOLEG_API_ARTICLE_CHECK"),
                 legal_basis_status=item.get("legal_basis_status", "placeholder"),
-                applicability_status=item.get("applicability_status", "unresolved"),
-                threshold_status=item.get("threshold_status", "placeholder"),
+                applicability_status=evidence.get("applicability_status", item.get("applicability_status", "unresolved")),
+                threshold_status=evidence.get("threshold_status", item.get("threshold_status", "placeholder")),
                 verified_outcome=item.get("verified_outcome"),
-                requires_expert_review=item.get("requires_expert_review", True),
+                requires_expert_review=evidence.get("requires_expert_review", item.get("requires_expert_review", True)),
+                applicability_evidence=[AssessmentApplicabilityEvidence(**value) for value in evidence.get("evidence", [])],
                 legal_references=[],
                 as_of=request.as_of,
                 required_action=item.get(
@@ -269,6 +305,7 @@ def _build_assessments(
 def analyze_project(request: AnalyzeRequest) -> AnalyzeResponse:
     procedure_rules = load_yaml_rule("procedure_rules.yaml")
     assessment_rules = load_yaml_rule("assessment_rules.yaml")
+    applicability_evidence = load_yaml_rule("assessment_applicability_evidence.yaml")
 
     warnings = [
         LEGAL_WARNING,
@@ -283,7 +320,7 @@ def analyze_project(request: AnalyzeRequest) -> AnalyzeResponse:
         warnings=warnings,
     )
     standard_graph = _build_standard_graph(procedure_rules, procedures)
-    assessments = _build_assessments(assessment_rules, request)
+    assessments = _build_assessments(assessment_rules, request, applicability_evidence)
 
     return AnalyzeResponse(
         project_name=request.project_name,
