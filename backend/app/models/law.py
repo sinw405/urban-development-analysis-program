@@ -1,4 +1,4 @@
-﻿from datetime import datetime
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from sqlalchemy import DateTime, Index, String, func
@@ -8,6 +8,7 @@ from app.core.database import Base
 
 if TYPE_CHECKING:
     from app.models.law_article import LawArticle
+    from app.models.law_attached_table_evidence import LawAttachedTableEvidence
     from app.models.procedure_legal_reference import ProcedureLegalReference
 
 
@@ -38,4 +39,5 @@ class Law(Base):
     )
 
     articles: Mapped[list["LawArticle"]] = relationship(back_populates="law")
+    attached_table_evidence: Mapped[list["LawAttachedTableEvidence"]] = relationship(back_populates="law", cascade="all, delete-orphan")
     procedure_references: Mapped[list["ProcedureLegalReference"]] = relationship(back_populates="law")

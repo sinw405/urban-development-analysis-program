@@ -112,6 +112,9 @@ class AssessmentApplicabilityEvidence(BaseModel):
     source: str
     supports: str
     notes: list[str] = Field(default_factory=list)
+    evidence_id: int | None = None
+    resolved_effective_date: date | None = None
+    as_of_status: str = "unresolved"
 
 
 class AssessmentItem(BaseModel):
@@ -132,6 +135,7 @@ class AssessmentItem(BaseModel):
     threshold_status: str = "placeholder"
     verified_outcome: str | None = None
     requires_expert_review: bool = True
+    local_rule_required: bool = False
     applicability_evidence: list[AssessmentApplicabilityEvidence] = Field(default_factory=list)
     legal_references: list[LegalReference] = Field(default_factory=list)
     as_of: date | None = None

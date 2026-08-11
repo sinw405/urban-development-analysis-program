@@ -17,6 +17,7 @@ from app.models import (  # noqa: F401
     Law,
     LawArticle,
     LawArticleVersion,
+    LawAttachedTableEvidence,
     LawUpdateEvent,
     LawChangeImpactEvent,
     OfficialLawSourceEvidence,

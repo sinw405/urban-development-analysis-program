@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.models.procedure_legal_reference import ProcedureLegalReference
 from app.schemas.analyze import AnalyzeResponse, LegalReference, LegalReferenceVersion
+from app.services.attached_table_evidence_service import resolve_attached_table_evidence
 from app.services.law_version_service import VERSION_STATUS_CURRENT, get_article_versions
 
 PENDING_MOLEG_API_MAPPING = "PENDING_MOLEG_API_MAPPING"
@@ -161,6 +162,20 @@ def attach_assessment_legal_references(
         ]
         if item.legal_references:
             item.legal_basis_status = _step_reference_status(item.legal_references)
+        if reference_as_of is not None:
+            for evidence in item.applicability_evidence:
+                if not evidence.attached_table_number:
+                    continue
+                resolved = resolve_attached_table_evidence(
+                    db=db,
+                    law_name=evidence.law_name,
+                    table_number=evidence.attached_table_number,
+                    as_of=reference_as_of,
+                )
+                if resolved is not None:
+                    evidence.evidence_id = resolved.id
+                    evidence.resolved_effective_date = resolved.effective_date
+                    evidence.as_of_status = "resolved"
         finalize_assessment_determination(item)
     return result
 

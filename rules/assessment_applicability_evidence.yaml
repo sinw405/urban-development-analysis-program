@@ -1,13 +1,13 @@
-﻿version: 0.1.0
+version: 0.1.0
 phase: Phase 47 Assessment Applicability Verification
 as_of: '2026-08-11'
 notes:
 - Evidence was observed in official MOLEG law detail responses; authentication material is not stored.
-- Attached-table evidence is provenance only because attached tables are not normalized by the current ingest pipeline.
+- Attached-table evidence is resolved through Phase 48 storage; row-level legal criteria remain unnormalized and non-executable.
 - No item in this file authorizes REQUIRED or NOT_REQUIRED without a separately verified executable rule.
 assessment_evidence:
 - assessment_code: URBAN_PLANNING_COMMITTEE_REVIEW
-  applicability_status: requires_expert_review
+  applicability_status: local_rule_required
   threshold_status: placeholder
   requires_expert_review: true
   evidence:
@@ -71,7 +71,7 @@ assessment_evidence:
     notes:
     - Administrative-plan and development-project branches are not normalized.
 - assessment_code: LANDSCAPE_REVIEW
-  applicability_status: requires_expert_review
+  applicability_status: local_rule_required
   threshold_status: placeholder
   requires_expert_review: true
   evidence:

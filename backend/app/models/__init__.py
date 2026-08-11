@@ -2,6 +2,7 @@ from app.models.analysis_result import AnalysisResult
 from app.models.law import Law
 from app.models.law_article import LawArticle
 from app.models.law_article_version import LawArticleVersion
+from app.models.law_attached_table_evidence import LawAttachedTableEvidence
 from app.models.law_update_event import LawUpdateEvent
 from app.models.law_update_registry import LawUpdateRegistry
 from app.models.law_update_run import LawUpdateRun
@@ -23,6 +24,7 @@ __all__ = [
     "Law",
     "LawArticle",
     "LawArticleVersion",
+    "LawAttachedTableEvidence",
     "LawUpdateEvent",
     "LawUpdateRegistry",
     "LawUpdateRun",

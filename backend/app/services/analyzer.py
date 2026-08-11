@@ -227,7 +227,7 @@ def _validate_applicability_evidence(evidence_rules: dict[str, Any]) -> dict[str
     items = evidence_rules.get("assessment_evidence", [])
     if not isinstance(items, list):
         raise ValueError("assessment_evidence must be a list")
-    allowed_statuses = {"verified", "partial", "unresolved", "requires_expert_review"}
+    allowed_statuses = {"verified", "partial", "unresolved", "requires_expert_review", "local_rule_required"}
     by_code: dict[str, dict[str, Any]] = {}
     for item in items:
         code = item.get("assessment_code")
@@ -247,9 +247,15 @@ def _validate_applicability_evidence(evidence_rules: dict[str, Any]) -> dict[str
                 raise ValueError(f"invalid applicability evidence status: {code}")
         if item.get("threshold_status", "placeholder") == "verified":
             threshold = item.get("threshold_evidence")
-            required = {"value", "unit", "operator", "law_name", "source_locator", "effective_date"}
+            required = {"value", "unit", "operator", "project_category", "law_name", "source_locator", "effective_date"}
             if not isinstance(threshold, dict) or required - set(threshold):
                 raise ValueError(f"verified threshold requires complete evidence: {code}")
+            if threshold["operator"] not in {"gt", "gte", "lt", "lte", "eq"}:
+                raise ValueError(f"invalid verified threshold operator: {code}")
+            if not isinstance(threshold["value"], (int, float)) or isinstance(threshold["value"], bool):
+                raise ValueError(f"verified threshold value must be numeric: {code}")
+            if not str(threshold["unit"]).strip() or not str(threshold["project_category"]).strip():
+                raise ValueError(f"verified threshold unit and project category are required: {code}")
         by_code[code] = item
     return by_code
 
@@ -289,6 +295,7 @@ def _build_assessments(
                 threshold_status=evidence.get("threshold_status", item.get("threshold_status", "placeholder")),
                 verified_outcome=item.get("verified_outcome"),
                 requires_expert_review=evidence.get("requires_expert_review", item.get("requires_expert_review", True)),
+                local_rule_required=evidence.get("applicability_status") == "local_rule_required",
                 applicability_evidence=[AssessmentApplicabilityEvidence(**value) for value in evidence.get("evidence", [])],
                 legal_references=[],
                 as_of=request.as_of,

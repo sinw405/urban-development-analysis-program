@@ -13,12 +13,14 @@ from app.models import (
     Law,
     LawArticle,
     LawArticleVersion,
+    LawAttachedTableEvidence,
     OfficialLawArticleRecord,
     OfficialLawDocument as OfficialLawDocumentModel,
     OfficialLawIngestRun,
     OfficialLawSourceEvidence,
 )
 from app.schemas.official_law_source import OfficialLawCandidate, OfficialLawDocument, OfficialLawSearchResult
+from app.services.attached_table_evidence_service import sync_attached_table_evidence
 from app.services.legal_reference_service import PENDING_MOLEG_API_MAPPING, TODO_MOLEG_API_ARTICLE_CHECK
 from app.services.moleg_live_client import (
     MOLEG_LAW_SEARCH_PATH,
@@ -48,6 +50,7 @@ class TableCounts:
     laws: int = 0
     law_articles: int = 0
     law_article_versions: int = 0
+    law_attached_table_evidence: int = 0
     official_law_documents: int = 0
     official_law_articles: int = 0
     official_law_ingest_runs: int = 0
@@ -187,7 +190,7 @@ def run_moleg_live_ingest(db: Session, law_name: str, dry_run: bool = True, forc
             return result
 
         result.history_status = _history_status(selected_versions=selected_versions, include_history=include_history)
-        documents: list[tuple[OfficialLawCandidate, OfficialLawDocument, str]] = []
+        documents: list[tuple[OfficialLawCandidate, OfficialLawDocument, str, dict[str, Any] | list[Any]]] = []
         for selected, version_status in selected_versions:
             detail_response = client._request(
                 MOLEG_LAW_SERVICE_PATH,
@@ -204,23 +207,23 @@ def run_moleg_live_ingest(db: Session, law_name: str, dry_run: bool = True, forc
                 result.final_reason_type = "invalid_response_format"
                 result.messages.append(f"No article units were normalized for MST {selected.mst}.")
                 return result
-            documents.append((selected, document, version_status))
+            documents.append((selected, document, version_status, detail_payload))
 
-        first_selected, first_document, _ = documents[0]
+        first_selected, first_document, _, _ = documents[0]
         result.detail_status = "ok"
         result.parse_status = "ok"
         result.selected_official_law_name = first_selected.title
         result.selected_law_id = first_selected.law_id or first_document.law_id
         result.selected_mst = first_selected.mst
-        result.effective_dates = sorted({item for _, document, _ in documents for item in [_date_to_yyyymmdd(document.enforcement_date)] if item})
+        result.effective_dates = sorted({item for _, document, _, _ in documents for item in [_date_to_yyyymmdd(document.enforcement_date)] if item})
         result.version_statuses = [
             {"mst": selected.mst, "effective_date": _date_to_yyyymmdd(document.enforcement_date or selected.enforcement_date), "version_status": version_status}
-            for selected, document, version_status in documents
+            for selected, document, version_status, _ in documents
         ]
-        result.parsed_article_count = sum(len(document.articles) for _, document, _ in documents)
+        result.parsed_article_count = sum(len(document.articles) for _, document, _, _ in documents)
 
         aggregate = LiveIngestCounters()
-        for selected, document, version_status in documents:
+        for selected, document, version_status, _ in documents:
             _add_counters(aggregate, plan_persistence(db=db, document=document, selected_candidate=selected, version_status=version_status))
         result.counters = aggregate
         if dry_run:
@@ -232,11 +235,12 @@ def run_moleg_live_ingest(db: Session, law_name: str, dry_run: bool = True, forc
 
         run = _create_ingest_run(db=db, law_name=law_name)
         first_official_document: OfficialLawDocumentModel | None = None
-        for selected, document, version_status in documents:
+        for selected, document, version_status, detail_payload in documents:
             official_document = sync_official_document(db=db, document=document, selected_candidate=selected, counters=result.counters)
             if first_official_document is None:
                 first_official_document = official_document
-            _sync_law_tables(db=db, document=document, selected_candidate=selected, counters=result.counters, version_status=version_status)
+            law = _sync_law_tables(db=db, document=document, selected_candidate=selected, counters=result.counters, version_status=version_status)
+            sync_attached_table_evidence(db=db, law=law, payload=detail_payload, mst=selected.mst or document.mst or "", effective_date=document.enforcement_date)
             _add_evidence(db=db, run=run, document=document, selected=selected, selected_endpoint=result.selected_endpoint, trust_env=result.trust_env, version_status=version_status)
         _complete_ingest_run(db=db, run=run, status="success", selected=first_selected, article_count=result.parsed_article_count, candidate_count=len(documents))
         if force_rollback_after_persist:
@@ -262,6 +266,7 @@ def collect_table_counts(db: Session) -> TableCounts:
         laws=db.scalar(select(func.count()).select_from(Law)) or 0,
         law_articles=db.scalar(select(func.count()).select_from(LawArticle)) or 0,
         law_article_versions=db.scalar(select(func.count()).select_from(LawArticleVersion)) or 0,
+        law_attached_table_evidence=db.scalar(select(func.count()).select_from(LawAttachedTableEvidence)) or 0,
         official_law_documents=db.scalar(select(func.count()).select_from(OfficialLawDocumentModel)) or 0,
         official_law_articles=db.scalar(select(func.count()).select_from(OfficialLawArticleRecord)) or 0,
         official_law_ingest_runs=db.scalar(select(func.count()).select_from(OfficialLawIngestRun)) or 0,

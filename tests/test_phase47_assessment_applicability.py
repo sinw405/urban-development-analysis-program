@@ -1,4 +1,4 @@
-﻿from copy import deepcopy
+from copy import deepcopy
 
 import pytest
 from fastapi.testclient import TestClient
@@ -34,7 +34,7 @@ def test_phase47_evidence_covers_all_assessments_without_verified_thresholds():
 
     assert len(by_code) == 8
     assert {item["applicability_status"] for item in by_code.values()} == {
-        "partial", "unresolved", "requires_expert_review"
+        "partial", "unresolved", "local_rule_required"
     }
     assert all(item["threshold_status"] == "placeholder" for item in by_code.values())
     assert all(item["evidence"] for item in by_code.values())
