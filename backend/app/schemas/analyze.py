@@ -12,6 +12,10 @@ class AnalyzeRequest(BaseModel):
     implementer_type: str = Field(..., description="Type of project implementer")
     local_government: str = Field(..., description="Relevant local government")
     as_of: date | None = Field(default=None, description="Optional date for stored legal reference version lookup")
+    assessment_inputs: dict[str, Any] = Field(
+        default_factory=dict,
+        description="Optional assessment-specific facts; values are never treated as legal thresholds by themselves",
+    )
 
 
 class LegalReferenceVersion(BaseModel):
@@ -103,6 +107,14 @@ class AssessmentItem(BaseModel):
     required_action: str
     notes: list[str] = Field(default_factory=list)
     assessment_code: str | None = None
+    determination_status: str = "UNRESOLVED"
+    determination_reason: str = "Assessment criteria are not verified."
+    condition: str = "unresolved"
+    required_inputs: list[str] = Field(default_factory=list)
+    missing_inputs: list[str] = Field(default_factory=list)
+    legal_basis_status: str = "placeholder"
+    legal_references: list[LegalReference] = Field(default_factory=list)
+    as_of: date | None = None
 
 
 class AnalyzeResponse(BaseModel):

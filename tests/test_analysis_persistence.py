@@ -53,7 +53,7 @@ def test_list_and_get_analysis_results():
     assert first_step["legal_references"] == []
     assert "order" not in first_step
     assert "legal_basis" not in first_step
-    assert len(detail["result_payload"]["assessments"]) == 4
+    assert len(detail["result_payload"]["assessments"]) == 8
 
 
 def test_analysis_list_pagination_total_and_sort():
@@ -110,7 +110,7 @@ def test_stored_assessment_thresholds_remain_placeholders():
     detail = detail_response.json()
 
     assessments = detail["result_payload"]["assessments"]
-    assert len(assessments) == 4
+    assert len(assessments) == 8
     for item in assessments:
         assert item["threshold"] == "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"
         assert item["legal_basis"] == "TODO_MOLEG_API_ARTICLE_CHECK"

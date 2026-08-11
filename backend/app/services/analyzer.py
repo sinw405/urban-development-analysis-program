@@ -184,19 +184,64 @@ def _build_procedures(
     return sorted(steps_by_code.values(), key=lambda item: (item.sequence, item.step_code))
 
 
-def _build_assessments(assessment_rules: dict[str, Any]) -> list[AssessmentItem]:
+def _validate_assessment_rules(assessment_rules: dict[str, Any]) -> None:
+    items = assessment_rules.get("assessment_items")
+    if not isinstance(items, list) or not items:
+        raise ValueError("assessment_items must be a non-empty list")
+
+    codes: list[str] = []
+    allowed_basis_statuses = {"verified", "candidate", "unresolved", "placeholder", "missing"}
+    for item in items:
+        code = item.get("assessment_code")
+        if not code:
+            raise ValueError("assessment_code is required")
+        codes.append(code)
+        required_inputs = item.get("required_inputs")
+        if not isinstance(required_inputs, list):
+            raise ValueError(f"required_inputs must be a list: {code}")
+        basis_status = item.get("legal_basis_status", "placeholder")
+        if basis_status not in allowed_basis_statuses:
+            raise ValueError(f"invalid legal_basis_status for {code}: {basis_status}")
+        if basis_status == "verified" and item.get("legal_basis") == "TODO_MOLEG_API_ARTICLE_CHECK":
+            raise ValueError(f"placeholder legal basis cannot be marked verified: {code}")
+
+    if len(codes) != len(set(codes)):
+        raise ValueError("assessment codes must be unique")
+
+
+def _build_assessments(
+    assessment_rules: dict[str, Any], request: AnalyzeRequest
+) -> list[AssessmentItem]:
+    _validate_assessment_rules(assessment_rules)
     assessments: list[AssessmentItem] = []
-    for item in assessment_rules.get("assessment_items", []):
+    for item in assessment_rules["assessment_items"]:
+        required_inputs = item.get("required_inputs", [])
+        missing_inputs = [key for key in required_inputs if request.assessment_inputs.get(key) is None]
+        if missing_inputs:
+            determination_status = "NEED_MORE_INFO"
+            determination_reason = "Required assessment inputs are missing; applicability was not determined."
+        else:
+            determination_status = "UNRESOLVED"
+            determination_reason = "Applicability criteria are not verified; no required/not-required decision was made."
+
         assessments.append(
             AssessmentItem(
-                assessment_code=item.get("assessment_code"),
+                assessment_code=item["assessment_code"],
                 name=item["name"],
-                status=item.get("status", "\ubc95\ub839 \uac80\ud1a0 \ud544\uc694"),
+                status=item.get("status", "?? ?? ??"),
+                determination_status=determination_status,
+                determination_reason=determination_reason,
+                condition=item.get("condition", "unresolved"),
+                required_inputs=required_inputs,
+                missing_inputs=missing_inputs,
                 threshold=item.get("threshold", "TODO_PLACEHOLDER_DO_NOT_USE_AS_CRITERIA"),
                 legal_basis=item.get("legal_basis", "TODO_MOLEG_API_ARTICLE_CHECK"),
+                legal_basis_status=item.get("legal_basis_status", "placeholder"),
+                legal_references=[],
+                as_of=request.as_of,
                 required_action=item.get(
                     "required_action",
-                    "\uae30\uc900 \ubbf8\ud655\uc815: \ucd94\ud6c4 \ubc95\uc81c\ucc98 Open API \ubc0f \uc804\ubb38\uac00 \uac80\ud1a0 \ud6c4 \ud655\uc815 \ud544\uc694",
+                    "Provide missing facts and verify stored legal basis before making an applicability decision.",
                 ),
                 notes=item.get("notes", []),
             )
@@ -221,7 +266,7 @@ def analyze_project(request: AnalyzeRequest) -> AnalyzeResponse:
         warnings=warnings,
     )
     standard_graph = _build_standard_graph(procedure_rules, procedures)
-    assessments = _build_assessments(assessment_rules)
+    assessments = _build_assessments(assessment_rules, request)
 
     return AnalyzeResponse(
         project_name=request.project_name,

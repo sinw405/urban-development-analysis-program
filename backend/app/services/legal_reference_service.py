@@ -137,3 +137,22 @@ def attach_legal_references(
         step.legal_references = references_by_step_code.get(step.step_code, [])
         step.legal_reference_status = _step_reference_status(step.legal_references)
     return result
+
+
+def attach_assessment_legal_references(
+    db: Session,
+    result: AnalyzeResponse,
+    as_of: date | None = None,
+) -> AnalyzeResponse:
+    reference_as_of = as_of if as_of is not None else result.as_of
+    codes = [item.assessment_code for item in result.assessments if item.assessment_code]
+    references_by_code = get_legal_references_by_step_code(
+        db=db, step_codes=codes, as_of=reference_as_of
+    )
+
+    for item in result.assessments:
+        item.as_of = reference_as_of
+        item.legal_references = references_by_code.get(item.assessment_code or "", [])
+        if item.legal_references:
+            item.legal_basis_status = _step_reference_status(item.legal_references)
+    return result
