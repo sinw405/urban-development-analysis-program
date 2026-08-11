@@ -9,6 +9,7 @@ from app.api.health import router as health_router
 from app.api.laws import router as laws_router
 from app.api.law_updates import router as law_updates_router
 from app.api.legal_references import router as legal_references_router
+from app.api.legal_retrieval import router as legal_retrieval_router
 from app.core.config import get_settings
 from app.services.law_update_scheduler_runtime import start_law_update_scheduler, shutdown_law_update_scheduler
 
@@ -45,3 +46,4 @@ app.include_router(analyses_router, prefix="/api")
 app.include_router(laws_router, prefix="/api")
 app.include_router(law_updates_router, prefix="/api")
 app.include_router(legal_references_router, prefix="/api")
+app.include_router(legal_retrieval_router, prefix="/api")
