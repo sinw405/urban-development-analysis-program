@@ -65,7 +65,7 @@ def run_moleg_live_probes(probe: str = "all", query: str = DEFAULT_LIVE_QUERY, m
         results["config"] = _config_probe(client)
     if "network" in requested:
         results["network"] = _network_probe(client)
-    matrix_needed = "matrix" in requested or bool({"search", "detail", "parse"} & requested)
+    matrix_needed = ("matrix" in requested or bool({"search", "detail", "parse"} & requested)) and client.configured and client.live_test_enabled
     if matrix_needed:
         endpoint_matrix = _endpoint_matrix(client, query)
         selected_item = _select_endpoint_item(endpoint_matrix)

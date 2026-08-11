@@ -1,10 +1,11 @@
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.models import LawChangeImpactEvent, LawUpdateEvent
+from app.models import LawChangeImpactEvent, LawUpdateEvent, LawUpdateRun, LawUpdateRunItem
 from app.schemas.law_updates import (
     LawUpdateEventListResponse,
     LawUpdateEventSummary,
@@ -13,6 +14,8 @@ from app.schemas.law_updates import (
     LiveLawVersionSummary,
 )
 from app.services.law_update_service import get_impacted_step_codes, get_law_update_events
+from app.services.law_update_scheduler_runtime import scheduler_status
+from app.services.law_update_scheduler_service import BatchAlreadyRunning, item_summary, recent_runs, run_law_update_batch, run_summary
 from app.services.law_version_impact_service import list_law_change_impact_events
 from app.services.moleg_live_client import MolegLiveClient
 from app.services.moleg_version_discovery_service import analyze_live_law_change
@@ -112,6 +115,33 @@ def analyze_live_law_update_impact(request: LiveLawImpactRequest, db: Session = 
         raise HTTPException(status_code=400, detail={"status": result.status, "errors": result.errors})
     return _live_impact_response(result)
 
+
+@router.post("/law-updates/scheduler/run")
+def run_law_update_scheduler_manually() -> dict:
+    try:
+        return {"run": run_summary(run_law_update_batch("manual")), "secret_exposed": False}
+    except BatchAlreadyRunning as exc:
+        raise HTTPException(status_code=409, detail={"status": "already_running", "message": str(exc)}) from exc
+
+
+@router.get("/law-updates/scheduler/status")
+def get_law_update_scheduler_status() -> dict:
+    return scheduler_status()
+
+
+@router.get("/law-updates/runs")
+def list_law_update_runs(limit: int = Query(default=20, ge=1, le=100), db: Session = Depends(get_db)) -> dict:
+    items = [run_summary(item) for item in recent_runs(db, limit)]
+    return {"items": items, "count": len(items), "secret_exposed": False}
+
+
+@router.get("/law-updates/runs/{run_id}")
+def get_law_update_run(run_id: int, db: Session = Depends(get_db)) -> dict:
+    run = db.get(LawUpdateRun, run_id)
+    if run is None:
+        raise HTTPException(status_code=404, detail="Law update run not found")
+    items = list(db.scalars(select(LawUpdateRunItem).where(LawUpdateRunItem.run_id == run_id).order_by(LawUpdateRunItem.id)).all())
+    return {"run": run_summary(run), "items": [item_summary(item) for item in items], "secret_exposed": False}
 
 @router.get("/law-updates/{event_id}", response_model=LawUpdateEventSummary)
 def get_law_update_event(event_id: int, kind: str | None = Query(default=None), db: Session = Depends(get_db)) -> LawUpdateEventSummary:
