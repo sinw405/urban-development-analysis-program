@@ -78,5 +78,19 @@ class Settings:
     def embedding_configured(self) -> bool:
         return self.embedding_provider == "openai-compatible" and bool(self.embedding_api_key and self.embedding_model) and self.embedding_dimension > 0
 
+    @property
+    def generation_provider(self) -> str: return os.getenv('GENERATION_PROVIDER', '').strip().lower()
+    @property
+    def generation_base_url(self) -> str: return os.getenv('GENERATION_BASE_URL', 'https://api.openai.com/v1').strip().rstrip('/')
+    @property
+    def generation_api_key(self) -> str: return os.getenv('GENERATION_API_KEY', '').strip()
+    @property
+    def generation_model(self) -> str: return os.getenv('GENERATION_MODEL', '').strip()
+    @property
+    def generation_timeout_seconds(self) -> float: return _env_float('GENERATION_TIMEOUT_SECONDS', 30.0)
+    @property
+    def generation_configured(self) -> bool:
+        return self.generation_provider == 'openai-compatible' and bool(self.generation_api_key and self.generation_model)
+
 @lru_cache
 def get_settings() -> Settings: return Settings()
