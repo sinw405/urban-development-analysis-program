@@ -45,4 +45,6 @@ class LegalRetrievalResponse(BaseModel):
     retrieval_strategy: str = "deterministic_lexical_v1"
     retrieval_mode: str = "lexical"
     vector_status: str = "not_configured"
+    provider_status: str = "not_configured"
+    backend_status: str = "not_checked"
     fallback_used: bool = False

@@ -7,6 +7,11 @@ services:
     container_name: urban-dev-backend
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/urban_dev
+      EMBEDDING_PROVIDER: ${EMBEDDING_PROVIDER:-}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-https://api.openai.com/v1}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-0}
     ports:
       - "8000:8000"
     depends_on:
@@ -16,7 +21,7 @@ services:
       - ./rules:/workspace/rules:ro
 
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: urban-dev-postgres
     environment:
       POSTGRES_USER: postgres

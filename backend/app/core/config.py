@@ -62,6 +62,21 @@ class Settings:
         value=_env_float("LAW_UPDATE_SCHEDULER_RETRY_BACKOFF_SECONDS",0.25)
         if value<0: raise ValueError("LAW_UPDATE_SCHEDULER_RETRY_BACKOFF_SECONDS must not be negative")
         return value
+    @property
+    def embedding_provider(self) -> str: return os.getenv("EMBEDDING_PROVIDER", "").strip().lower()
+    @property
+    def embedding_base_url(self) -> str: return os.getenv("EMBEDDING_BASE_URL", "https://api.openai.com/v1").strip().rstrip("/")
+    @property
+    def embedding_api_key(self) -> str: return os.getenv("EMBEDDING_API_KEY", "").strip()
+    @property
+    def embedding_model(self) -> str: return os.getenv("EMBEDDING_MODEL", "").strip()
+    @property
+    def embedding_dimension(self) -> int: return _env_int("EMBEDDING_DIMENSION", 0)
+    @property
+    def embedding_timeout_seconds(self) -> float: return _env_float("EMBEDDING_TIMEOUT_SECONDS", 15.0)
+    @property
+    def embedding_configured(self) -> bool:
+        return self.embedding_provider == "openai-compatible" and bool(self.embedding_api_key and self.embedding_model) and self.embedding_dimension > 0
 
 @lru_cache
 def get_settings() -> Settings: return Settings()

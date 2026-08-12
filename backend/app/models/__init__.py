@@ -18,6 +18,7 @@ from app.models.procedure_legal_reference import ProcedureLegalReference
 from app.models.procedure_official_article_candidate import ProcedureOfficialArticleCandidate
 from app.models.procedure_article_review_event import ProcedureArticleReviewEvent
 from app.models.project import Project
+from app.models.legal_source_embedding import LegalSourceEmbedding
 
 __all__ = [
     "AnalysisResult",
@@ -40,4 +41,5 @@ __all__ = [
     "ProcedureOfficialArticleCandidate",
     "ProcedureArticleReviewEvent",
     "Project",
+    "LegalSourceEmbedding",
 ]
