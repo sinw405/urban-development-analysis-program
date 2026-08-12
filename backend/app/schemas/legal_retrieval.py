@@ -1,4 +1,4 @@
-﻿from datetime import date
+from datetime import date
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -11,6 +11,7 @@ class LegalRetrievalRequest(BaseModel):
     as_of: date
     top_k: int = Field(default=5, ge=1, le=50)
     source_types: list[SourceType] | None = None
+    retrieval_mode: Literal["lexical", "vector", "hybrid"] = "lexical"
 
 
 class LegalRetrievalResult(BaseModel):
@@ -28,6 +29,12 @@ class LegalRetrievalResult(BaseModel):
     citation_id: str
     content_hash: str
     relevance_score: float
+    lexical_score: float | None = None
+    lexical_rank: int | None = None
+    vector_score: float | None = None
+    vector_rank: int | None = None
+    fused_score: float | None = None
+    fused_rank: int | None = None
 
 
 class LegalRetrievalResponse(BaseModel):
@@ -36,4 +43,6 @@ class LegalRetrievalResponse(BaseModel):
     top_k: int
     results: list[LegalRetrievalResult]
     retrieval_strategy: str = "deterministic_lexical_v1"
+    retrieval_mode: str = "lexical"
     vector_status: str = "not_configured"
+    fallback_used: bool = False
