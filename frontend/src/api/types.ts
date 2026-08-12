@@ -103,6 +103,37 @@ export interface AnalyzeResponse {
   created_at: string | null;
 }
 
+export type RagSourceType = 'article' | 'attached_table';
+export type RagAnswerStatus = 'grounded' | 'grounded_with_conflicts' | 'insufficient_evidence' | 'generation_unavailable' | 'validation_failed';
+
+export interface RagAnswerRequest {
+  question: string;
+  as_of: string;
+  retrieval_mode: 'lexical' | 'vector' | 'hybrid';
+  top_k: number;
+  source_types?: RagSourceType[];
+}
+
+export interface RagEvidence {
+  source_type: RagSourceType; law_identifier: string; law_name: string; source_identifier: string;
+  title: string; text: string; text_excerpt: string; effective_date: string; version_status: string;
+  mst: string | null; provenance: Record<string, unknown>; citation_id: string; content_hash: string; relevance_score: number;
+}
+
+export interface RagCitation {
+  citation_id: string; law_identifier: string; law_name: string; source_type: RagSourceType;
+  source_identifier: string; title: string; effective_date: string; mst: string | null;
+  provenance: Record<string, unknown>; excerpt: string; content_hash: string;
+}
+
+export interface RagClaim { text: string; citation_ids: string[]; }
+
+export interface RagAnswerResponse {
+  status: RagAnswerStatus; answer: string | null; claims: RagClaim[]; citations: RagCitation[]; evidence: RagEvidence[];
+  as_of: string; retrieval_mode: string; retrieval_status: string; generation_status: string; provider_status: string;
+  retrieval_fallback_used: boolean; disclaimer: string; warnings: string[];
+}
+
 export interface AnalysisSummary {
   analysis_id: number;
   project_id: number;

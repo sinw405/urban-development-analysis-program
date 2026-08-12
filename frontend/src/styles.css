@@ -403,6 +403,25 @@ select:focus {
   margin-top: 1rem;
 }
 
+.ragPanel { display: grid; gap: 0.8rem; }
+.ragPanelHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.ragResult { display: grid; gap: 0.75rem; min-width: 0; }
+.ragAnswer { white-space: pre-wrap; overflow-wrap: anywhere; padding: 0.9rem; border-left: 4px solid #0f62fe; background: #f5f9ff; }
+.ragEvidenceList { display: grid; gap: 0.55rem; }
+.ragCitation { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 0.25rem 0.65rem; text-align: left; background: #fff; border-color: #cfd8e6; }
+.ragCitation strong, .ragCitation span:last-child { overflow-wrap: anywhere; }
+.ragCitation span:last-child { grid-column: 2; color: #475467; }
+.ragEvidenceDetail { padding: 0.85rem; border: 1px solid #d8dee8; border-radius: 8px; }
+.ragExcerpt { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 18rem; overflow-y: auto; }
+.ragDisclaimer { color: #475467; font-size: 0.9rem; border-top: 1px solid #e4e7ec; padding-top: 0.75rem; }
+
+@media (max-width: 900px) {
+  .ragPanelHeader { flex-direction: column; }
+  .ragPanelHeader button { width: 100%; }
+  .ragCitation { grid-template-columns: 1fr; }
+  .ragCitation span:last-child { grid-column: 1; }
+}
+
 .legalReferenceCard {
   border: 1px solid #d8dee8;
   border-radius: 8px;

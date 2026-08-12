@@ -100,9 +100,10 @@ interface ProcedureStepDetailProps {
   normalizedStep: NormalizedProcedureStep;
   checklistStatus: ChecklistStatus;
   onChecklistStatusChange: (status: ChecklistStatus) => void;
+  asOf: string | null;
 }
 
-export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onChecklistStatusChange }: ProcedureStepDetailProps) {
+export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onChecklistStatusChange, asOf }: ProcedureStepDetailProps) {
   return (
     <article className="procedureDetailCard">
       <div className="cardTitle">
@@ -157,6 +158,8 @@ export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onC
         <h4>근거 법령</h4>
         <LegalReferenceCards references={step.legal_references} />
       </section>
+      <GroundedLegalExplanation stepName={normalizedStep.title} asOf={asOf} />
     </article>
   );
 }
+import { GroundedLegalExplanation } from './GroundedLegalExplanation';

@@ -78,7 +78,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
           </div>
           <span className="badge neutral">{summary.procedureCount}개 단계</span>
         </div>
-        <ProcedureRoadmap steps={result.procedures} stepStatuses={checklistStatuses} onStepStatusChange={updateChecklistStatus} />
+        <ProcedureRoadmap steps={result.procedures} stepStatuses={checklistStatuses} onStepStatusChange={updateChecklistStatus} asOf={result.as_of} />
       </section>
 
       <section className="panel reportPanel">
