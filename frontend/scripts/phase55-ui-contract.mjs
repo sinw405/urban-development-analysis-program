@@ -1,0 +1,10 @@
+import assert from 'node:assert/strict'; import { readFileSync } from 'node:fs';
+const rag=readFileSync(new URL('../src/components/GroundedLegalExplanation.tsx',import.meta.url),'utf8');
+const step=readFileSync(new URL('../src/components/ProcedureChecklist.tsx',import.meta.url),'utf8');
+const assessment=readFileSync(new URL('../src/components/AssessmentChecklist.tsx',import.meta.url),'utf8');
+const persistence=readFileSync(new URL('../src/utils/checklistPersistence.ts',import.meta.url),'utf8');
+for(const value of ['official_source_url','https:','law.go.kr','noopener noreferrer','국가법령정보센터 원문 보기','attached_table']) assert.ok(rag.includes(value));
+for(const value of ['required_documents','related_agencies','estimated_duration','saveChecklist','storageKey']) assert.ok(step.includes(value));
+for(const value of ['assessment_code','required_action','missing_inputs','saveChecklist']) assert.ok(assessment.includes(value));
+for(const value of ['analysis_id','project_id','step','assessment','fingerprint','localStorage']) assert.ok(persistence.includes(value));
+assert.doesNotMatch(rag,/dangerouslySetInnerHTML|javascript:/); console.log('Phase 55 UI contract checks passed');

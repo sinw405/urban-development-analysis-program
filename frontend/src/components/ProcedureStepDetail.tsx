@@ -101,9 +101,11 @@ interface ProcedureStepDetailProps {
   checklistStatus: ChecklistStatus;
   onChecklistStatusChange: (status: ChecklistStatus) => void;
   asOf: string | null;
+  persistenceScope: string;
 }
 
-export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onChecklistStatusChange, asOf }: ProcedureStepDetailProps) {
+export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onChecklistStatusChange, asOf, persistenceScope }: ProcedureStepDetailProps) {
+  const storageKey = checklistKey(persistenceScope, 'step', step.step_code, dataFingerprint([step.required_documents, step.related_agencies, step.estimated_duration, step.legal_references]));
   return (
     <article className="procedureDetailCard">
       <div className="cardTitle">
@@ -123,7 +125,7 @@ export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onC
         </div>
       )}
 
-      <ProcedureChecklist step={step} status={checklistStatus} onStatusChange={onChecklistStatusChange} />
+      <ProcedureChecklist step={step} status={checklistStatus} onStatusChange={onChecklistStatusChange} storageKey={storageKey} />
 
       <dl className="definitionGrid compactDefinition">
         <dt>{labelFor("estimated_duration")}</dt>
@@ -163,3 +165,4 @@ export function ProcedureStepDetail({ step, normalizedStep, checklistStatus, onC
   );
 }
 import { GroundedLegalExplanation } from './GroundedLegalExplanation';
+import { checklistKey, dataFingerprint } from '../utils/checklistPersistence';

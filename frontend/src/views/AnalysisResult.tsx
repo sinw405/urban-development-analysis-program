@@ -41,6 +41,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
   }
 
   const summary = normalizeAnalysisSummary(result, checklistStatuses);
+  const persistenceScope = checklistScope(result);
 
   function updateChecklistStatus(stepCode: string, status: ChecklistStatus) {
     setChecklistStatuses((current) => ({ ...current, [stepCode]: status }));
@@ -78,7 +79,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
           </div>
           <span className="badge neutral">{summary.procedureCount}개 단계</span>
         </div>
-        <ProcedureRoadmap steps={result.procedures} stepStatuses={checklistStatuses} onStepStatusChange={updateChecklistStatus} asOf={result.as_of} />
+        <ProcedureRoadmap steps={result.procedures} stepStatuses={checklistStatuses} onStepStatusChange={updateChecklistStatus} asOf={result.as_of} persistenceScope={persistenceScope} />
       </section>
 
       <section className="panel reportPanel">
@@ -112,6 +113,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
           </div>
         </section>
       )}
+      {result.assessments.length > 0 ? <section className='panel'><h2>심의·평가 확인 체크리스트</h2><div className='assessmentChecklistGrid'>{result.assessments.map(item => <AssessmentChecklist key={item.assessment_code ?? item.name} item={item} scope={persistenceScope} />)}</div></section> : null}
 
       <details className="developerDetails">
         <summary>개발자용 원문 응답 보기</summary>
@@ -120,3 +122,5 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
     </section>
   );
 }
+import { checklistScope } from '../utils/checklistPersistence';
+import { AssessmentChecklist } from '../components/AssessmentChecklist';

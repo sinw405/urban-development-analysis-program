@@ -8,7 +8,7 @@ from typing import Iterable
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.models import Law, LawArticle, LawAttachedTableEvidence
+from app.models import Law, LawArticle, LawAttachedTableEvidence, OfficialLawDocument
 from app.schemas.legal_retrieval import LegalRetrievalResult
 from app.services.law_version_service import get_current_article_version
 
@@ -31,6 +31,18 @@ def _hash(source_identifier: str, text: str) -> str:
 
 def _mst(source: str | None) -> str | None:
     return source.split(":", 1)[1] if source and source.startswith("MOLEG_LIVE:") else None
+
+
+def _official_source_url(db: Session, law: Law, mst: str | None) -> str | None:
+    if not mst:
+        return None
+    for document in db.scalars(select(OfficialLawDocument).where(OfficialLawDocument.mst == mst)).all():
+        if document.law_id not in {None, law.law_key} and document.law_title != law.law_name:
+            continue
+        value = document.sanitized_source_url.strip()
+        if value.startswith('https://www.law.go.kr/') or value.startswith('https://law.go.kr/'):
+            return value
+    return None
 
 
 def _score(query_terms: list[str], law_name: str, title: str, text: str) -> float:
@@ -68,7 +80,7 @@ def build_legal_corpus(db: Session, as_of: date, source_types: set[str] | None =
                 source_type="article", law_identifier=law.law_key or str(law.id), law_name=law.law_name,
                 source_identifier=source_id, title=article.article_title or article.article_number_text or "Untitled article",
                 text=text, text_excerpt=text[:500], effective_date=version.effective_date, version_status="current",
-                mst=_mst(version.source), provenance={"source": version.source, "mapping_status": article.mapping_status},
+                mst=_mst(version.source), provenance={"source": version.source, "mapping_status": article.mapping_status, "official_source_url": _official_source_url(db, law, _mst(version.source))},
                 citation_id=citation, content_hash=_hash(source_id, text), relevance_score=0,
             ))
     if "attached_table" in allowed:
@@ -87,7 +99,7 @@ def build_legal_corpus(db: Session, as_of: date, source_types: set[str] | None =
                 source_type="attached_table", law_identifier=law.law_key or str(law.id), law_name=law.law_name,
                 source_identifier=source_id, title=evidence.table_title, text=evidence.normalized_text,
                 text_excerpt=evidence.normalized_text[:500], effective_date=evidence.effective_date,
-                version_status="current", mst=evidence.mst, provenance=evidence.provenance_json,
+                version_status="current", mst=evidence.mst, provenance={**evidence.provenance_json, "official_source_url": _official_source_url(db, law, evidence.mst)},
                 citation_id=citation, content_hash=_hash(source_id, evidence.normalized_text), relevance_score=0,
             ))
     return results

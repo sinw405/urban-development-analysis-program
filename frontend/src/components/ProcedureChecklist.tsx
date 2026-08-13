@@ -16,6 +16,7 @@ interface ProcedureChecklistProps {
   step: ProcedureStep;
   status: ChecklistStatus;
   onStatusChange: (status: ChecklistStatus) => void;
+  storageKey: string;
 }
 
 function statusClass(status: ChecklistStatus): string {
@@ -58,19 +59,20 @@ function buildChecklistItems(step: ProcedureStep): ChecklistItem[] {
   ];
 }
 
-export function ProcedureChecklist({ step, status, onStatusChange }: ProcedureChecklistProps) {
+export function ProcedureChecklist({ step, status, onStatusChange, storageKey }: ProcedureChecklistProps) {
   const items = useMemo(() => buildChecklistItems(step), [step]);
-  const [checkedItems, setCheckedItems] = useState<Record<ChecklistItemKey, boolean>>({
+  const [checkedItems, setCheckedItems] = useState<Record<ChecklistItemKey, boolean>>(() => loadChecklist(storageKey, {
     legal: false,
     documents: false,
     agencies: false,
     duration: false,
     notes: false
-  });
+  }) as Record<ChecklistItemKey, boolean>);
 
   function updateCheckedItem(key: ChecklistItemKey, checked: boolean) {
     const next = { ...checkedItems, [key]: checked };
     setCheckedItems(next);
+    saveChecklist(storageKey, next);
 
     const checkedCount = Object.values(next).filter(Boolean).length;
     if (checkedCount === 0) {
@@ -110,3 +112,4 @@ export function ProcedureChecklist({ step, status, onStatusChange }: ProcedureCh
     </section>
   );
 }
+import { loadChecklist, saveChecklist } from '../utils/checklistPersistence';

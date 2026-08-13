@@ -9,6 +9,7 @@ interface ProcedureRoadmapProps {
   stepStatuses: Record<string, ChecklistStatus>;
   onStepStatusChange: (stepCode: string, status: ChecklistStatus) => void;
   asOf: string | null;
+  persistenceScope: string;
 }
 
 function statusClass(status: ChecklistStatus): string {
@@ -21,7 +22,7 @@ function statusClass(status: ChecklistStatus): string {
   return "pending";
 }
 
-export function ProcedureRoadmap({ steps, stepStatuses, onStepStatusChange, asOf }: ProcedureRoadmapProps) {
+export function ProcedureRoadmap({ steps, stepStatuses, onStepStatusChange, asOf, persistenceScope }: ProcedureRoadmapProps) {
   const normalizedSteps = normalizeProcedureSteps(steps, stepStatuses);
 
   if (normalizedSteps.length === 0) {
@@ -73,6 +74,7 @@ export function ProcedureRoadmap({ steps, stepStatuses, onStepStatusChange, asOf
               checklistStatus={step.checklistStatus}
               onChecklistStatusChange={(nextStatus) => onStepStatusChange(step.stepCode, nextStatus)}
               asOf={asOf}
+              persistenceScope={persistenceScope}
             />
           </div>
         </div>

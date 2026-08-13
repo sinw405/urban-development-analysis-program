@@ -85,6 +85,8 @@ export interface AssessmentItem {
   legal_basis: string;
   required_action: string;
   notes: string[];
+  determination_status?: string;
+  missing_inputs?: string[];
 }
 
 export interface AnalyzeResponse {

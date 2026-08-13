@@ -10,6 +10,12 @@ const labels = {
 };
 const sourceLabel = (value: string) => value === 'attached_table' ? labels.table : labels.article;
 
+export function officialSourceUrl(provenance: Record<string, unknown>) {
+  const value = provenance.official_source_url;
+  if (typeof value !== 'string') return null;
+  try { const url = new URL(value); return url.protocol === 'https:' && (url.hostname === 'law.go.kr' || url.hostname === 'www.law.go.kr') ? url.href : null; } catch { return null; }
+}
+
 export function ragStateMessage(status: string) {
   const messages: Record<string, string> = {
     insufficient_evidence: '현재 확보된 법령 근거만으로는 이 내용을 확정하기 어렵습니다.',
@@ -23,10 +29,12 @@ export function ragStateMessage(status: string) {
 function EvidenceDetail({ item }: { item: RagCitation | RagEvidence }) {
   const excerpt = 'excerpt' in item ? item.excerpt : item.text_excerpt;
   const source = typeof item.provenance.source === 'string' ? item.provenance.source : '저장된 법령 근거';
+  const officialUrl = officialSourceUrl(item.provenance);
   return <dl className='definitionGrid ragEvidenceDetail'>
     <dt>근거 구분</dt><dd>{sourceLabel(item.source_type)}</dd><dt>법령</dt><dd>{item.law_name}</dd>
     <dt>조문/별표</dt><dd>{item.title}</dd><dt>시행일</dt><dd>{item.effective_date}</dd>
     <dt>출처</dt><dd>{source}</dd>{item.mst ? <><dt>법령 버전 식별값</dt><dd>{item.mst}</dd></> : null}
+    <dt>공식 원문</dt><dd>{officialUrl ? <a href={officialUrl} target='_blank' rel='noopener noreferrer'>국가법령정보센터 원문 보기</a> : '공식 원문 링크가 등록되지 않음'}</dd>
     <dt>근거 내용</dt><dd className='ragExcerpt'>{excerpt}</dd>
   </dl>;
 }
