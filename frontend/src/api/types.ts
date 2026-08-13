@@ -632,3 +632,25 @@ export interface OfficialLawSeedStatusResponse {
   batch1_apply_supported: boolean;
   last_seed_generation_status_optional: string | null;
 }
+
+export interface CaseHistoryItem {
+  stage: string | null;
+  date: string | null;
+  status: string | null;
+  description: string | null;
+}
+
+export interface CaseComparisonItem {
+  id: number;
+  name: string;
+  location: string | null;
+  area_m2: number | null;
+  method: string | null;
+  operator_type: string | null;
+  timeline: CaseHistoryItem[];
+  history: CaseHistoryItem[];
+}
+
+export interface CaseComparisonResponse {
+  items: CaseComparisonItem[];
+}

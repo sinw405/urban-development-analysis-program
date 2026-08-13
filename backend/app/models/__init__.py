@@ -1,4 +1,5 @@
 from app.models.analysis_result import AnalysisResult
+from app.models.development_case import DevelopmentCase
 from app.models.law import Law
 from app.models.law_article import LawArticle
 from app.models.law_article_version import LawArticleVersion
@@ -22,6 +23,7 @@ from app.models.legal_source_embedding import LegalSourceEmbedding
 
 __all__ = [
     "AnalysisResult",
+    "DevelopmentCase",
     "Law",
     "LawArticle",
     "LawArticleVersion",

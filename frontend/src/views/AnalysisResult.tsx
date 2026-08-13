@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import { AnalysisReport } from "../components/AnalysisReport";
+import { CaseComparison } from "../components/CaseComparison";
 import type { ChecklistStatus } from "../components/ProcedureChecklist";
 import { ProcedureRoadmap } from "../components/ProcedureRoadmap";
 import type { AnalyzeResponse } from "../api/types";
@@ -69,6 +70,8 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
           <div><dt>기관 확인 필요</dt><dd>{summary.missingAgencyCount}개 단계</dd></div>
         </dl>
       </section>
+
+      <CaseComparison currentProject={result} />
 
       <section className="panel">
         <div className="panelHeader">

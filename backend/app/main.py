@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.analyses import router as analyses_router
 from app.api.analyze import router as analyze_router
+from app.api.cases import router as cases_router
 from app.api.health import router as health_router
 from app.api.laws import router as laws_router
 from app.api.law_updates import router as law_updates_router
@@ -42,6 +43,7 @@ if settings.cors_allowed_origins:
 
 app.include_router(health_router)
 app.include_router(analyze_router, prefix="/api")
+app.include_router(cases_router, prefix="/api")
 app.include_router(analyses_router, prefix="/api")
 app.include_router(laws_router, prefix="/api")
 app.include_router(law_updates_router, prefix="/api")
