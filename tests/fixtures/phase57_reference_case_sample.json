@@ -1,0 +1,17 @@
+{
+  "fixture_id": "PHASE57_TEST_SAMPLE_FIXTURE_DO_NOT_USE",
+  "reference_case_name": "TEST/SAMPLE/FIXTURE urban development reference",
+  "data_classification": "TEST_SAMPLE_FIXTURE",
+  "source_note": "Synthetic test fixture only; not verified real-project evidence and never production seeded.",
+  "project_input": {
+    "project_name": "TEST/SAMPLE/FIXTURE project",
+    "location": "TEST/SAMPLE/FIXTURE location",
+    "area_square_meters": 1,
+    "implementation_method": "TEST/SAMPLE/FIXTURE method",
+    "implementer_type": "TEST/SAMPLE/FIXTURE operator",
+    "local_government": "TEST/SAMPLE/FIXTURE government"
+  },
+  "expected_steps": null,
+  "expected_assessments": null,
+  "expected_legal_references": null
+}
