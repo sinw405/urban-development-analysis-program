@@ -18,6 +18,13 @@ class DevelopmentCase(Base):
     operator_type: Mapped[str | None] = mapped_column(String(255), nullable=True)
     timeline: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False, default=list)
     history: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False, default=list)
+    data_classification: Mapped[str] = mapped_column(
+        String(50), nullable=False, default='UNVERIFIED', server_default='UNVERIFIED'
+    )
+    provenance: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
