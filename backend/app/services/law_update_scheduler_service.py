@@ -15,6 +15,8 @@ from app.core.database import SessionLocal, engine
 from app.models import LawUpdateRegistry, LawUpdateRun, LawUpdateRunItem
 from app.services.moleg_live_client import MolegLiveClient
 from app.services.moleg_version_discovery_service import analyze_live_law_change
+from app.core.observability import log_event
+from app.services.operational_alert_service import emit_operational_alert
 
 logger = logging.getLogger(__name__)
 
@@ -78,7 +80,8 @@ def run_law_update_batch(
             run.duration_ms = int((run.finished_at - run.started_at).total_seconds() * 1000)
             run.status = "completed" if run.failed_count == 0 else "failed" if run.success_count == 0 else "partial"
             db.commit(); db.refresh(run)
-            logger.info("law update run completed run_id=%s status=%s elapsed_ms=%s", run.id, run.status, run.duration_ms)
+            log_event(logger, logging.INFO, "law.collection.run_completed", run_id=run.id,
+                      status=run.status, duration_ms=run.duration_ms, failed_count=run.failed_count)
             return run
 
 
@@ -123,7 +126,9 @@ def _process_law(run_id, registry_id, law_identifier, law_name, session_factory,
             registry.last_success_at = item.finished_at
             registry.last_detected_mst = item.to_mst
             db.commit()
-            logger.info("law update item completed run_id=%s law=%s status=%s retry=%s event_id=%s", run_id, law_name, item.status, item.retry_count, item.event_id)
+            log_event(logger, logging.INFO, "law.collection.item_completed", run_id=run_id,
+                      law_identifier=law_identifier, status=item.status, retry_count=item.retry_count,
+                      amendment_event_id=item.event_id)
 
 
 def _finish_failure(db: Session, item: LawUpdateRunItem, code: str, message: str):
@@ -134,7 +139,12 @@ def _finish_failure(db: Session, item: LawUpdateRunItem, code: str, message: str
     item.error_code = _sanitize(code, 100)
     item.sanitized_error = _sanitize(message, 1000)
     _finish_item(item); db.commit()
-    logger.warning("law update item failed run_id=%s law=%s code=%s", item.run_id, item.law_name, item.error_code)
+    log_event(logger, logging.ERROR, "law.collection.failed", operation="law_update",
+              run_id=item.run_id, law_identifier=item.law_identifier, failure_category=item.error_code,
+              retry_count=item.retry_count, error=item.sanitized_error)
+    emit_operational_alert("law.collection.failed", severity="error", run_id=item.run_id,
+                           law_identifier=item.law_identifier, failure_category=item.error_code,
+                           retry_count=item.retry_count)
 
 
 def _finish_item(item: LawUpdateRunItem):

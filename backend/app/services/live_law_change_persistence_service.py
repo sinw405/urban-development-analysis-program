@@ -2,12 +2,17 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 import hashlib
+import logging
 from typing import Any
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from app.models import LiveLawChangeEvent, LiveLawChangeEventAudit, OfficialLawArticleRecord, OfficialLawDocument
 from app.services.law_version_impact_service import LawVersionImpactService, LawVersionImpactResult
+from app.core.observability import log_event
+from app.services.operational_alert_service import emit_operational_alert
+
+logger = logging.getLogger(__name__)
 
 COMPLETE_DOCUMENT_STATUS = "normalized"
 
@@ -108,6 +113,7 @@ def execute_phase43(db: Session, client, selection, ensure_versions: bool = True
         result.changed_articles = event.changed_articles_json or []
         result.impacted_rules = event.impacted_rules_json or []
         _audit(db, event, "persisted", "reused", {"idempotency_key": key}, persist_event)
+        _monitor_change(result, law_identifier, selection)
         return result
     _audit(db, event, "analysis_started", "started", None, persist_event)
     impact = LawVersionImpactService(db).analyze(selection.law_name, selection.from_mst, selection.to_mst, dry_run=True)
@@ -137,7 +143,20 @@ def execute_phase43(db: Session, client, selection, ensure_versions: bool = True
         _audit(db, event, "persisted", "completed", {"idempotency_key": key}, False)
         if persist_event:
             db.commit()
+    _monitor_change(result, law_identifier, selection)
     return result
+
+
+def _monitor_change(result, law_identifier, selection):
+    log_event(logger, logging.INFO, "law.amendment.evaluated", law_identifier=str(law_identifier),
+              from_mst=selection.from_mst, to_mst=selection.to_mst,
+              version_changed=result.version_changed, content_changed=result.content_changed,
+              changed_article_count=len(result.changed_articles), event_id=None if result.event is None else result.event.id,
+              event_created=result.event_created)
+    if result.content_changed:
+        emit_operational_alert("law.amendment.detected", severity="warning",
+                               law_identifier=str(law_identifier), from_mst=selection.from_mst,
+                               to_mst=selection.to_mst, changed_article_count=len(result.changed_articles))
 
 
 def _get_or_create_event(db, selection, key, persist):

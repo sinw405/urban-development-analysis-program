@@ -75,6 +75,36 @@ services:
       backend:
         condition: service_healthy
 
+  db-backup:
+    profiles: ["operations"]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/urban_dev
+      BACKUP_DIRECTORY: /backups
+    command: ["python", "-m", "app.ops.database_backup", "backup"]
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  db-restore-validate:
+    profiles: ["operations"]
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://postgres:postgres@postgres:5432/urban_dev
+      BACKUP_DIRECTORY: /backups
+    command: ["python", "-m", "app.ops.database_backup", "validate"]
+    volumes:
+      - ./backups:/backups:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   postgres_dev_data:
   frontend_dev_node_modules:
