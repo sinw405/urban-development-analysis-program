@@ -179,6 +179,7 @@ h4 {
 
 .stack {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
 }
 
@@ -1120,6 +1121,37 @@ tr:hover td {
 .assessmentChecklistGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; }
 @media (max-width: 900px) { .assessmentChecklistGrid { grid-template-columns: 1fr; } }
 .caseComparison { display: grid; gap: 1rem; }
+.referenceDisclaimer {
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid #d8dee8;
+  border-left: 4px solid #0f62fe;
+  border-radius: 8px;
+  background: #edf5ff;
+  color: #344054;
+  padding: 0.85rem 1rem;
+  overflow-wrap: anywhere;
+}
+.referenceDisclaimer h2,
+.referenceDisclaimer h3 {
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+}
+.referenceDisclaimer p {
+  margin: 0.35rem 0 0;
+  line-height: 1.6;
+}
+.referenceDisclaimer-global {
+  margin-bottom: 1.5rem;
+  font-size: 0.92rem;
+}
+@media (max-width: 600px) {
+  .referenceDisclaimer { padding: 0.75rem; }
+}
+@media print {
+  .referenceDisclaimer { background: #ffffff; color: #111827; }
+  .referenceDisclaimer-report { break-inside: avoid; }
+}
 .caseComparison .noticeBox, .caseComparison .loadingBox, .caseComparison .errorBox { margin: 0; }
 .caseSelector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
 .caseSelectorItem { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: 0.6rem; border: 1px solid #e4e7ec; border-radius: 8px; padding: 0.75rem; background: #fbfcfe; }

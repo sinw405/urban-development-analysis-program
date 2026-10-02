@@ -1,5 +1,6 @@
 ﻿import { useState } from "react";
 import { AnalysisReport } from "../components/AnalysisReport";
+import { ReferenceDisclaimer } from "../components/ReferenceDisclaimer";
 import { CaseComparison } from "../components/CaseComparison";
 import type { ChecklistStatus } from "../components/ProcedureChecklist";
 import { ProcedureRoadmap } from "../components/ProcedureRoadmap";
@@ -50,6 +51,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
 
   return (
     <section className="stack">
+      <ReferenceDisclaimer variant="analysis" />
       <section className="panel subtle">
         <div className="panelHeader">
           <div>

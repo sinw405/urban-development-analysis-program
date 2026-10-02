@@ -1,5 +1,6 @@
 import type { AnalyzeResponse } from "../api/types";
 import type { ChecklistStatus } from "./ProcedureChecklist";
+import { ReferenceDisclaimer } from "./ReferenceDisclaimer";
 import { CANDIDATE_LEGAL_REFERENCE_NOTICE, normalizeAnalysisSummary } from "../utils/analysisSummary";
 
 interface AnalysisReportProps {
@@ -127,10 +128,7 @@ export function AnalysisReport({ result, checklistStatuses }: AnalysisReportProp
         </div>
       </section>
 
-      <section className="reportSection reportDisclaimer">
-        <h3>참고 및 고지</h3>
-        <p>본 분석 결과는 도시개발사업 절차 검토를 위한 참고자료이며, 최종 적용 여부는 관계 법령 원문, 인허가권자 협의 및 전문가 검토를 통해 확인해야 합니다.</p>
-      </section>
+      <ReferenceDisclaimer variant="report" />
     </section>
   );
 }

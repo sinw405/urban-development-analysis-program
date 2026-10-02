@@ -1,5 +1,6 @@
 ﻿import { useEffect, useState } from "react";
 import { Navigation } from "./components/Navigation";
+import { ReferenceDisclaimer } from "./components/ReferenceDisclaimer";
 import { Dashboard } from "./views/Dashboard";
 import { AnalysisForm } from "./views/AnalysisForm";
 import { AnalysisDetailView } from "./views/AnalysisDetailView";
@@ -35,6 +36,7 @@ export function App() {
         <Navigation currentRoute={route} onNavigate={navigate} />
       </header>
       <main>
+        <ReferenceDisclaimer />
         {route === "/" && <Dashboard onNavigate={navigate} />}
         {route === "/analyze" && <AnalysisForm />}
         {route === "/analyses" && <AnalysesList onNavigate={navigate} />}
