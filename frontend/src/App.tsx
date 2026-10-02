@@ -1,6 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import { Navigation } from "./components/Navigation";
 import { ReferenceDisclaimer } from "./components/ReferenceDisclaimer";
+import { MunicipalityOrdinanceNotice } from "./components/MunicipalityOrdinanceNotice";
 import { Dashboard } from "./views/Dashboard";
 import { AnalysisForm } from "./views/AnalysisForm";
 import { AnalysisDetailView } from "./views/AnalysisDetailView";
@@ -37,6 +38,7 @@ export function App() {
       </header>
       <main>
         <ReferenceDisclaimer />
+        <MunicipalityOrdinanceNotice />
         {route === "/" && <Dashboard onNavigate={navigate} />}
         {route === "/analyze" && <AnalysisForm />}
         {route === "/analyses" && <AnalysesList onNavigate={navigate} />}

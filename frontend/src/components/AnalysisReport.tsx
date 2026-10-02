@@ -1,6 +1,7 @@
 import type { AnalyzeResponse } from "../api/types";
 import type { ChecklistStatus } from "./ProcedureChecklist";
 import { ReferenceDisclaimer } from "./ReferenceDisclaimer";
+import { MunicipalityOrdinanceNotice } from "./MunicipalityOrdinanceNotice";
 import { CANDIDATE_LEGAL_REFERENCE_NOTICE, normalizeAnalysisSummary } from "../utils/analysisSummary";
 
 interface AnalysisReportProps {
@@ -129,6 +130,7 @@ export function AnalysisReport({ result, checklistStatuses }: AnalysisReportProp
       </section>
 
       <ReferenceDisclaimer variant="report" />
+      <MunicipalityOrdinanceNotice municipality={result.local_government} variant="report" />
     </section>
   );
 }

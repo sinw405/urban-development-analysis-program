@@ -1,6 +1,7 @@
 ﻿import { useState } from "react";
 import { AnalysisReport } from "../components/AnalysisReport";
 import { ReferenceDisclaimer } from "../components/ReferenceDisclaimer";
+import { MunicipalityOrdinanceNotice } from "../components/MunicipalityOrdinanceNotice";
 import { CaseComparison } from "../components/CaseComparison";
 import type { ChecklistStatus } from "../components/ProcedureChecklist";
 import { ProcedureRoadmap } from "../components/ProcedureRoadmap";
@@ -52,6 +53,7 @@ export function AnalysisResult({ result }: AnalysisResultProps) {
   return (
     <section className="stack">
       <ReferenceDisclaimer variant="analysis" />
+      <MunicipalityOrdinanceNotice municipality={result.local_government} variant="result" />
       <section className="panel subtle">
         <div className="panelHeader">
           <div>

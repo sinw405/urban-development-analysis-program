@@ -3,6 +3,7 @@ import { analyzeProject } from "../api/analyze";
 import type { AnalyzeRequest, AnalyzeResponse } from "../api/types";
 import { methodLabel, operatorLabel } from "../utils/labels";
 import { AnalysisResult } from "./AnalysisResult";
+import { MunicipalityOrdinanceNotice } from "../components/MunicipalityOrdinanceNotice";
 
 const initialForm: AnalyzeRequest = {
   project_name: "TEST_PROJECT_DO_NOT_USE",
@@ -66,6 +67,8 @@ export function AnalysisForm() {
         <div className="noticeBox compactNotice">
           실제 사업명처럼 보이는 샘플은 사용하지 않습니다. 기본값은 화면 검증 전용 TEST 데이터입니다.
         </div>
+
+        <MunicipalityOrdinanceNotice municipality={form.local_government} variant="input" />
 
         <form className="formGrid" onSubmit={submit}>
           <label>

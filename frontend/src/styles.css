@@ -813,6 +813,8 @@ tr:hover td {
 
 .checklistItem span {
   display: grid;
+  min-width: 0;
+  overflow-wrap: anywhere;
   gap: 0.2rem;
 }
 
@@ -838,6 +840,7 @@ tr:hover td {
 
 .analysisReport {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   background: #ffffff;
   padding: 1.25rem;
@@ -1145,12 +1148,31 @@ tr:hover td {
   margin-bottom: 1.5rem;
   font-size: 0.92rem;
 }
+.ordinanceNotice {
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid #d8dee8;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #344054;
+  padding: 0.85rem 1rem;
+  overflow-wrap: anywhere;
+}
+.ordinanceNotice h2,
+.ordinanceNotice h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+.ordinanceNotice p { margin: 0.35rem 0 0; line-height: 1.6; }
+.ordinanceNotice-global,
+.ordinanceNotice-input { margin-bottom: 1rem; font-size: 0.92rem; }
+.ordinanceNotice .badge { white-space: normal; }
 @media (max-width: 600px) {
   .referenceDisclaimer { padding: 0.75rem; }
+  .ordinanceNotice { padding: 0.75rem; }
 }
 @media print {
   .referenceDisclaimer { background: #ffffff; color: #111827; }
   .referenceDisclaimer-report { break-inside: avoid; }
+  .ordinanceNotice { background: #ffffff; color: #111827; }
+  .ordinanceNotice-report { break-inside: avoid; }
 }
 .caseComparison .noticeBox, .caseComparison .loadingBox, .caseComparison .errorBox { margin: 0; }
 .caseSelector { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
